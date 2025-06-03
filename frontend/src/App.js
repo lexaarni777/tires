@@ -10,6 +10,7 @@ import PrivateRoute from './components/PrivateRoute/PrivateRoute'; // Импор
 import UserManagement from './components/UserManagement/UserManagement'; // Импортируем компонент для управления пользователями (новый)
 import Orders from './components/Orders/Orders'; // Импортируем компонент для управления пользователями (новый)
 import Cart from './components/Cart/Cart';
+import ProductDetailed from './components/ProductDetailed/ProductDetailed'; // Импортируем компонент для управления пользователями (новый)
 
 function App() {
 
@@ -29,6 +30,10 @@ function App() {
         </PrivateRoute>
       }/>
 
+      {/* Маршрут для датализированной карточки продукта - доступен всем пользователям*/}
+      <Route path='/productdetailed/:id' element={<ProductDetailed/>
+      }/>
+      
       {/* Маршрут для списка продуктов - доступен всем пользователям */}
       <Route path='/productlist' element={<ProductList/>}/>
 

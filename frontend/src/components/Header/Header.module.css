@@ -1,6 +1,6 @@
 /* Header.module.css */
 .header {
-    background-color: #f8f8f8;
+    background-color: white;
     border-bottom: 1px solid #ccc;
 }
 
@@ -10,7 +10,10 @@
     align-items: center;
     padding: 10px 20px;
 }
-
+.IconHeader{
+    display: flex;
+    align-items: center;
+}
 .storeInfo h1 {
     margin: 0;
     font-size: 24px;
@@ -23,40 +26,61 @@
 .socialLinks a {
     margin-right: 10px;
     text-decoration: none;
-    color: #007bff;
+    color: #333333;
 }
 
 .cartIcon {
     cursor: pointer;
+    margin: 0 10px;
 }
 
 .headerBottom {
-    background-color: #007bff;
+    background-color: #EEEEEE;
+    height: 60px;
 }
 
 .menu {
     display: flex;
     justify-content: space-around;
+    align-items: center;
+    height: 100%;
     list-style: none;
-    padding: 10px 0;
     margin: 0;
 }
 
+.submenuHead{
+    position: relative;
+}
+
 .menu li a {
-    color: white;
+    color: #333333;;
     text-decoration: none;
-    padding: 10px 15px;
+    padding: 10px 20px;
 }
 
 .submenu {
     display: none;
     position: absolute;
-    background-color: #0056b3;
+    background-color: #EEEEEE ;
     list-style: none;
     padding: 10px;
     margin: 0;
+    width: 150px;
 }
 
-.menu li:hover .submenu {
-    display: block;
+.menu li:hover .submenu,
+.submenu:hover {
+    top: 30px;
+    left: -30px;
+    display: flex;
+    flex-direction: column;
+}
+.submenu li {
+    margin: 15px 0;
+    width: 100%;
+}
+.submenu li a {
+    padding: 5px 10px;
+    color: #333333;
+    width: 100%;
 }

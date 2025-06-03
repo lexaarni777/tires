@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 
 // Middleware для проверки токена авторизации
 exports.verifyToken = (req, res, next) => {
+  console.log('verifyToken req: ', req)
     const authHeader = req.headers.authorization;
     console.log('verifyToken: ', authHeader)
    

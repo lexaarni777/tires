@@ -10,8 +10,8 @@ const { createOrderInDB, addOrderItemsInDB, getUserOrders  } = require('../model
 // Создание нового заказа
 exports.createOrder = async (req, res) => {
   const userId = req.user.id; // Получаем ID пользователя из токена
-  const { cartItems } = req.body; // Получаем товары из тела запроса
-
+  const  cartItems  = req.body; // Получаем товары из тела запроса
+  console.log('createOrder req', req.body)
   console.log('createOrder', userId, cartItems)
   if (!cartItems || cartItems.length === 0) {
     return res.status(400).json({ message: 'Корзина пуста. Невозможно создать заказ.' });

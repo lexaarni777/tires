@@ -1,49 +1,107 @@
-import React, { useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { fetchProducts, deleteProduct } from '../../slices/productSlice';
-import { fetchCart } from '../../slices/cartSlice';
-import ProductCard from '../ProductCard/ProductCard';
-import styles from './ProductList.module.css'; // Импортируйте стили
-import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import ProductCard from "../ProductCard/ProductCard";
 
+// Импортируем асинхронные thunks из productSlice и stockSlice
+import { fetchProducts } from "../../slices/productSlice";
+import { fetchStock } from "../../slices/stockSlice";
+import styles from "./ProductList.module.css";
+/**
+ * Компонент ProductList
+ * 
+ * - Загружает список шин (каталог) с сервера с учётом фильтров.
+ * - Загружает остатки/цены по складам для всех шин.
+ * - Передаёт в каждую карточку нужные данные (product, stock).
+ * - Управляет фильтрами для каталога.
+ */
 const ProductList = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Хук для работы с маршрутизацией
-  
-  useEffect(() => {
-    console.log("Fetching cart items...");
-    dispatch(fetchCart())
-      .then(() => console.log("Cart items fetched successfully."))
-      .catch((error) => console.error("Failed to fetch cart items:", error)); // Обработка ошибок
-  }, [dispatch]);
 
+  // Состояния для фильтрации — здесь пример только с брендом, размером и сезоном
+  const [brand, setBrand] = useState("");
+  const [size, setSize] = useState("");
+  const [season, setSeason] = useState("");
+
+  // Получаем данные из Redux: список шин и их статусы
   const products = useSelector((state) => state.products.items);
-  console.log('Products:', products);
+  const productsStatus = useSelector((state) => state.products.status);
+
+  // Получаем данные из Redux: все остатки по складам
+  const stock = useSelector((state) => state.stock.items);
+  const stockStatus = useSelector((state) => state.stock.status);
+
+  // Формируем объект фильтров для отправки на backend
+  const filters = {};
+  if (brand) filters.brand = brand;
+  if (size) filters.size = size;
+  if (season) filters.season = season;
+
+  // Загружаем каталог и остатки при изменении фильтров
   useEffect(() => {
-    dispatch(fetchProducts());
-  }, [dispatch]);
+    dispatch(fetchProducts(filters)); // грузим шины с фильтрацией
+  }, [dispatch, brand, size, season]);
 
-  // Функция удаления товара
-  const handleDelete = (id) => {
-    dispatch(deleteProduct(id));
-  };
+  // Загружаем все остатки после загрузки каталога
+  useEffect(() => {
+    if (products.length > 0) {
+      // Получаем все ID шин, которые сейчас в каталоге
+      const ids = products.map((product) => product.id);
+      // Можно запросить все остатки для этих шин через параметр tyre_id[]
+      // (в fetchStock доработай если хочешь массовую загрузку, иначе просто fetchStock() без параметров — все остатки)
+      dispatch(fetchStock());
+    }
+  }, [dispatch, products]);
 
-  // Функция редактирования товара
-  const handleEdit = (product) => {
-    // Переход на страницу редактирования товара
-    navigate(`/edit/${product.id}`, { state: { product } });
-  };
+  // Группируем остатки по id шины для быстрого доступа
+  // { 1: [остатки], 2: [остатки], ... }
+  const stockByTyreId = React.useMemo(() => {
+    const map = {};
+    for (const row of stock) {
+      if (!map[row.tyre_id]) map[row.tyre_id] = [];
+      map[row.tyre_id].push(row);
+    }
+    return map;
+  }, [stock]);
 
+  // Примитивный фильтр — можно сделать выпадающие списки, чекбоксы и т.д.
   return (
-    <div className={styles.productList}>
-      <h1>Товары</h1>
-      <div className={styles.gridContainer}> {/* Используем отдельный класс для сетки */}
-        {products.map(product => (
-          <ProductCard 
-            key={product.id} 
-            product={product} 
-            onDelete={handleDelete} 
-            onEdit={handleEdit} // Передаем обработчик редактирования
+    <div className={styles.wrapper}>
+      {/* Фильтр каталога шин */}
+      <div className={styles.filterBar}>
+        <input
+          type="text"
+          placeholder="Бренд"
+          value={brand}
+          onChange={(e) => setBrand(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Размер (например, 205/55R16)"
+          value={size}
+          onChange={(e) => setSize(e.target.value)}
+        />
+        <input
+          type="text"
+          placeholder="Сезон (например, Зимние)"
+          value={season}
+          onChange={(e) => setSeason(e.target.value)}
+        />
+        {/* Здесь можно добавить кнопки, селекты и любые фильтры */}
+      </div>
+      {/* Выводим статус загрузки каталога/остатков */}
+      {(productsStatus === "loading" || stockStatus === "loading") && (
+        <div>Загрузка товаров...</div>
+      )}
+      {/* Выводим список карточек товаров */}
+      <div className={styles.list}>
+        {products.length === 0 && productsStatus === "succeeded" && (
+          <div>Нет товаров по выбранным фильтрам.</div>
+        )}
+        {products.map((product) => (
+          <ProductCard
+            key={product.id}
+            product={product}
+            stock={stockByTyreId[product.id] || []}
           />
         ))}
       </div>

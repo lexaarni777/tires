@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { fetchCart, removeFromCart, clearCart, createOrder } from '../../slices/cartSlice'; // Пример Redux-slice
+import { fetchCart, removeFromCart, clearCart, placeOrder } from '../../slices/cartSlice'; // Пример Redux-slice
 import { useNavigate } from 'react-router-dom';
 import styles from './Cart.module.css';
+import { clearCartServerSide } from '../../slices/cartSlice';
+
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -25,13 +27,14 @@ const Cart = () => {
 
   const handleClearCart = () => {
     console.log("Clearing cart...");
-    dispatch(clearCart()); // Очищаем корзину
+    dispatch(clearCartServerSide()); // Очищаем корзину
   };
 
   const handleCheckout = async () => {
-    const result = await dispatch(createOrder(cartItems)); // Оформляем заказ
+    console.log("placeOrder(cartItems)...", cartItems);
+    const result = await dispatch(placeOrder(cartItems)); // Оформляем заказ
 
-    if (createOrder.fulfilled.match(result)) {
+    if (placeOrder.fulfilled.match(result)) {
       alert('Заказ успешно создан!'); // Выводим сообщение об успехе
       dispatch(clearCart()); // Очищаем корзину после успешного заказа
       //navigate('/orders'); // Перенаправляем на страницу заказов

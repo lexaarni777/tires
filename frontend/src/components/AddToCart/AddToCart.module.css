@@ -25,12 +25,12 @@
 
 .productCard .price {
     font-size: 1.2rem;
-    color: #007bff;
+    color: #EEEEEE;
     margin: 10px 0;
 }
 
 .productCard button {
-    background-color: #007bff;
+    background-color: #EEEEEE;
     color: white;
     border: none;
     border-radius: 5px;
@@ -40,7 +40,7 @@
 }
 
 .productCard button:hover {
-    background-color: #0056b3;
+    background-color: #F57C00;
 }
 .productImage {
     width: 100%;

@@ -1,83 +1,195 @@
-import React from 'react';
-import { useSelector, useDispatch } from 'react-redux';
-import styles from './ProductCard.module.css'; // Импорт стилей
-import { addToCart, decrementToCart } from '../../slices/cartSlice';
-import { useNavigate } from 'react-router-dom';
-import AddToCart from '../AddToCart/AddToCart';
-const ProductCard = ({ product, onDelete, onEdit }) => {
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../../slices/cartSlice"; // Исправь путь, если у тебя структура иная
+import styles from "./ProductCard.module.css";
 
-  console.log(product)
-  const dispatch = useDispatch();
+
+/**
+ * ProductCard — компонент карточки товара.
+ * Принимает:
+ * - product: объект каталога шины (с названием, изображениями и характеристиками)
+ * - stock: массив остатков (каждый — склад, цена, остаток и т.д. по этой шине)
+ */
+const ProductCard = ({ product, stock = [] }) => {
   const navigate = useNavigate();
-  // Получаем auth из Redux state
+  const dispatch = useDispatch();
   const auth = useSelector((state) => state.auth);
 
-  // Получаем auth из Redux state
-  const cart = useSelector((state) => state.cart.items);
-  
-  const decrementOnAddToCart = (productId, call) => {
-    dispatch(decrementToCart({
-      productId: productId,
-      quantity: '-1',
-      id: auth.id,
-    })); // Удаляем товар из корзины
+  // Склад, выбранный пользователем для добавления в корзину (по умолчанию — первый)
+  const [selectedStockId, setSelectedStockId] = useState(stock[0]?.id || null);
+  // Количество — по умолчанию 1
+  const [quantity, setQuantity] = useState(1);
+
+  /**
+   * handleClick — переход на детализированную карточку товара (по клику на саму карточку)
+   */
+  const handleClick = () => {
+    navigate(`/productdetailed/${product.id}`);
   };
 
-  const onAddToCart = (productId) => {
-    dispatch(addToCart({
-      productId: productId,
-      quantity: '1',
-      id: auth.id,
-    })); // Удаляем товар из корзины
+  /**
+   * getFeaturedImage — возвращает ссылку на главное изображение товара,
+   * если есть в product.images, иначе возвращает плейсхолдер
+   */
+  const getFeaturedImage = () => {
+    if (product.images && product.images.length > 0) {
+      const featured = product.images.find((img) => img.is_featured_image);
+      return featured
+        ? `http://localhost:5000${featured.image_path}`
+        : `http://localhost:5000${product.images[0].image_path}`;
+    }
+    return "https://via.placeholder.com/150";
   };
 
-  const handleToCart = () => {
-    navigate('/cart');
-  }
+  /**
+   * handleAddToCart — обработчик кнопки "Добавить в корзину"
+   * - Проверяет выбранный склад
+   * - Диспатчит экшен addToCart с полным объектом товара и склада
+   */
+  const handleAddToCart = (e) => {
+    e.stopPropagation(); // Не переходит на детальную при клике по кнопке
+    const selectedStock = stock.find((s) => s.id === selectedStockId);
+    if (!selectedStock) return;
 
-  const route = () => {
-    const call = cart.find(products=> products.product_id == product.id)?.quantity
-    const isRole = auth.roles.indexOf('admin')!==-1;
-    return(
-      isRole//Если у пользователя есть роль админа
-          ?<React.Fragment>
-            {console.log(call)}
-            <button onClick={() => onDelete(product.id)}>Удалить</button>
-            <button onClick={() => onEdit(product)}>Редактировать</button>
-            {call//Если товары уже есть в корзине
-            ?<React.Fragment>
-              <div className={styles.BlockAddToCart}>
-                <button className={styles.goToCart} onClick={handleToCart}>Перейти в корзину</button>
-                <div className={styles.BlockAddToCartBut}>
-                  <button onClick={() => onAddToCart(product.id)}>+</button>
-                  <input type='number' value={call}></input>
-                  <button onClick={() => decrementOnAddToCart(product.id, call)}>-</button>
-                </div>
-              </div>    
-              </React.Fragment>
-            :<button onClick={() => onAddToCart(product.id)}>Добавить в корзину</button>
-            } 
-          </React.Fragment>
-          :<React.Fragment>
-            <button onClick={() => onAddToCart(product.id)}>Добавить в корзину</button>
-          </React.Fragment>
-    )
-  }
-  console.log('auth',auth)
+    dispatch(
+      addToCart({
+        userId: auth.id, 
+        productId: product.id,
+        productName: product.name,
+        article: product.article,
+        image: getFeaturedImage(),
+        stockId: selectedStock.id,
+        location: selectedStock.location,
+        price: selectedStock.price_retail, // всегда розничная
+        quantity: quantity,
+        maxAvailable: selectedStock.stock,
+      })
+    );
+  };
 
-// Определяем путь к изображению (берем изображение, у которого is_featured_image равно true, или плейсхолдер)
-const productImage = product.images && product.images.length > 0 
-  ? `http://localhost:5000${product.images.find(image => image.is_featured_image)?.image_path || product.images[0].image_path}` 
-  : 'https://via.placeholder.com/150'; // Плейсхолдер для товаров без изображения
-    
+  /**
+   * renderStockTable — возвращает таблицу остатков и цен по всем складам.
+   * Рядом с кнопкой можно добавить выпадающий список для выбора склада
+   */
+  const renderStockTable = () => {
+    if (!stock.length) {
+      return <div className={styles.noStock}>Нет остатков на складах</div>;
+    }
+    return (
+      <table className={styles.stockTable}>
+        <thead>
+          <tr>
+            <th>Склад</th>
+            <th>Остаток</th>
+            <th>Розничная цена</th>
+            <th>Оптовая цена</th>
+          </tr>
+        </thead>
+        <tbody>
+          {stock.map((row) => (
+            <tr key={row.id}>
+              <td>{row.location}</td>
+              <td>{row.stock ?? "-"}</td>
+              <td>
+                {row.price_retail != null ? `${row.price_retail} ₽` : "-"}
+              </td>
+              <td>
+                {row.price_wholesale != null ? `${row.price_wholesale} ₽` : "-"}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+  };
 
+  // Получаем текущий выбранный склад для UI (чтобы выводить maxAvailable, цену и т.д.)
+  const selectedStock = stock.find((s) => s.id === selectedStockId);
+
+  // Основной рендер карточки
   return (
-    <div className={styles.productCard}>
-      <h3>{product.name}</h3>
-      <img src={productImage} alt={product.name} className={styles.productImage} />
-      <p className={styles.price}>Цена: {product.retail_msk} ₽</p>
-      <p>На складе в МСК: {product.stock_msk1 + product.stock_msk2}</p>
-      {route()}
+    <div className={styles.card} onClick={handleClick} tabIndex={0}>
+      {/* Блок с изображением */}
+      <div className={styles.imageWrap}>
+        <img
+          src={getFeaturedImage()}
+          alt={product.name}
+          className={styles.image}
+        />
+      </div>
+
+      {/* Информация о шине */}
+      <div className={styles.info}>
+        {/* Название и артикул */}
+        <div className={styles.title}>{product.name}</div>
+        <div className={styles.article}>Артикул: {product.article}</div>
+
+        {/* Характеристики */}
+        <div className={styles.meta}>
+          {product.brand && (
+            <span className={styles.brand}>Бренд: {product.brand}</span>
+          )}
+          {product.size && (
+            <span className={styles.size}>Размер: {product.size}</span>
+          )}
+          {product.season && (
+            <span className={styles.season}>Сезон: {product.season}</span>
+          )}
+          {/* Можно добавить другие характеристики */}
+        </div>
+
+        {/* Таблица остатков и цен */}
+        <div className={styles.stockBlock}>{renderStockTable()}</div>
+
+        {/* Блок выбора склада, количества и кнопки "Добавить в корзину" */}
+        {stock.length > 0 && (
+          <div className={styles.cartControls} onClick={(e) => e.stopPropagation()}>
+            {/* Селектор склада — только если складов больше одного */}
+            {stock.length > 1 && (
+              <select
+                value={selectedStockId}
+                onChange={(e) => {
+                  setSelectedStockId(Number(e.target.value));
+                  setQuantity(1); // сбрасываем количество при смене склада
+                }}
+                className={styles.select}
+              >
+                {stock.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.location} (в наличии: {s.stock} шт.)
+                  </option>
+                ))}
+              </select>
+            )}
+            {/* Выбор количества — ограничен остатком на выбранном складе */}
+            <input
+              type="number"
+              min={1}
+              max={selectedStock?.stock || 1}
+              value={quantity}
+              onClick={(e) => e.stopPropagation()}
+              onChange={(e) => {
+                let val = Number(e.target.value);
+                if (val > (selectedStock?.stock || 1)) val = selectedStock.stock;
+                if (val < 1) val = 1;
+                setQuantity(val);
+              }}
+              className={styles.qtyInput}
+            />
+            {/* Кнопка "Добавить в корзину" */}
+            <button
+              className={styles.addToCartBtn}
+              onClick={handleAddToCart}
+              disabled={
+                !selectedStockId || (selectedStock?.stock || 0) < 1
+              }
+            >
+              Добавить в корзину
+            </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

@@ -1,26 +1,24 @@
 /**
- * CONTROLLERS/AUTHCONTROLLER.JS
- * Логика обработки запросов, связанных с корзиной товаров.
- * Функции:
- * - Добавить товар в корзину.
- * - Получить корзину пользователя
- * - Обновить количество товара в корзине
- * - Удалить товар из корзины
- * - Очистить корзину
+ * Контроллеры для обработки запросов, связанных с корзиной товаров.
+ * Теперь все действия — с учётом склада (stock_id) и цены (price).
  */
 
-const { addToCart, getCart, updateCartItem, removeFromCart, clearCart   } = require('../models/cartModel');
+const { addToCart, getCart, updateCartItem, removeFromCart, clearCart } = require('../models/cartModel');
 
 // Добавить товар в корзину
 exports.addProductToCart = async (req, res) => {
-  const userId = req.body.id; // ID пользователя из авторизации
-  const { productId, quantity } = req.body;
+  // userId получаем из body (или из req.user, если есть авторизация)
+  const { userId, productId, stockId, price, quantity } = req.body;
 
-  console.log('addProductToCart', req.body)
+  console.log('addProductToCart', req.body);
+
+  if (!productId || !stockId || !quantity) {
+    return res.status(400).json({ message: 'Не переданы все обязательные параметры (productId, stockId, quantity)' });
+  }
 
   try {
-    // Вызываем функцию модели для добавления товара
-    const cartItem = await addToCart(userId, productId, quantity);
+    // Вызываем модель, теперь с учётом склада и цены
+    const cartItem = await addToCart(userId, productId, stockId, price, quantity);
     res.status(201).json(cartItem);
   } catch (err) {
     console.error('Ошибка добавления товара в корзину:', err);
@@ -30,12 +28,10 @@ exports.addProductToCart = async (req, res) => {
 
 // Получить корзину пользователя
 exports.getCart = async (req, res) => {
-  console.log('getCart userId', req.params.userId)
   const userId = req.params.userId;
   try {
     const cartItems = await getCart(userId);
-    console.log('getCart cartItems', cartItems)
-    res.status(200).json(cartItems);
+    res.status(200).json({ items: cartItems });
   } catch (err) {
     console.error('Ошибка получения корзины:', err);
     res.status(500).send('Ошибка сервера');
@@ -45,12 +41,14 @@ exports.getCart = async (req, res) => {
 // Обновить количество товара в корзине
 exports.updateCartItem = async (req, res) => {
   const userId = req.body.id;
-  const { productId } = req.params;
-  const { quantity } = req.body;
+  const { productId, stockId, quantity } = req.body;
 
+  if (!productId || !stockId || !quantity) {
+    return res.status(400).json({ message: 'Не переданы обязательные параметры (productId, stockId, quantity)' });
+  }
 
   try {
-    const updatedItem = await updateCartItem(userId, productId, quantity);
+    const updatedItem = await updateCartItem(userId, productId, stockId, quantity);
     res.status(200).json(updatedItem);
   } catch (err) {
     console.error('Ошибка обновления корзины:', err);
@@ -58,28 +56,27 @@ exports.updateCartItem = async (req, res) => {
   }
 };
 
-// Удалить товар из корзины
+// Удалить товар из корзины (конкретную позицию по складу)
 exports.removeFromCart = async (req, res) => {
-  console.log('removeFromCart req.body', req)
-
   const userId = req.body.id;
-  const { productId } = req.params;
-  const authHeader = req.headers.authorization
-  console.log('removeFromCart userId productId', userId, req.params, authHeader)
+  const { productId, stockId } = req.body;
+
+  if (!productId || !stockId) {
+    return res.status(400).json({ message: 'Не переданы обязательные параметры (productId, stockId)' });
+  }
+
   try {
-    await removeFromCart(userId, productId);
-    res.status(200).json({ message: 'Товар удален из корзины' });
+    await removeFromCart(userId, productId, stockId);
+    res.status(200).json({ message: 'Товар удалён из корзины' });
   } catch (err) {
     console.error('Ошибка удаления товара из корзины:', err);
     res.status(500).send('Ошибка сервера');
   }
 };
 
-
-// Очистить корзину
+// Очистить всю корзину пользователя
 exports.clearCart = async (req, res) => {
-  const userId = req.body.id;
-
+  const userId = req.body.userId;
   try {
     await clearCart(userId);
     res.status(200).json({ message: 'Корзина очищена' });

@@ -1,14 +1,14 @@
 /**
- * Логика взаимодействия с таблицей корзины в базе данных.
+ * Логика взаимодействия с таблицами заказов и заказанных товаров.
  * Функции:
- * - Создаем новый заказ в таблице orders
- * - Добавляем товары заказа в таблицу order_items
- * - получаем заказы пользователя
+ * - Создание нового заказа (orders)
+ * - Добавление товаров в заказ (order_items)
+ * - Получение заказов пользователя с деталями по товарам
  */
 
 const pool = require('../config/db');
 
-// Создаем новый заказ в таблице orders
+// Создаём новый заказ для пользователя
 exports.createOrderInDB = async (userId) => {
   const query = `
     INSERT INTO orders (user_id, status, created_at, updated_at)
@@ -16,53 +16,51 @@ exports.createOrderInDB = async (userId) => {
     RETURNING id;
   `;
   const { rows } = await pool.query(query, [userId]);
-  return rows[0]; // Возвращаем объект с id нового заказа
+  return rows[0]; // Возвращаем id созданного заказа
 };
 
-
-// Добавляем товары заказа в таблицу order_items
+// Добавляем товары из корзины в таблицу order_items
 exports.addOrderItemsInDB = async (orderId, cartItems) => {
-  console.log('addOrderItemsInDB', orderId, cartItems);
-
+  // В идеале, если контролируешь склады — добавляй сюда также stock_id!
   const query = `
-    INSERT INTO order_items (order_id, product_id, quantity, price, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+    INSERT INTO order_items (order_id, product_id, stock_id, quantity, price, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
   `;
 
-  // Извлекаем только необходимые данные для таблицы order_items
   const promises = cartItems.map((item) =>
     pool.query(query, [
-      orderId,             // Идентификатор заказа
-      item.product_id,     // Идентификатор товара
-      item.quantity,       // Количество товара
-      parseFloat(item.price), // Цена товара (переводим в число)
+      orderId,
+      item.product_id || item.productId,
+      item.stock_id || item.stockId,   // Вот так!
+      item.quantity,
+      parseFloat(item.price)
     ])
   );
 
-  await Promise.all(promises); // Выполняем все запросы параллельно
+  await Promise.all(promises);
 };
 
-  // получаем заказы пользователя
+// Получаем заказы пользователя (с деталями по товарам из tyre_catalog)
 exports.getUserOrders = async (userId) => {
   const query = `
     SELECT 
       o.id AS order_id,
-      o.total_amount,
       o.status,
       o.created_at,
+      SUM(oi.quantity * oi.price) AS total_amount,
       json_agg(
         json_build_object(
           'product_id', oi.product_id,
-          'name', p.name,
+          'name', t.name,
           'quantity', oi.quantity,
           'price', oi.price
         )
       ) AS items
     FROM orders o
     LEFT JOIN order_items oi ON o.id = oi.order_id
-    LEFT JOIN products p ON oi.product_id = p.id
+    LEFT JOIN tyre_catalog t ON oi.product_id = t.id
     WHERE o.user_id = $1
-    GROUP BY o.id
+    GROUP BY o.id, o.status, o.created_at
     ORDER BY o.created_at DESC;
   `;
   const result = await pool.query(query, [userId]);

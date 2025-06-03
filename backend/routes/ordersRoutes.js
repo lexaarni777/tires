@@ -9,7 +9,7 @@ const { createOrder, getUserOrders } = require('../controllers/ordersController'
 const { verifyToken}  = require('../middleware/authMiddleware');
 const router = express.Router();
 
-// POST /api/cart/add - Создать новый заказ
+// POST /api/orders/create - Создать новый заказ
 router.post('/create', verifyToken, createOrder );
 
 

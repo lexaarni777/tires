@@ -31,14 +31,17 @@ const Header = () => {
                         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
                     </div>
                 </div>
+                <div className={classes.IconHeader}>
                 <div className={classes.cartIcon}>
-                    <FaUser size={24} 
-                    onClick={handleUserClick}/>
-                </div>
-                <div className={classes.cartIcon}>
-                    <FaShoppingCart size={24} 
-                    onClick={handleCartClick}
-                    />
+                        <FaShoppingCart size={24} 
+                        onClick={handleCartClick}
+                        />
+                    </div>
+                    <div className={classes.cartIcon}>
+                        <FaUser size={24} 
+                        onClick={handleUserClick}/>
+                    </div>
+    
                 </div>
             </div>
 
@@ -48,7 +51,7 @@ const Header = () => {
                     <li><NavLink to="/">Главная</NavLink></li>
                     <li><NavLink to="/productlist">Шины</NavLink></li>
                     <li><NavLink to="/wheels">Диски</NavLink></li>
-                    <li>
+                    <li className={classes.submenuHead}>
                         Услуги
                         <ul className={classes.submenu}>
                             <li><NavLink to="/services/delivery">Доставка</NavLink></li>
@@ -57,7 +60,6 @@ const Header = () => {
                         </ul>
                     </li>
                     <li><NavLink to="/contacts">Контакты</NavLink></li>
-                    <li><NavLink to="/authform">Войти</NavLink></li>
                 </ul>
             </nav>
         </header>

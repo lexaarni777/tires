@@ -1,112 +1,134 @@
 /**
  * MODELS/PRODUCTMODEL.JS
- * Логика взаимодействия с таблицей товаров в базе данных.
+ * Логика взаимодействия с таблицей каталога шин (tyre_catalog) и изображениями.
  * Функции:
- * - Получение списка товаров с изображениями.
- * - Создание нового товара.
- * - Обновление товара.
- * - Удаление товара.
+ * - Получение списка шин с изображениями.
+ * - Создание новой шины (товара).
+ * - Обновление шины.
+ * - Удаление шины.
+ * - Получение шины по ID.
  */
 
 const pool = require('../config/db');
 
-// Получить все товары с изображениями
+// Получить все шины с изображениями
 exports.getProductsFromDB = async () => {
   const query = `
     SELECT 
-      p.*, 
+      t.*,  -- Все поля из tyre_catalog
       COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images
-    FROM products p
-    LEFT JOIN productsimages pi ON p.id = pi.product_id 
-    GROUP BY p.id;
+    FROM tyre_catalog t
+    LEFT JOIN productsimages pi ON t.id = pi.product_id
+    GROUP BY t.id
+    ORDER BY t.id ASC;
   `;
   const { rows } = await pool.query(query);
   return rows;
 };
 
-// Создать новый товар
+// Создать новую шину (товар) — принимает объект productData с нужными полями
 exports.createProductInDB = async (productData) => {
-    console.log('productData', productData);
-  
-    const query = `
-      INSERT INTO products 
-      (id, name, price_opt_vlg, price_opt_msk, stock_vlg, stock_msk1, stock_msk2, retail_vlg, retail_msk) 
-      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
-      RETURNING *;
-    `;
-  
-    const values = [
-      productData.id,
-      productData.name,
-      productData.price_opt_vlg,
-      productData.price_opt_msk,
-      productData.stock_vlg,
-      productData.stock_msk1,
-      productData.stock_msk2,
-      productData.retail_vlg,
-      productData.retail_msk,
-    ];
-
-    console.log('values', values)
-  
-    try {
-      const { rows } = await pool.query(query, values);
-      return rows[0];
-    } catch (err) {
-      console.error('Ошибка при создании товара в базе данных:', err);
-      throw err; // Выбрасываем ошибку для обработки выше
-    }
-  };
-  
-
-// Обновить товар
-exports.updateProductInDB = async (productId, productData) => {
+  // Ожидаются все нужные поля из tyre_catalog (без id, если SERIAL)
   const query = `
-    UPDATE products 
-    SET 
-      name = $1, 
-      price_opt_vlg = $2, 
-      price_opt_msk = $3, 
-      stock_vlg = $4, 
-      stock_msk1 = $5, 
-      stock_msk2 = $6, 
-      retail_vlg = $7, 
-      retail_msk = $8
-    WHERE id = $9
+    INSERT INTO tyre_catalog 
+      (article, name, brand, model, size, load_index, speed_index, season, vehicle_type, tread_depth, section_width, recommended_rim_width, diameter, country, description)
+    VALUES 
+      ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     RETURNING *;
   `;
+
   const values = [
+    productData.article,
     productData.name,
-    productData.price_opt_vlg,
-    productData.price_opt_msk,
-    productData.stock_vlg,
-    productData.stock_msk1,
-    productData.stock_msk2,
-    productData.retail_vlg,
-    productData.retail_msk,
-    productId,
+    productData.brand,
+    productData.model,
+    productData.size,
+    productData.load_index,
+    productData.speed_index,
+    productData.season,
+    productData.vehicle_type,
+    productData.tread_depth,
+    productData.section_width,
+    productData.recommended_rim_width,
+    productData.diameter,
+    productData.country,
+    productData.description
   ];
+
+  try {
+    const { rows } = await pool.query(query, values);
+    return rows[0];
+  } catch (err) {
+    console.error('Ошибка при создании шины в базе данных:', err);
+    throw err;
+  }
+};
+
+// Обновить информацию о шине (товаре)
+exports.updateProductInDB = async (productId, productData) => {
+  // Здесь обязательно поддерживай порядок и названия полей как в базе
+  const query = `
+    UPDATE tyre_catalog
+    SET
+      article = $1,
+      name = $2,
+      brand = $3,
+      model = $4,
+      size = $5,
+      load_index = $6,
+      speed_index = $7,
+      season = $8,
+      vehicle_type = $9,
+      tread_depth = $10,
+      section_width = $11,
+      recommended_rim_width = $12,
+      diameter = $13,
+      country = $14,
+      description = $15
+    WHERE id = $16
+    RETURNING *;
+  `;
+
+  const values = [
+    productData.article,
+    productData.name,
+    productData.brand,
+    productData.model,
+    productData.size,
+    productData.load_index,
+    productData.speed_index,
+    productData.season,
+    productData.vehicle_type,
+    productData.tread_depth,
+    productData.section_width,
+    productData.recommended_rim_width,
+    productData.diameter,
+    productData.country,
+    productData.description,
+    productId
+  ];
+
   const { rows } = await pool.query(query, values);
   return rows[0];
 };
 
-// Удалить товар
+// Удалить шину (товар)
 exports.deleteProductInDB = async (productId) => {
-  const query = 'DELETE FROM products WHERE id = $1 RETURNING *';
+  const query = 'DELETE FROM tyre_catalog WHERE id = $1 RETURNING *';
   const { rows } = await pool.query(query, [productId]);
   return rows[0];
 };
 
-// Получить товар по ID
+// Получить одну шину (товар) по ID с изображениями
 exports.getProductByIdFromDB = async (productId) => {
   const query = `
     SELECT 
-      p.*, 
+      t.*, 
       COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images
-    FROM products p
-    LEFT JOIN productsimages pi ON p.id = pi.product_id
-    WHERE p.id = $1
-    GROUP BY p.id;
+    FROM tyre_catalog t
+    LEFT JOIN productsimages pi ON t.id = pi.product_id
+    WHERE t.id = $1
+    GROUP BY t.id;
   `;
   const { rows } = await pool.query(query, [productId]);
   return rows[0];
