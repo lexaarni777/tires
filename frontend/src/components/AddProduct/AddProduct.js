@@ -1,95 +1,184 @@
 import React, { useState } from 'react';
-import { useSelector } from 'react-redux';
-import { useDispatch } from 'react-redux';
-import { addProduct, uploadProductsFromExcel } from '../../slices/productSlice';
+import { useSelector, useDispatch } from 'react-redux';
+import { addProduct, addStock, uploadProductsFromExcel } from '../../slices/productSlice';
 import styles from './AddProduct.module.css';
 
+/**
+ * AddProduct — компонент для добавления новой шины вручную
+ * и для массовой загрузки каталога из Excel.
+ */
+
+const warehouseList = [
+  { location: 'Москва-1' },
+  { location: 'Москва-2' },
+  { location: 'Волгоград' },
+];
+
 const AddProduct = () => {
-  const [id, setid] = useState('');
-  const [name, setname] = useState('');
-  const [price_opt_vlg, setprice_opt_vlg] = useState('');
-  const [price_opt_msk, setprice_opt_msk] = useState('');
-  const [stock_vlg, setstock_vlg] = useState('');
-  const [stock_msk1, setstock_msk1] = useState('');
-  const [stock_msk2, setstock_msk2] = useState('');
-  const [retail_vlg, setretail_vlg] = useState('');
-  const [retail_msk, setretail_msk] = useState('');
-  const [images, setImages] = useState([]); // Хранение изображений
+  // Состояние для справочника шин (tyre_catalog)
+  const [catalog, setCatalog] = useState({
+    article: '',
+    name: '',
+    brand: '',
+    model: '',
+    size: '',
+    load_index: '',
+    speed_index: '',
+    season: '',
+    vehicle_type: '',
+    tread_depth: '',
+    section_width: '',
+    recommended_rim_width: '',
+    diameter: '',
+    country: '',
+    description: '',
+  });
+
+  // Остатки и цены по складам (tyre_stock)
+  const [stocks, setStocks] = useState(
+    warehouseList.map((wh) => ({
+      location: wh.location,
+      stock: '',
+      price_retail: '',
+      price_wholesale: '',
+    }))
+  );
+
+  const [images, setImages] = useState([]); // Изображения
+  const [file, setFile] = useState(null); // Excel-файл
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [file, setFile] = useState(null);
   const dispatch = useDispatch();
 
-
+  // Получаем пользователя (если нужно для проверки прав)
   const user = useSelector((state) => state.auth.user);
   const roles = useSelector((state) => state.auth.roles);
-  (console.log(user, roles))
 
+  /**
+   * Обработка изменения поля справочника шин
+   */
+  const handleCatalogChange = (e) => {
+    setCatalog({ ...catalog, [e.target.name]: e.target.value });
+  };
+
+  /**
+   * Обработка изменения остатков/цен по складам
+   */
+  const handleStockChange = (idx, field, value) => {
+    setStocks((prev) =>
+      prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s))
+    );
+  };
+
+  /**
+   * Перетаскивание файлов изображений
+   */
+  const handleFileDrop = (e) => {
+    e.preventDefault();
+    const files = Array.from(e.dataTransfer.files);
+    setImages((prevImages) => [...prevImages, ...files]);
+  };
+
+  /**
+   * Обработка выбора Excel-файла
+   */
+  const handleFileChange = (e) => {
+    setFile(e.target.files[0]);
+  };
+
+  /**
+   * Загрузка изображений для товара
+   * (вызывается после успешного создания товара)
+   */
+  const uploadImages = async (productId) => {
+    for (const file of images) {
+      const formData = new FormData();
+      formData.append('image', file);
+      try {
+        await fetch(`http://localhost:5000/api/images/${productId}/upload-image`, {
+          method: 'POST',
+          body: formData,
+        });
+      } catch (err) {
+        console.error('Ошибка при загрузке изображения:', err);
+      }
+    }
+  };
+
+  /**
+   * Добавить новый товар вручную (tyre_catalog + tyre_stock)
+   */
   const handleManualSubmit = async (e) => {
     e.preventDefault();
     setError(null);
     setSuccess(false);
 
     try {
-      const productData = {
-        id,
-        name,
-        price_opt_vlg: parseFloat(price_opt_vlg),
-        price_opt_msk: parseFloat(price_opt_msk),
-        stock_vlg: parseInt(stock_vlg),
-        stock_msk1: parseInt(stock_msk1),
-        stock_msk2: parseInt(stock_msk2),
-        retail_vlg: parseFloat(retail_vlg),
-        retail_msk: parseFloat(retail_msk),
-      };
+      // 1. Добавляем товар в справочник (tyre_catalog)
+      const createdProduct = await dispatch(addProduct(catalog)).unwrap();
 
-      await dispatch(addProduct(productData)); // Сохраняем товар
+      // 2. Добавляем остатки и цены по каждому складу
+      const productId = createdProduct.id;
+      for (const stock of stocks) {
+        if (
+          stock.stock !== '' ||
+          stock.price_retail !== '' ||
+          stock.price_wholesale !== ''
+        ) {
+          await dispatch(
+            addStock({
+              tyre_id: productId,
+              location: stock.location,
+              stock: parseInt(stock.stock, 10) || 0,
+              price_retail: parseFloat(stock.price_retail) || 0,
+              price_wholesale: parseFloat(stock.price_wholesale) || 0,
+            })
+          );
+        }
+      }
+
+      // 3. Загружаем фотографии (если есть)
+      if (images.length > 0) {
+        await uploadImages(productId);
+      }
+
       setSuccess(true);
 
-      // Сбрасываем поля
-      setid('');
-      setname('');
-      setprice_opt_vlg('');
-      setprice_opt_msk('');
-      setstock_vlg('');
-      setstock_msk1('');
-      setstock_msk2('');
-      setretail_vlg('');
-      setretail_msk('');
+      // Сбросить формы
+      setCatalog({
+        article: '',
+        name: '',
+        brand: '',
+        model: '',
+        size: '',
+        load_index: '',
+        speed_index: '',
+        season: '',
+        vehicle_type: '',
+        tread_depth: '',
+        section_width: '',
+        recommended_rim_width: '',
+        diameter: '',
+        country: '',
+        description: '',
+      });
+      setStocks(
+        warehouseList.map((wh) => ({
+          location: wh.location,
+          stock: '',
+          price_retail: '',
+          price_wholesale: '',
+        }))
+      );
       setImages([]);
     } catch (err) {
-      setError(err.message);
+      setError(err.message || 'Ошибка при добавлении товара 1');
     }
   };
 
-  const handleFileDrop = (e) => {
-    e.preventDefault();
-    const files = Array.from(e.dataTransfer.files);
-    setImages((prevImages) => [...prevImages, ...files]); // Добавляем изображения в состояние
-  };
-
-  const uploadImages = async () => {
-    for (const file of images) {
-      const formData = new FormData();
-      formData.append('image', file);
-      console.log(id)
-
-      try {
-        const response = await fetch(`http://localhost:5000/api/images/${id}/upload-image`, {
-          method: 'POST',
-          body: formData,
-        });
-        console.log(response)
-
-        if (!response.ok) {
-          console.error('Ошибка при загрузке изображения');
-        }
-      } catch (err) {
-        console.error('Ошибка при загрузке:', err);
-      }
-    }
-  };
-
+  /**
+   * Загрузка каталога из Excel (batch upload)
+   */
   const handleExcelSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -108,20 +197,18 @@ const AddProduct = () => {
     }
   };
 
-  const handleFileChange = (e) => {
-    setFile(e.target.files[0]);
-  };
-
   return (
     <div className={styles.container}>
-      <h2>Добавить товар вручную</h2>
+      <h2>Добавить новую шину вручную</h2>
       <form onSubmit={handleManualSubmit}>
+        {/* Все поля справочника шин (tyre_catalog) */}
         <div className={styles.formGroup}>
-          <label>ID:</label>
+          <label>Артикул:</label>
           <input
-            type="number"
-            value={id}
-            onChange={(e) => setid(e.target.value)}
+            type="text"
+            name="article"
+            value={catalog.article}
+            onChange={handleCatalogChange}
             required
           />
         </div>
@@ -129,78 +216,67 @@ const AddProduct = () => {
           <label>Название:</label>
           <input
             type="text"
-            value={name}
-            onChange={(e) => setname(e.target.value)}
+            name="name"
+            value={catalog.name}
+            onChange={handleCatalogChange}
             required
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Цена опт Волгоград:</label>
+          <label>Бренд:</label>
           <input
-            type="number"
-            step="0.01"
-            value={price_opt_vlg}
-            onChange={(e) => setprice_opt_vlg(e.target.value)}
-            required
+            type="text"
+            name="brand"
+            value={catalog.brand}
+            onChange={handleCatalogChange}
           />
         </div>
         <div className={styles.formGroup}>
-          <label>Цена опт Москва:</label>
+          <label>Модель:</label>
           <input
-            type="number"
-            step="0.01"
-            value={price_opt_msk}
-            onChange={(e) => setprice_opt_msk(e.target.value)}
-            required
+            type="text"
+            name="model"
+            value={catalog.model}
+            onChange={handleCatalogChange}
           />
         </div>
+        {/* ... остальные поля аналогично ... */}
         <div className={styles.formGroup}>
-          <label>Склад Волгоград:</label>
-          <input
-            type="number"
-            value={stock_vlg}
-            onChange={(e) => setstock_vlg(e.target.value)}
-            required
+          <label>Описание:</label>
+          <textarea
+            name="description"
+            value={catalog.description}
+            onChange={handleCatalogChange}
           />
         </div>
-        <div className={styles.formGroup}>
-          <label>Склад Москва 1:</label>
-          <input
-            type="number"
-            value={stock_msk1}
-            onChange={(e) => setstock_msk1(e.target.value)}
-            required
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Склад Москва 2:</label>
-          <input
-            type="number"
-            value={stock_msk2}
-            onChange={(e) => setstock_msk2(e.target.value)}
-            required
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Розничная цена Волгоград:</label>
-          <input
-            type="number"
-            step="0.01"
-            value={retail_vlg}
-            onChange={(e) => setretail_vlg(e.target.value)}
-            required
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Розничная цена Москва:</label>
-          <input
-            type="number"
-            step="0.01"
-            value={retail_msk}
-            onChange={(e) => setretail_msk(e.target.value)}
-            required
-          />
-        </div>
+
+        <h3>Остатки и цены по складам</h3>
+        {stocks.map((stock, idx) => (
+          <div key={idx} className={styles.formGroup}>
+            <strong>{stock.location}</strong>
+            <label>Остаток:</label>
+            <input
+              type="number"
+              value={stock.stock}
+              onChange={(e) => handleStockChange(idx, 'stock', e.target.value)}
+            />
+            <label>Розничная цена:</label>
+            <input
+              type="number"
+              value={stock.price_retail}
+              step="0.01"
+              onChange={(e) => handleStockChange(idx, 'price_retail', e.target.value)}
+            />
+            <label>Оптовая цена:</label>
+            <input
+              type="number"
+              value={stock.price_wholesale}
+              step="0.01"
+              onChange={(e) => handleStockChange(idx, 'price_wholesale', e.target.value)}
+            />
+          </div>
+        ))}
+
         <div className={styles.formGroup}>
           <label>Перетащите фотографии сюда:</label>
           <div
@@ -218,7 +294,7 @@ const AddProduct = () => {
             ))}
           </div>
         </div>
-        <button type="submit" onClick={uploadImages}>
+        <button type="submit">
           Добавить вручную
         </button>
       </form>

@@ -60,9 +60,9 @@ export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (i
  * Асинхронное действие: удалить одну позицию из корзины по id строки корзины.
  * (itemId — id строки корзины, не товара!)
  */
-export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (cartItemId, { getState, dispatch }) => {
+export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (cart_id, { getState, dispatch }) => {
     const { auth } = getState();
-    await fetch(`http://localhost:5000/api/cart/delete/${cartItemId}`, {
+    await fetch(`http://localhost:5000/api/cart/delete/${cart_id}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${auth.token}`,
@@ -71,7 +71,7 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (car
     });
     // Обновить корзину после удаления
     dispatch(fetchCart());
-    return cartItemId;
+    return cart_id;
 });
 
 /**

@@ -20,9 +20,9 @@ const Cart = () => {
       .catch((error) => console.error("Failed to fetch cart items:", error)); // Обработка ошибок
   }, [dispatch]);
 
-  const handleRemove = (productId) => {
-    console.log(`Removing product with ID: ${productId}`);
-    dispatch(removeFromCart(productId)); // Удаляем товар из корзины
+  const handleRemove = (cart_id) => {
+    console.log(`Removing product with ID: ${cart_id}`);
+    dispatch(removeFromCart(cart_id)); // Удаляем товар из корзины
   };
 
   const handleClearCart = () => {
@@ -66,7 +66,7 @@ const Cart = () => {
             </div>
             <button
               className={styles.removeButton}
-              onClick={() => handleRemove(item.product_id)}
+              onClick={() => handleRemove(item.cart_id)}
             >
               Удалить
             </button>

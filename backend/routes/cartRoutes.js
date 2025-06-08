@@ -9,11 +9,14 @@
  */
 
 const express = require('express');
-const { addProductToCart, getCart, updateCartItem, removeFromCart, clearCart  } = require('../controllers/cartController');
+const { addProductToCart, getCart, updateCartItem, removeFromCart, clearCart, decrementCartItem } = require('../controllers/cartController');
 const router = express.Router();
 
 // POST /api/cart/add - добавть товар в козину
 router.post('/add', addProductToCart );
+
+// POST /api/cart/decrement - добавть товар в козину
+router.post('/decrement', decrementCartItem );
 
 // GET /api/cart/getcart - Получить текущую корзину пользователя.
 router.get('/getcart/:userId', getCart );
@@ -21,8 +24,8 @@ router.get('/getcart/:userId', getCart );
 // PUT /api/cart/update/:productId - Обновить количество товара в корзине
 router.get('/update/:productId', updateCartItem  );
 
-// DELETE  /api/cart/delete/:productId - Удалить указанный товар из корзины
-router.delete('/delete/:productId', removeFromCart   );
+// DELETE  /api/cart/delete/:cart_id) - Удалить указанный товар из корзины
+router.delete('/delete/:cart_id', removeFromCart   );
 
 // DELETE  /api/cart/delete - Удалить все товары из корзины
 router.delete('/delete', clearCart);

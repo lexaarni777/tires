@@ -3,6 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 /**
  * Асинхронное действие для загрузки каталога шин.
  * params — объект фильтров (например, { brand: 'Triangle', size: '205/55R16' })
+ * Загружает все товары из tyre_catalog с изображениями.
  */
 export const fetchProducts = createAsyncThunk(
   'products/fetchProducts',
@@ -15,12 +16,13 @@ export const fetchProducts = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Ошибка при загрузке каталога');
     }
-    return response.json();
+    return response.json(); // Ожидается массив товаров с вложенными images
   }
 );
 
 /**
  * Асинхронное действие для удаления шины из каталога.
+ * Удаляет из базы строку из tyre_catalog (а на бэке желательно каскадно удалять и все остатки/изображения!)
  */
 export const deleteProduct = createAsyncThunk(
   'products/deleteProduct',
@@ -39,12 +41,13 @@ export const deleteProduct = createAsyncThunk(
       const error = await response.json();
       throw new Error(error.message || 'Ошибка при удалении товара');
     }
-    return id; // Возвращаем id удалённого товара
+    return id;
   }
 );
 
 /**
- * Асинхронное действие для добавления новой шины в каталог.
+ * Асинхронное действие для добавления новой шины в справочник (tyre_catalog).
+ * На бэке создаётся только сам товар, без остатков.
  */
 export const addProduct = createAsyncThunk(
   'products/addProduct',
@@ -61,12 +64,36 @@ export const addProduct = createAsyncThunk(
     if (!response.ok) {
       throw new Error('Ошибка при добавлении товара');
     }
-    return response.json();
+    return response.json(); // возвращает созданный объект шины (tyre_catalog)
+  }
+);
+
+/**
+ * Асинхронное действие для добавления остатков и цен по складам (tyre_stock).
+ * Ожидает объект типа { product_id, location, stock, price_retail, price_wholesale }
+ */
+export const addStock = createAsyncThunk(
+  'products/addStock',
+  async (stockData) => {
+    const token = localStorage.getItem('token');
+    const response = await fetch('http://localhost:5000/api/products/stock', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(stockData),
+    });
+    if (!response.ok) {
+      throw new Error('Ошибка при добавлении остатка по складу');
+    }
+    return response.json(); // возвращает созданный объект остатков
   }
 );
 
 /**
  * Асинхронное действие для массовой загрузки каталога шин из Excel/CSV.
+ * Формирует FormData и отправляет на backend.
  */
 export const uploadProductsFromExcel = createAsyncThunk(
   'products/uploadProductsFromExcel',
@@ -92,23 +119,24 @@ export const uploadProductsFromExcel = createAsyncThunk(
   }
 );
 
-// Основной слайс каталога шин
+// Основной слайс каталога шин (tyre_catalog)
 const productSlice = createSlice({
   name: 'products',
   initialState: {
-    items: [],
+    items: [], // Массив всех шин (tyre_catalog)
     status: 'idle', // idle | loading | succeeded | failed
     error: null,
   },
   reducers: {
-    // Можно добавить ручное обновление каталога из других компонентов
+    // Ручная установка каталога (например, после массового импорта)
     setProducts: (state, action) => {
       state.items = action.payload;
     },
+    // Можно добавить reducer для обновления остатков по складам, если потребуется
   },
   extraReducers: (builder) => {
     builder
-      // Загрузка каталога
+      // Загрузка каталога шин
       .addCase(fetchProducts.pending, (state) => {
         state.status = 'loading';
       })
@@ -126,6 +154,15 @@ const productSlice = createSlice({
         state.items.push(action.payload);
       })
       .addCase(addProduct.rejected, (state, action) => {
+        state.error = action.error.message;
+      })
+
+      // Добавление остатков по складу (tyre_stock)
+      // Здесь можно реализовать обновление состояния остатков в items, если храним их во вложенном виде
+      .addCase(addStock.fulfilled, (state, action) => {
+        // Можно реализовать, если ты хранишь склады во вложенном виде у товара (не обязательно)
+      })
+      .addCase(addStock.rejected, (state, action) => {
         state.error = action.error.message;
       })
 

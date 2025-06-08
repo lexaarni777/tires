@@ -152,6 +152,7 @@ exports.getStock = async (req, res) => {
 // Добавить остаток (по складу)
 exports.createStock = async (req, res) => {
   try {
+    console.log('Добавление остатков:', req.body);
     const { tyre_id, location, price_wholesale, price_retail, stock } = req.body;
     const { rows } = await pool.query(
       'INSERT INTO tyre_stock (tyre_id, location, price_wholesale, price_retail, stock) VALUES ($1, $2, $3, $4, $5) RETURNING *',

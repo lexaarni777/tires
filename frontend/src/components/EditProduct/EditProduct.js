@@ -1,51 +1,132 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import styles from './EditProduct.module.css'; // Импортируем стили
+import styles from './EditProduct.module.css';
+
+const warehouseList = [
+  { location: 'Москва-1' },
+  { location: 'Москва-2' },
+  { location: 'Волгоград' },
+];
 
 const EditProduct = () => {
   const { id } = useParams();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const product = location.state?.product || {
+  // Состояния для каталога шин и остатков по складам
+  const [catalog, setCatalog] = useState({
+    article: '',
     name: '',
-    price_opt_vlg: '',
-    price_opt_msk: '',
-    stock_vlg: '',
-    stock_msk1: '',
-    stock_msk2: '',
-    retail_vlg: '',
-    retail_msk: '',
-  };
+    brand: '',
+    model: '',
+    size: '',
+    load_index: '',
+    speed_index: '',
+    season: '',
+    vehicle_type: '',
+    tread_depth: '',
+    section_width: '',
+    recommended_rim_width: '',
+    diameter: '',
+    country: '',
+    description: '',
+  });
 
-  const [formData, setFormData] = useState(product);
-  const [images, setImages] = useState([]); // Состояние для изображений
+  const [stocks, setStocks] = useState([]); // Остатки по складам
+  const [images, setImages] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Загружаем изображения при загрузке компонента
+  // Получаем инфу о товаре и остатках по id
   useEffect(() => {
-    const fetchImages = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`http://localhost:5000/api/products/${id}/images`);
-        console.log('response', response)
-        if (response.ok) {
-          const data = await response.json();
-          setImages(data); // Устанавливаем загруженные изображения
-        } else {
-          console.error('Ошибка при загрузке изображений');
-        }
+        // Получаем данные из каталога
+        const productRes = await fetch(`http://localhost:5000/api/products/catalog/${id}`);
+        if (!productRes.ok) throw new Error('Ошибка при получении товара');
+        const productData = await productRes.json();
+        setCatalog(productData);
+
+        // Получаем остатки по складам
+        const stockRes = await fetch(`http://localhost:5000/api/products/stock?tyre_id=${id}`);
+        if (!stockRes.ok) throw new Error('Ошибка при получении остатков');
+        const stockData = await stockRes.json();
+        setStocks(stockData);
+
+        // Получаем изображения
+        const imagesRes = await fetch(`http://localhost:5000/api/products/${id}/images`);
+        if (imagesRes.ok) setImages(await imagesRes.json());
+        setLoading(false);
       } catch (err) {
-        console.error('Ошибка при запросе:', err);
+        alert('Ошибка загрузки данных: ' + err.message);
+        setLoading(false);
       }
     };
-
-    fetchImages();
+    fetchData();
   }, [id]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+  // Обработка изменений каталога шин
+  const handleCatalogChange = (e) => {
+    setCatalog({ ...catalog, [e.target.name]: e.target.value });
   };
 
+  // Обработка изменений остатков/цен по складам
+  const handleStockChange = (idx, field, value) => {
+    setStocks((prev) =>
+      prev.map((s, i) => (i === idx ? { ...s, [field]: value } : s))
+    );
+  };
+
+  // Сохранить изменения в каталоге
+  const handleCatalogSubmit = async (e) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost:5000/api/products/catalog/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(catalog),
+      });
+      if (res.ok) {
+        alert('Информация о товаре обновлена!');
+      } else {
+        alert('Ошибка обновления товара');
+      }
+    } catch (err) {
+      alert('Ошибка обновления: ' + err.message);
+    }
+  };
+
+  // Сохранить изменения в остатках по складам
+  const handleStockSubmit = async (e, stock, idx) => {
+    e.preventDefault();
+    const token = localStorage.getItem('token');
+    try {
+      const res = await fetch(`http://localhost:5000/api/products/stock/${stock.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          price_retail: stock.price_retail,
+          price_wholesale: stock.price_wholesale,
+          stock: stock.stock,
+        }),
+      });
+      if (res.ok) {
+        alert('Остатки на складе обновлены!');
+      } else {
+        alert('Ошибка обновления остатков');
+      }
+    } catch (err) {
+      alert('Ошибка обновления остатков: ' + err.message);
+    }
+  };
+
+  // --------- Зона изображений (оставляем как есть) --------
   const handleDrop = async (e) => {
     e.preventDefault();
     const files = Array.from(e.dataTransfer.files);
@@ -59,20 +140,16 @@ const EditProduct = () => {
     formData.append('image', file);
 
     try {
-        console.log('ID товара:', id);
-        console.log('Файлы для загрузки:', images);
       const response = await fetch(`http://localhost:5000/api/images/${id}/upload-image`, {
         method: 'POST',
         body: formData,
       });
       if (response.ok) {
         const data = await response.json();
-        setImages((prevImages) => [...prevImages, data]); // Добавляем новое изображение
-      } else {
-        console.error('Ошибка загрузки изображения');
+        setImages((prevImages) => [...prevImages, data]);
       }
     } catch (err) {
-      console.error('Ошибка при загрузке:', err);
+      alert('Ошибка загрузки изображения: ' + err.message);
     }
   };
 
@@ -84,163 +161,98 @@ const EditProduct = () => {
       if (response.ok) {
         setImages((prevImages) => prevImages.filter((img) => img.id !== imageId));
         alert('Изображение успешно удалено');
-      } else {
-        console.error('Ошибка при удалении изображения');
       }
     } catch (err) {
-      console.error('Ошибка при удалении:', err);
+      alert('Ошибка при удалении: ' + err.message);
     }
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    const token = localStorage.getItem('token');
-    try {
-      const response = await fetch(`http://localhost:5000/api/products/${id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify(formData),
-      });
-
-      if (response.ok) {
-        alert('Товар успешно обновлен!');
-        navigate('/');
-      } else {
-        alert('Ошибка при обновлении товара!');
-      }
-    } catch (err) {
-      console.error('Ошибка при обновлении:', err);
-    }
-  };
+  if (loading) return <div>Загрузка...</div>;
 
   return (
     <div className={styles.editProduct}>
       <h1 className={styles.title}>Редактировать товар</h1>
-      <form onSubmit={handleSubmit} className={styles.form}>
+
+      {/* --- Форма редактирования каталога --- */}
+      <form onSubmit={handleCatalogSubmit} className={styles.form}>
+        <div className={styles.formGroup}>
+          <label>Артикул:</label>
+          <input type="text" name="article" value={catalog.article} onChange={handleCatalogChange} required />
+        </div>
         <div className={styles.formGroup}>
           <label>Название:</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            required
-            className={styles.input}
-          />
+          <input type="text" name="name" value={catalog.name} onChange={handleCatalogChange} required />
         </div>
         <div className={styles.formGroup}>
-          <label>Цена опт (Влг):</label>
-          <input
-            type="number"
-            name="price_opt_vlg"
-            value={formData.price_opt_vlg}
-            onChange={handleChange}
-            className={styles.input}
-          />
+          <label>Бренд:</label>
+          <input type="text" name="brand" value={catalog.brand || ''} onChange={handleCatalogChange} />
         </div>
         <div className={styles.formGroup}>
-          <label>Цена опт (Мск):</label>
-          <input
-            type="number"
-            name="price_opt_msk"
-            value={formData.price_opt_msk}
-            onChange={handleChange}
-            className={styles.input}
-          />
+          <label>Модель:</label>
+          <input type="text" name="model" value={catalog.model || ''} onChange={handleCatalogChange} />
         </div>
+        {/* ... остальные поля по аналогии ... */}
         <div className={styles.formGroup}>
-          <label>Наличие (Влг):</label>
-          <input
-            type="number"
-            name="stock_vlg"
-            value={formData.stock_vlg}
-            onChange={handleChange}
-            className={styles.input}
-          />
+          <label>Описание:</label>
+          <textarea name="description" value={catalog.description || ''} onChange={handleCatalogChange} />
         </div>
-        <div className={styles.formGroup}>
-          <label>Наличие (Мск1):</label>
-          <input
-            type="number"
-            name="stock_msk1"
-            value={formData.stock_msk1}
-            onChange={handleChange}
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Наличие (Мск2):</label>
-          <input
-            type="number"
-            name="stock_msk2"
-            value={formData.stock_msk2}
-            onChange={handleChange}
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Розница (Влг):</label>
-          <input
-            type="number"
-            name="retail_vlg"
-            value={formData.retail_vlg}
-            onChange={handleChange}
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.formGroup}>
-          <label>Розница (Мск):</label>
-          <input
-            type="number"
-            name="retail_msk"
-            value={formData.retail_msk}
-            onChange={handleChange}
-            className={styles.input}
-          />
-        </div>
-    {/* Зона для загрузки изображений */}
-        <div  className={styles.dragDrop} onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
-          <p>Перетащите фотографии сюда для загрузки</p>
-        </div>
-
-        {/* Отображение миниатюр изображений */}
-        <div className={styles.imageList}>
-          {images.map((image) => (
-            
-            <div key={image.id} className={styles.imageItem}>
-                {console.log(image)}
-              <img
-                src={`http://localhost:5000${image.image_path}`}
-                alt={`Uploaded ${image.id}`}
-                className={styles.image}
-              />
-              <button
-                type="button"
-                onClick={() => deleteImage(image.id)}
-                className={styles.deleteButton}
-              >
-                Удалить
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <div className={styles.actions}>
-          <button type="submit" className={styles.saveButton}>
-            Сохранить
-          </button>
-          <button
-            type="button"
-            className={styles.cancelButton}
-            onClick={() => navigate('/')}
-          >
-            Отмена
-          </button>
-        </div>
+        <button type="submit" className={styles.saveButton}>
+          Сохранить товар
+        </button>
       </form>
+
+      {/* --- Форма редактирования остатков по каждому складу --- */}
+      <h2>Остатки и цены по складам</h2>
+      {stocks.map((stock, idx) => (
+        <form key={stock.id} onSubmit={(e) => handleStockSubmit(e, stock, idx)} className={styles.form}>
+          <div className={styles.formGroup}>
+            <strong>{stock.location}</strong>
+            <label>Остаток:</label>
+            <input
+              type="number"
+              value={stock.stock}
+              onChange={(e) => handleStockChange(idx, 'stock', e.target.value)}
+            />
+            <label>Розничная цена:</label>
+            <input
+              type="number"
+              step="0.01"
+              value={stock.price_retail}
+              onChange={(e) => handleStockChange(idx, 'price_retail', e.target.value)}
+            />
+            <label>Оптовая цена:</label>
+            <input
+              type="number"
+              step="0.01"
+              value={stock.price_wholesale}
+              onChange={(e) => handleStockChange(idx, 'price_wholesale', e.target.value)}
+            />
+          </div>
+          <button type="submit" className={styles.saveButton}>
+            Сохранить склад
+          </button>
+        </form>
+      ))}
+
+      {/* --- Зона изображений --- */}
+      <h2>Изображения</h2>
+      <div className={styles.dragDrop} onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
+        <p>Перетащите фотографии сюда для загрузки</p>
+      </div>
+      <div className={styles.imageList}>
+        {images.map((image) => (
+          <div key={image.id} className={styles.imageItem}>
+            <img src={`http://localhost:5000${image.image_path}`} alt={`Uploaded ${image.id}`} className={styles.image} />
+            <button type="button" onClick={() => deleteImage(image.id)} className={styles.deleteButton}>
+              Удалить
+            </button>
+          </div>
+        ))}
+      </div>
+
+      <button type="button" className={styles.cancelButton} onClick={() => navigate('/')}>
+        Отмена
+      </button>
     </div>
   );
 };

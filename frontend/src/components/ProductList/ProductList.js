@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard";
+import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
 
 // Импортируем асинхронные thunks из productSlice и stockSlice
-import { fetchProducts } from "../../slices/productSlice";
+import { fetchProducts,deleteProduct} from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
 import styles from "./ProductList.module.css";
 /**
@@ -16,6 +17,7 @@ import styles from "./ProductList.module.css";
  */
 const ProductList = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate(); // Хук для работы с маршрутизацией
 
   // Состояния для фильтрации — здесь пример только с брендом, размером и сезоном
   const [brand, setBrand] = useState("");
@@ -63,6 +65,16 @@ const ProductList = () => {
     return map;
   }, [stock]);
 
+    // Функция удаления товара
+    const handleDelete = (id) => {
+      dispatch(deleteProduct(id));
+    };
+      // Функция редактирования товара
+  const handleEdit = (product) => {
+    // Переход на страницу редактирования товара
+    navigate(`/edit/${product.id}`, { state: { product } });
+  };
+
   // Примитивный фильтр — можно сделать выпадающие списки, чекбоксы и т.д.
   return (
     <div className={styles.wrapper}>
@@ -101,6 +113,8 @@ const ProductList = () => {
           <ProductCard
             key={product.id}
             product={product}
+            onDelete={handleDelete}
+            onEdit={handleEdit}
             stock={stockByTyreId[product.id] || []}
           />
         ))}

@@ -33,6 +33,16 @@ exports.addToCart = async (userId, productId, stockId, price, quantity) => {
   return newItem.rows[0];
 };
 
+// Получить одну позицию корзины по user, product и stock
+exports.getCartItem = async (userId, productId, stockId) => {
+  const result = await pool.query(
+    'SELECT * FROM cart WHERE user_id = $1 AND product_id = $2 AND stock_id = $3',
+    [userId, productId, stockId]
+  );
+  return result.rows[0];
+};
+
+
 // Получить корзину пользователя с деталями по шине и складу
 exports.getCart = async (userId) => {
   const result = await pool.query(
@@ -76,12 +86,9 @@ exports.updateCartItem = async (userId, productId, stockId, quantity) => {
   return updatedItem.rows[0];
 };
 
-// Удалить позицию из корзины (user, product, stock)
-exports.removeFromCart = async (userId, productId, stockId) => {
-  await pool.query(
-    'DELETE FROM cart WHERE user_id = $1 AND product_id = $2 AND stock_id = $3',
-    [userId, productId, stockId]
-  );
+// Удалить товар из корзины по cart_id
+exports.removeFromCart = async (cart_id) => {
+  await pool.query('DELETE FROM cart WHERE id = $1', [cart_id]);
 };
 
 // Очистить корзину пользователя полностью
