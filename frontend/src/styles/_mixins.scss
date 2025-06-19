@@ -1,0 +1,21 @@
+// === Брейкпоинты ===
+$breakpoints: (
+  xs: 320px,
+  sm: 576px,
+  md: 768px,
+  lg: 1024px,
+  xl: 1440px
+);
+
+// === Mixin: Адаптивный медиа-запрос ===
+@mixin respond($breakpoint) {
+  @media (max-width: map-get($breakpoints, $breakpoint)) {
+    @content;
+  }
+}
+
+// === Mixin: Flex column ===
+@mixin flex-column {
+  display: flex;
+  flex-direction: column;
+}

@@ -3,6 +3,7 @@ const pool = require('../config/db');
 
 // Импорт XLSX для работы с файлами Excel (xlsx, xls)
 const XLSX = require('xlsx');
+const productModel = require('../models/productModel');
 
 /* =========================
    1. Работа с КАТАЛОГОМ шин
@@ -11,24 +12,9 @@ const XLSX = require('xlsx');
 // Получить все товары каталога с фильтрацией по параметрам запроса
 exports.getAllTyres = async (req, res) => {
   try {
-    // Получаем фильтры из query-параметров (например: /api/catalog?brand=Triangle&size=205/55R16)
-    const filters = req.query;
-    let query = 'SELECT * FROM tyre_catalog';
-    const values = [];
-
-    // Формируем WHERE для всех пришедших фильтров
-    if (Object.keys(filters).length > 0) {
-      const where = [];
-      Object.entries(filters).forEach(([key, value], idx) => {
-        where.push(`${key} = $${idx + 1}`);
-        values.push(value);
-      });
-      query += ' WHERE ' + where.join(' AND ');
-    }
-
-    // Делаем запрос к базе (с учётом фильтров)
-    const { rows } = await pool.query(query, values);
-    res.json(rows);
+    // Если нужны фильтры — нужно доработать модель, но базовая логика такая:
+    const products = await productModel.getProductsFromDB();
+    res.json(products);
   } catch (err) {
     console.error('Ошибка при получении каталога шин:', err);
     res.status(500).send('Ошибка сервера');
@@ -39,14 +25,16 @@ exports.getAllTyres = async (req, res) => {
 exports.getTyreById = async (req, res) => {
   try {
     const { id } = req.params;
-    const { rows } = await pool.query('SELECT * FROM tyre_catalog WHERE id = $1', [id]);
-    if (rows.length === 0) return res.status(404).json({ message: 'Товар не найден' });
-    res.json(rows[0]);
+    const product = await productModel.getProductByIdFromDB(id);
+    if (!product) return res.status(404).json({ message: 'Товар не найден' });
+    res.json(product);
   } catch (err) {
     console.error('Ошибка при получении шины:', err);
     res.status(500).send('Ошибка сервера');
   }
 };
+
+
 
 // Создать новую шину в каталоге
 exports.createTyre = async (req, res) => {
@@ -110,12 +98,34 @@ exports.deleteTyre = async (req, res) => {
     const { id } = req.params;
     const { rows } = await pool.query('DELETE FROM tyre_catalog WHERE id = $1 RETURNING *', [id]);
     if (rows.length === 0) return res.status(404).json({ message: 'Товар не найден' });
-    res.json({ message: 'Товар успешно удалён', product: rows[0] });
+
+    // === Новая логика для удаления связанных изображений ===
+    // 1. Удаляем записи об изображениях из базы
+    await pool.query('DELETE FROM productsimages WHERE product_id = $1', [id]);
+
+    // 2. Удаляем папку с файлами (uploads/imageProducts/{product_id}/)
+    const fs = require('fs');
+    const path = require('path');
+    const imageDir = path.join('uploads', 'imageProducts', id.toString());
+    // Удалить папку рекурсивно, если она существует (Node.js >= v12.10.0)
+    if (fs.existsSync(imageDir)) {
+      fs.rmSync(imageDir, { recursive: true, force: true });
+    }
+    // === Конец новой логики ===
+
+    res.json({ message: 'Товар и все изображения успешно удалены', product: rows[0] });
   } catch (err) {
     console.error('Ошибка при удалении шины:', err);
     res.status(500).send('Ошибка сервера');
   }
 };
+
+/**
+ * Кратко что изменилось:
+ * - При удалении товара теперь автоматически удаляются все связанные записи об изображениях и физическая папка с файлами этого товара.
+ * - Так не останется "мусорных" файлов на диске.
+ */
+
 
 /* ==============================
    2. Работа с ОСТАТКАМИ и ЦЕНАМИ

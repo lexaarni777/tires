@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCart, removeFromCart, clearCart, placeOrder } from '../../slices/cartSlice'; // Пример Redux-slice
 import { useNavigate } from 'react-router-dom';
-import styles from './Cart.module.css';
+import styles from './Cart.module.scss';
 import { clearCartServerSide } from '../../slices/cartSlice';
 
 

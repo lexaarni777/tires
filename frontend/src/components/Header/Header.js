@@ -3,7 +3,7 @@ import React from 'react';
 import { FaShoppingCart } from 'react-icons/fa'; // Иконка корзины
 import { FaUser } from "react-icons/fa";
 import { NavLink, useNavigate } from 'react-router-dom'; // Для навигации
-import classes from './Header.module.css';
+import classes from './Header.module.scss';
 
 const Header = () => {
     const navigate = useNavigate(); // Хук для программной навигации

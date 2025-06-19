@@ -9,7 +9,7 @@
 
 const express = require('express');
 const uploadImage = require('../config/multer');
-const { deleteImage, getImagesForProduct, uploadProductImage, setFeaturedImage } = require('../controllers/imagesController');
+const { deleteImage, getImagesForProduct, uploadProductImage, setFeaturedImage, batchUpdateImageOrder, getFeaturedImageThumb } = require('../controllers/imagesController');
 const router = express.Router();
 
 router.post('/:id/upload-image', uploadImage.single('image'), uploadProductImage);
@@ -22,6 +22,11 @@ router.get('/:id', getImagesForProduct);
 
 // PUT: /api/images/productId/featured-image Установка главного изображения
 router.put('/:productId/featured-image', setFeaturedImage);
+
+// PUT: /api/images/:productId/order
+router.put('/:productId/order', batchUpdateImageOrder);
+
+
 
 
 module.exports = router;

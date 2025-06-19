@@ -13,14 +13,14 @@ const pool = require('../config/db');
 
 // Получить все шины с изображениями
 exports.getProductsFromDB = async () => {
-  const query = `
+const query = `
     SELECT 
-      t.*,  -- Все поля из tyre_catalog
+      t.*,  
       COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images
     FROM tyre_catalog t
     LEFT JOIN productsimages pi ON t.id = pi.product_id
     GROUP BY t.id
-    ORDER BY t.id ASC;
+    ORDER BY t.id ASC
   `;
   const { rows } = await pool.query(query);
   return rows;
@@ -133,3 +133,4 @@ exports.getProductByIdFromDB = async (productId) => {
   const { rows } = await pool.query(query, [productId]);
   return rows[0];
 };
+

@@ -9,12 +9,20 @@
 
 const pool = require('../config/db');
 
-// Добавить изображение для товара
-exports.addImageToDB = async (productId, imagePath) => {
-  const query = 'INSERT INTO productsimages (product_id, image_path) VALUES ($1, $2) RETURNING *';
-  const { rows } = await pool.query(query, [productId, imagePath]);
+// Добавить изображение для товара с порядком (order)
+exports.addImageToDB = async (productId, imagePath, order = 0, isFeatured = false) => {
+  const query = `
+    INSERT INTO productsimages (product_id, image_path, "order", is_featured_image)
+    VALUES ($1, $2, $3, $4) RETURNING *
+  `;
+  const { rows } = await pool.query(query, [productId, imagePath, order, isFeatured]);
   return rows[0];
 };
+/**
+ * - Теперь можно сразу задавать порядок и статус главного.
+ * - Используется для загрузки любого изображения.
+ */
+
 
 // Удалить изображение
 exports.deleteImageFromDB = async (imageId) => {
@@ -22,20 +30,24 @@ exports.deleteImageFromDB = async (imageId) => {
   const { rows } = await pool.query(query, [imageId]);
   return rows[0];
 };
-
-// Получить все изображения для товара
+// Получить все изображения для товара (отсортированные по order)
 exports.getImagesForProductFromDB = async (productId) => {
-    const query = 'SELECT * FROM productsimages WHERE product_id = $1';
-    const values = [productId];
-  
-    try {
-      const { rows } = await pool.query(query, values);
-      return rows;
-    } catch (err) {
-      console.error('Ошибка в модели при получении изображений:', err);
-      throw err;
-    }
-  };
+  const query = `
+    SELECT * FROM productsimages WHERE product_id = $1 ORDER BY "order" ASC, id ASC
+  `;
+  const values = [productId];
+  try {
+    const { rows } = await pool.query(query, values);
+    return rows;
+  } catch (err) {
+    console.error('Ошибка в модели при получении изображений:', err);
+    throw err;
+  }
+};
+/**
+ * - Всегда возвращает отсортированный по "order" список.
+ */
+
 
 // Обновить главное изображение для товара
 exports.updateFeaturedImage = async (productId, imageId) => {
@@ -68,3 +80,4 @@ exports.updateFeaturedImage = async (productId, imageId) => {
     client.release(); // Закрываем соединение
   }
 };
+

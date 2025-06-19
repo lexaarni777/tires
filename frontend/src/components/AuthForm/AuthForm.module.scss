@@ -1,0 +1,120 @@
+@import '../../styles/variables.scss';  // Цвета, шрифты, отступы
+@import '../../styles/mixins.scss';     // Медиа-запросы
+
+.authForm {
+  max-width: 400px;                      // Ограничиваем ширину формы
+  margin: 0 auto;                        // Центрируем по горизонтали
+  padding: 20px;                         // Внутренний отступ
+  border: 1px solid $border-color;       // Граница с переменной
+  border-radius: 8px;                    // Скругляем углы
+  background-color: #fff;                // Белый фон
+}
+
+.title {
+  text-align: center;                    // Центровка заголовка
+  font-size: 1.5em;                      // Размер шрифта
+  margin-bottom: 20px;                   // Отступ снизу
+  color: $text-primary;                  // Основной цвет текста
+}
+
+.form {
+  display: flex;                         // Флекс-контейнер
+  flex-direction: column;               // Элементы по вертикали
+}
+
+.fieldGroup {
+  margin-bottom: 15px;                  // Расстояние между полями
+}
+
+.label {
+  display: block;                       // Блочный элемент
+  margin-bottom: 5px;                   // Отступ снизу
+  font-weight: bold;                    // Жирный текст
+  color: $text-primary;                 // Основной цвет
+}
+
+.input {
+  width: 100%;                          // На всю ширину родителя
+  padding: 8px;                         // Внутренний отступ
+  border: 1px solid $border-color;      // Граница с переменной
+  border-radius: 4px;                   // Скруглённые углы
+  font-size: 1em;                       // Размер шрифта
+  background-color: #fff;               // Белый фон
+
+  &:focus {
+    outline: none;                      // Убираем обводку
+    border-color: $primary;             // Синий бордер
+    box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.2); // Светлая подсветка
+  }
+}
+
+.select {
+  @extend .input;                       // Наследуем стили от input
+}
+
+.button {
+  width: 100%;                          // На всю ширину
+  padding: 10px;                        // Внутренний отступ
+  background-color: $primary;           // Синий фон
+  color: #fff;                          // Белый текст
+  border: none;                         // Без рамки
+  border-radius: 4px;                   // Скруглённые углы
+  cursor: pointer;                      // Курсор — рука
+  transition: background-color 0.3s;    // Плавное наведение
+  font-size: 1em;                       // Размер текста
+
+  &:hover {
+    background-color: darken($primary, 8%); // Темнее при наведении
+  }
+
+  &:disabled {
+    background-color: lighten($primary, 30%); // Осветление при загрузке
+    cursor: not-allowed;                      // Курсор запрета
+  }
+}
+
+.toggleButton {
+  width: 100%;                          // На всю ширину
+  padding: 10px;                        // Отступ
+  background-color: $accent;            // Оранжевый фон
+  color: #fff;                          // Белый текст
+  border: none;                         // Без рамки
+  border-radius: 4px;                   // Скругление
+  cursor: pointer;                      // Курсор
+  transition: background-color 0.3s;    // Плавное наведение
+  font-size: 1em;                       // Размер текста
+  margin-top: 10px;                     // Отступ сверху
+
+  &:hover {
+    background-color: darken($accent, 8%); // Темнее при наведении
+  }
+}
+
+.loading {
+  text-align: center;                  // Центровка текста
+  color: $primary;                     // Цвет загрузки
+  font-weight: bold;                   // Жирный текст
+}
+
+.error {
+  color: $danger;                      // Красный цвет ошибки
+  text-align: center;                  // Центровка
+  margin-bottom: 15px;                 // Отступ снизу
+  font-weight: bold;                   // Жирный текст
+}
+
+// === Мобильная адаптация ===
+@include respond(sm) {
+  .authForm {
+    padding: 16px;                     // Меньше отступов на мобилке
+  }
+
+  .title {
+    font-size: 1.3em;                  // Чуть меньше заголовок
+  }
+
+  .button,
+  .toggleButton {
+    font-size: 0.95em;                 // Меньше текст кнопок
+  }
+}

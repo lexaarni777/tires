@@ -1,0 +1,48 @@
+@import '../../styles/variables.scss';  // Цвета, отступы, шрифты
+@import '../../styles/mixins.scss';     // Медиазапросы
+
+.wrapper {
+  max-width: 1440px;                  // Ограничение по ширине контейнера
+  margin: 0 auto;                     // Центровка
+  padding: 16px;                      // Отступы слева и справа
+}
+
+.filterBar {
+  display: flex;                      // Горизонтальное расположение
+  flex-wrap: wrap;                    // Перенос строк на малых экранах
+  gap: 12px;                          // Отступ между инпутами
+  margin-bottom: 20px;                // Отступ снизу
+
+  input {
+    flex: 1;                          // Каждый инпут занимает одинаковую ширину
+    min-width: 180px;                // Минимальная ширина
+    padding: 10px;                   // Внутренний отступ
+    font-size: 14px;                 // Размер текста
+    border: 1px solid $border-color; // Граница
+    border-radius: 4px;              // Скругление углов
+    background: #fff;                // Белый фон
+
+    &:focus {
+      outline: none;                 // Убираем синий обвод
+      border-color: $primary;       // Синий бордер при фокусе
+      box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.2); // Светлая подсветка
+    }
+  }
+}
+
+.list {
+  display: grid;                     // Сетка
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); // Гибкое количество колонок
+  gap: 20px;                         // Расстояние между карточками
+}
+
+// === Адаптивность для маленьких экранов ===
+@include respond(sm) {
+  .filterBar {
+    flex-direction: column;         // Фильтры идут вертикально
+  }
+
+  .list {
+    grid-template-columns: 1fr;     // Одна колонка
+  }
+}

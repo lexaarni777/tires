@@ -1,0 +1,212 @@
+@import '../../styles/variables.scss';  // Импорт цветовых и размерных переменных
+@import '../../styles/mixins.scss';     // Импорт медиазапросов и шаблонов
+@import '../../styles/typography.scss'; // Импорт типографики
+
+.card {
+  background: #fff;                    // Белый фон карточки
+  border: 1px solid $border-color;     // Граница по переменной
+  border-radius: 8px;                  // Скругление углов
+  box-shadow: $shadow-light;           // Мягкая тень
+  padding: 16px;                       // Внутренний отступ
+  cursor: pointer;                     // Курсор — рука
+  transition: box-shadow 0.3s ease;    // Плавный переход тени
+
+  &:hover {
+    box-shadow: $shadow-hover;         // Увеличенная тень при наведении
+  }
+}
+
+.imageWrap {
+  text-align: center;                 // Центрирование изображения
+  margin-bottom: 12px;               // Отступ снизу
+}
+
+.image {
+  max-width: 100%;                   // Не выходит за границы блока
+  max-height: 160px;                // Максимальная высота
+  object-fit: contain;              // Подгоняет размер, сохраняя пропорции
+}
+
+.info {
+  @include flex-column;             // Вертикальная флекс-колонка
+  gap: 8px;                         // Отступ между блоками
+}
+
+.title {
+  font-size: 18px;                  // Размер шрифта заголовка
+  font-weight: 600;                 // Полужирный
+  color: $text-primary;             // Цвет основного текста
+}
+
+.article {
+  font-size: 14px;                  // Меньший размер
+  color: $text-muted;               // Второстепенный цвет
+}
+
+.meta {
+  display: flex;                    // Горизонтальное расположение
+  flex-wrap: wrap;                  // Перенос строк
+  gap: 8px;                         // Отступ между элементами
+  font-size: 14px;                  // Размер шрифта
+  color: $text-muted;               // Вторичный цвет
+}
+
+.stockTable {
+  width: 100%;                      // Ширина 100%
+  border-collapse: collapse;        // Убираем промежутки между ячейками
+  font-size: 14px;                  // Размер текста
+  margin-top: 12px;                 // Отступ сверху
+
+  th, td {
+    padding: 6px 8px;               // Отступы в ячейках
+    border: 1px solid $border-color; // Границы таблицы
+    text-align: left;              // Выравнивание по левому краю
+  }
+
+  th {
+    background-color: $background; // Фон заголовков
+    font-weight: 600;              // Полужирный
+  }
+}
+
+.noStock {
+  color: $danger;                  // Красный текст ошибки
+  font-size: 14px;                 // Размер шрифта
+  margin-top: 8px;                 // Отступ сверху
+}
+
+.cartControls {
+  margin-top: 16px;                // Отступ сверху
+  display: flex;                   // Flexbox
+  flex-direction: column;         // Вертикально
+  gap: 12px;                       // Отступ между блоками
+}
+
+.select {
+  padding: 8px;                    // Внутренний отступ
+  font-size: 14px;                 // Размер шрифта
+  border: 1px solid $border-color; // Граница
+  border-radius: 4px;             // Скругление
+}
+
+.BlockAddToCart {
+  display: flex;                   // Flexbox
+  flex-direction: column;         // Вертикальное направление
+  gap: 8px;                        // Расстояние между кнопкой и количеством
+}
+
+.BlockAddToCartBut {
+  display: flex;                   // Горизонтальный флекс
+  gap: 6px;                        // Отступ между кнопками
+  align-items: center;            // Центровка по вертикали
+
+  button {
+    width: 32px;                   // Ширина кнопки
+    height: 32px;                  // Высота кнопки
+    font-size: 18px;               // Размер текста
+    font-weight: bold;             // Жирный текст
+    background-color: $primary;    // Синий фон
+    color: #fff;                   // Белый текст
+    border: none;                  // Без границ
+    border-radius: 4px;            // Скругление
+    cursor: pointer;               // Рука
+
+    &:disabled {
+      background-color: lighten($primary, 20%); // Осветлённый цвет при отключении
+      cursor: not-allowed;           // Курсор запрета
+    }
+  }
+
+  input {
+    width: 50px;                   // Ширина поля
+    text-align: center;            // Центровка текста
+    padding: 4px;                  // Внутренний отступ
+    font-size: 14px;               // Размер шрифта
+    border: 1px solid $border-color; // Граница
+    border-radius: 4px;            // Скругление
+  }
+}
+
+.qtyInput {
+  width: 60px;                     // Ширина инпута количества
+  padding: 6px;                    // Внутренний отступ
+  text-align: center;              // Центрирование текста
+  border: 1px solid $border-color; // Цвет границы
+  border-radius: 4px;              // Скругление
+}
+
+.addToCartBtn {
+  background-color: $accent;       // Акцентный фон (оранжевый)
+  color: #fff;                      // Белый текст
+  padding: 10px 16px;               // Внутренние отступы
+  border: none;                     // Без границы
+  border-radius: 6px;               // Скруглённые углы
+  font-weight: 600;                 // Жирный текст
+  cursor: pointer;                  // Рука
+
+  &:hover {
+    background-color: darken($accent, 7%); // Затемнение при наведении
+  }
+
+  &:disabled {
+    background-color: lighten($accent, 20%); // Осветление при отключении
+    cursor: not-allowed;                     // Курсор запрета
+  }
+}
+
+.goToCart {
+  background-color: transparent;    // Прозрачный фон
+  color: $primary;                  // Синий текст
+  border: 1px solid $primary;       // Синяя граница
+  padding: 8px 12px;                // Отступы
+  border-radius: 6px;               // Скругление
+  font-size: 14px;                  // Размер шрифта
+  cursor: pointer;                  // Курсор
+
+  &:hover {
+    background-color: $primary;     // Синий фон при наведении
+    color: #fff;                    // Белый текст
+  }
+}
+
+.adminControls {
+  display: flex;                    // Горизонтальный флекс
+  gap: 8px;                         // Отступ между кнопками
+
+  .button {
+    background: none;               // Без фона
+    border: 1px dashed $border-color; // Пунктирная граница
+    padding: 6px 10px;              // Отступы
+    font-size: 13px;                // Мелкий шрифт
+    cursor: pointer;                // Курсор
+
+    &:hover {
+      border-color: $danger;        // Красная граница при наведении
+      color: $danger;               // Красный текст
+    }
+  }
+}
+
+// === Адаптивность для маленьких экранов ===
+@include respond(sm) {
+  .stockTable {
+    font-size: 12px;                // Уменьшение текста в таблице
+  }
+
+  .title {
+    font-size: 16px;                // Уменьшение заголовка
+  }
+
+  .addToCartBtn {
+    width: 100%;                    // Кнопка на всю ширину
+  }
+
+  .BlockAddToCartBut {
+    flex-direction: column;         // Вертикальное выравнивание
+    align-items: stretch;           // Растягивание элементов
+
+    button, input {
+      width: 100%;                  // На всю ширину блока
+    }
+  }
+}

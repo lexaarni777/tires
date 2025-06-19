@@ -1,0 +1,132 @@
+@import '../../styles/variables.scss';  // Цвета, отступы, фон
+@import '../../styles/mixins.scss';     // Медиа-запросы
+
+.container {
+  max-width: 800px;                           // Ограничиваем ширину блока
+  margin: 20px auto;                          // Центровка по горизонтали с отступом
+  padding: 20px;                              // Внутренний отступ
+  border: 1px solid $border-color;            // Граница с переменной
+  border-radius: 8px;                         // Скругление углов
+  background-color: #fff;                     // Белый фон
+  box-shadow: $shadow-light;                  // Лёгкая тень
+}
+
+h2 {
+  color: $text-primary;                       // Основной цвет текста
+  text-align: center;                         // Центровка заголовка
+  margin-bottom: 20px;                        // Отступ снизу
+}
+
+h3 {
+  color: $text-primary;                       // Цвет подзаголовка
+  margin: 20px 0 10px;                        // Отступы сверху и снизу
+}
+
+form {
+  margin-bottom: 20px;                        // Отступ между двумя формами
+}
+
+.formGroup {
+  display: flex;                              // Флекс-контейнер
+  flex-direction: column;                    // Расположение по вертикали
+  margin-bottom: 15px;                        // Отступ между группами
+}
+
+label {
+  font-weight: bold;                          // Жирный текст
+  margin-bottom: 5px;                         // Отступ от поля
+  color: $text-primary;                       // Цвет шрифта
+}
+
+input,
+textarea {
+  padding: 10px;                              // Внутренний отступ
+  border: 1px solid $border-color;            // Граница
+  border-radius: 4px;                         // Скругление
+  font-size: 16px;                            // Размер шрифта
+  background-color: #fff;                     // Белый фон
+
+  &:focus {
+    outline: none;                            // Убираем обводку
+    border-color: $primary;                   // Синяя граница при фокусе
+    box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.15); // Подсветка
+  }
+}
+
+.button {
+  padding: 10px 15px;                         // Внутренние отступы
+  font-size: 16px;                            // Размер шрифта
+  border: none;                               // Без рамки
+  border-radius: 4px;                         // Скругление
+  cursor: pointer;                            // Курсор — рука
+  transition: background-color 0.2s ease;     // Плавное затемнение
+  background-color: $primary;                 // Синий фон
+  color: #fff;                                // Белый текст
+
+  &:hover {
+    background-color: darken($primary, 10%);  // Темнее при наведении
+  }
+}
+
+.error {
+  color: $danger;                             // Красный цвет ошибок
+  font-weight: bold;                          // Жирный текст
+  text-align: center;                         // Центровка
+  margin-top: 10px;                           // Отступ сверху
+}
+
+.success {
+  color: $success;                            // Зелёный при успехе
+  font-weight: bold;                          // Жирный текст
+  text-align: center;                         // Центровка
+  margin-top: 10px;                           // Отступ сверху
+}
+
+.dragDrop {
+  border: 2px dashed $border-color;           // Пунктирная рамка
+  border-radius: 8px;                         // Скругление
+  padding: 20px;                              // Отступы внутри
+  text-align: center;                         // Центровка текста
+  background-color: #f8f8f8;                  // Светлый фон
+  margin-bottom: 10px;                        // Отступ снизу
+
+  &:hover {
+    background-color: #e9f7ff;                // Подсветка при наведении
+  }
+}
+
+.imagePreview {
+  display: flex;                              // Горизонтальное отображение
+  gap: 10px;                                  // Промежуток между изображениями
+  margin-top: 10px;                           // Отступ сверху
+  flex-wrap: wrap;                            // Перенос строк при нехватке места
+}
+
+.imageItem img {
+  width: 100px;                               // Ширина превью
+  height: 100px;                              // Высота
+  object-fit: cover;                          // Обрезка по контейнеру
+  border: 1px solid $border-color;            // Граница
+  border-radius: 4px;                         // Скругление углов
+}
+
+// === Адаптивность для мобилок ===
+@include respond(sm) {
+  .container {
+    padding: 16px;                            // Меньше внутренние отступы
+  }
+
+  input,
+  textarea {
+    font-size: 14px;                          // Меньше шрифт на мобилке
+  }
+
+  button {
+    font-size: 14px;                          // Меньше кнопка
+  }
+
+  .imageItem img {
+    width: 80px;                              // Меньше картинка
+    height: 80px;                             // Пропорционально
+  }
+}

@@ -1,0 +1,125 @@
+@import '../../styles/variables.scss';  // Цвета, отступы, фон
+@import '../../styles/mixins.scss';     // Медиа-запросы
+
+.cartContainer {
+  max-width: 800px;                      // Ограничиваем ширину корзины
+  margin: 20px auto;                     // Центруем по горизонтали с вертикальным отступом
+  padding: 20px;                         // Внутренние отступы
+  border: 1px solid $border-color;       // Серая рамка по переменной
+  border-radius: 8px;                    // Скругляем углы
+  background-color: #fff;                // Белый фон
+}
+
+.cartContainer h2 {
+  text-align: center;                    // Центровка заголовка
+  color: $text-primary;                  // Основной цвет текста
+}
+
+.cartItems {
+  list-style: none;                      // Убираем маркеры списка
+  padding: 0;                            // Обнуляем отступы
+  margin: 20px 0;                        // Отступ сверху и снизу
+}
+
+.cartItem {
+  display: flex;                         // Горизонтальное расположение
+  align-items: center;                   // Центровка по вертикали
+  justify-content: space-between;       // Раскидываем по краям
+  padding: 10px 0;                       // Отступ сверху и снизу
+  border-bottom: 1px solid $border-color; // Линия снизу
+}
+
+.productImage {
+  width: 80px;                           // Фиксированная ширина
+  height: 80px;                          // Фиксированная высота
+  object-fit: cover;                     // Масштабирование изображения
+  border-radius: 4px;                    // Скругление углов
+}
+
+.productDetails {
+  flex: 1;                               // Занимает всё оставшееся пространство
+  margin-left: 15px;                     // Отступ слева от картинки
+}
+
+.productDetails h3 {
+  margin: 0 0 10px;                      // Отступ снизу от заголовка
+  font-size: 18px;                       // Размер шрифта
+  color: $text-primary;                  // Основной цвет текста
+}
+
+.productDetails p {
+  margin: 5px 0;                         // Вертикальные отступы между строками
+  font-size: 14px;                       // Размер шрифта
+  color: $text-muted;                    // Второстепенный цвет
+}
+
+.cartActions {
+  display: flex;                         // Горизонтальное выравнивание
+  justify-content: space-between;       // Кнопки по краям
+  margin-top: 20px;                      // Отступ сверху
+  gap: 10px;                             // Отступ между кнопками
+  flex-wrap: wrap;                       // Перенос на мобильных
+}
+
+.removeButton,
+.clearButton,
+.checkoutButton {
+  padding: 10px 20px;                    // Внутренние отступы
+  font-size: 14px;                       // Размер текста
+  color: #fff;                           // Белый текст
+  border: none;                          // Без рамки
+  border-radius: 4px;                    // Скруглённые углы
+  cursor: pointer;                       // Курсор — рука
+}
+
+.removeButton {
+  background-color: $danger;             // Красный фон
+  &:hover {
+    background-color: darken($danger, 7%); // Темнее при наведении
+  }
+}
+
+.clearButton {
+  background-color: #ffc107;             // Жёлтый фон (ручной акцент)
+  &:hover {
+    background-color: #e0a800;           // Затемнение при наведении
+  }
+}
+
+.checkoutButton {
+  background-color: $success;            // Зелёный — подтверждение
+  &:hover {
+    background-color: darken($success, 7%); // Тёмно-зелёный при наведении
+  }
+}
+
+.emptyCart {
+  text-align: center;                    // Центровка текста
+  font-size: 18px;                       // Размер шрифта
+  color: $text-muted;                    // Серый цвет
+  padding: 40px 0;                       // Отступы сверху и снизу
+}
+
+// === Мобильная адаптация ===
+@include respond(sm) {
+  .cartItem {
+    flex-direction: column;              // Вертикальная раскладка
+    align-items: flex-start;             // Выравнивание по левому краю
+  }
+
+  .cartActions {
+    flex-direction: column;              // Кнопки друг под другом
+    align-items: stretch;                // Растягиваются по ширине
+  }
+
+  .removeButton,
+  .clearButton,
+  .checkoutButton {
+    width: 100%;                         // Кнопки на всю ширину
+  }
+
+  .productDetails {
+    margin-left: 0;                      // Убираем отступ при вертикальном расположении
+    margin-top: 10px;                    // Отступ сверху
+  }
+}

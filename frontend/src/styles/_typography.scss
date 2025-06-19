@@ -1,0 +1,34 @@
+// === Подключение шрифта Inter ===
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+// === Базовые стили ===
+body {
+  font-family: $font-family-base;
+  font-size: 16px;
+  color: $text-primary;
+  background-color: $background;
+}
+
+// === Заголовки ===
+.h1 {
+  font-size: 32px;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.h2 {
+  font-size: 24px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.h3 {
+  font-size: 20px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.text-muted {
+  color: $text-muted;
+  font-size: 14px;
+}

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementToCart } from "../../slices/cartSlice";
-import styles from "./ProductCard.module.css";
+import styles from "./ProductCard.module.scss";
 
 /**
  * ProductCard — карточка товара.
@@ -22,6 +22,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   const [selectedStockId, setSelectedStockId] = useState(stock[0]?.id || null);
   // Количество — по умолчанию 1
   const [quantity, setQuantity] = useState(1);
+  console.log('product.images', product.images);
 
   // Функция перехода на детальную карточку товара
   const handleClick = () => {
@@ -253,8 +254,8 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           {/* Действия для администратора: удалить / редактировать */}
           {auth.roles && auth.roles.indexOf("admin") !== -1 && (
             <div className={styles.adminControls}>
-              <button onClick={(e) => { e.stopPropagation(); onEdit(product); }}>Редактировать</button>
-              <button onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>Удалить</button>
+              <button className={styles.button} onClick={(e) => { e.stopPropagation(); onEdit(product); }}>Редактировать</button>
+              <button className={styles.button}onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>Удалить</button>
             </div>
           )}
         </div>

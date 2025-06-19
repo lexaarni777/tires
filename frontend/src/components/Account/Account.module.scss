@@ -1,0 +1,73 @@
+@import '../../styles/variables.scss';  // Цвета, отступы, шрифты
+@import '../../styles/mixins.scss';     // Медиа-запросы
+
+.account {
+  max-width: 600px;                       // Ограничение ширины блока
+  margin: 0 auto;                         // Центровка по горизонтали
+  padding: 20px;                          // Внутренние отступы
+  text-align: center;                     // Центровка содержимого
+  background-color: $background;          // Светлый фон
+  border-radius: 8px;                     // Скругление углов
+  box-shadow: $shadow-light;              // Лёгкая тень
+}
+
+.userInfo {
+  margin-bottom: 20px;                    // Отступ снизу
+  font-size: 1.1em;                       // Немного увеличенный размер текста
+
+  p {
+    margin: 10px 0;                       // Отступ сверху и снизу для абзацев
+    color: $text-primary;                 // Основной цвет текста
+  }
+}
+
+.actions {
+  display: flex;                          // Горизонтальное выравнивание
+  justify-content: center;               // Центровка содержимого
+  flex-wrap: wrap;                        // Перенос на новую строку при нехватке ширины
+  gap: 10px;                              // Отступ между кнопками и ссылками
+
+  a {
+    display: inline-block;               // Ссылки как блочные кнопки
+    padding: 10px 20px;                  // Отступы
+    border-radius: 4px;                  // Скруглённые углы
+    background-color: $primary;          // Синий фон
+    color: #fff;                         // Белый текст
+    text-decoration: none;               // Убираем подчёркивание
+    font-size: 1em;                      // Размер текста
+    transition: background-color 0.3s;   // Плавное изменение фона
+
+    &:hover {
+      background-color: darken($primary, 10%); // Тёмно-синий при наведении
+    }
+  }
+}
+
+.button {
+  padding: 10px 20px;                    // Внутренний отступ
+  border: none;                          // Убираем рамку
+  border-radius: 4px;                    // Скруглённые углы
+  background-color: $accent;             // Оранжевый фон
+  color: #fff;                           // Белый текст
+  font-size: 1em;                        // Размер шрифта
+  cursor: pointer;                       // Курсор — рука
+  transition: background-color 0.3s ease; // Плавное затемнение при наведении
+
+  &:hover {
+    background-color: darken($accent, 8%); // При наведении — темнее
+  }
+}
+
+// === Адаптация под мобильные экраны ===
+@include respond(sm) {
+  .actions {
+    flex-direction: column;              // Вертикальное расположение кнопок
+    align-items: stretch;                // Растянуть на всю ширину
+  }
+
+  .button,
+  a {
+    width: 100%;                         // Кнопки и ссылки на всю ширину
+    text-align: center;                  // Центровка текста
+  }
+}

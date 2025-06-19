@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import styles from './EditProduct.module.css';
+import styles from './EditProduct.module.scss';
 
 const warehouseList = [
   { location: 'Москва-1' },
@@ -167,6 +167,76 @@ const EditProduct = () => {
     }
   };
 
+  // ===== Drag-and-drop реализация =====
+const [draggedIndex, setDraggedIndex] = useState(null);
+
+// Начало перетаскивания
+const handleDragStart = (index) => {
+  setDraggedIndex(index);
+};
+
+// Обработка перетаскивания поверх другого элемента
+const handleDragOver = (index, e) => {
+  e.preventDefault();
+  if (draggedIndex === null || draggedIndex === index) return;
+
+  const updatedImages = [...images];
+  const [removed] = updatedImages.splice(draggedIndex, 1);
+  updatedImages.splice(index, 0, removed);
+  setImages(updatedImages);
+  setDraggedIndex(index);
+};
+
+// Отпускание мыши — сохраняем порядок на сервере
+const handleDragEnd = async () => {
+  setDraggedIndex(null);
+  // Формируем payload для API
+  const orderPayload = images.map((img, idx) => ({
+    id: img.id,
+    order: idx + 1
+  }));
+
+  try {
+    await fetch(`http://localhost:5000/api/images/${id}/order`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(orderPayload),
+    });
+    // Рефрешим список изображений после обновления порядка
+    const imagesRes = await fetch(`http://localhost:5000/api/products/${id}/images`);
+    if (imagesRes.ok) setImages(await imagesRes.json());
+  } catch (err) {
+    alert('Ошибка сохранения порядка: ' + err.message);
+  }
+};
+
+// Смена главного изображения
+const handleSetFeatured = async (imageId) => {
+  try {
+    await fetch(`http://localhost:5000/api/images/${id}/featured-image`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageId }),
+    });
+    // После смены главного — рефрешить изображения
+    const imagesRes = await fetch(`http://localhost:5000/api/products/${id}/images`);
+    if (imagesRes.ok) setImages(await imagesRes.json());
+  } catch (err) {
+    alert('Ошибка установки главного изображения: ' + err.message);
+  }
+};
+
+// Получить путь к миниатюре для главного фото
+const getThumbPath = (image) => {
+  if (!image.is_featured_image) return null;
+  const parts = image.image_path.split('.');
+  parts[parts.length - 2] += '_thumb';
+  return parts.join('.');
+};
+
+
+
+
   if (loading) return <div>Загрузка...</div>;
 
   return (
@@ -234,21 +304,89 @@ const EditProduct = () => {
         </form>
       ))}
 
-      {/* --- Зона изображений --- */}
-      <h2>Изображения</h2>
-      <div className={styles.dragDrop} onDrop={handleDrop} onDragOver={(e) => e.preventDefault()}>
-        <p>Перетащите фотографии сюда для загрузки</p>
+{/* --- Зона изображений --- */}
+<h2>Изображения</h2>
+<div
+  className={styles.dragDrop}
+  onDrop={handleDrop}
+  onDragOver={(e) => e.preventDefault()}
+>
+  <p>Перетащите фотографии сюда для загрузки</p>
+</div>
+<div className={styles.imageList}>
+  {images.map((image, index) => (
+    <div
+      key={image.id}
+      className={styles.imageItem}
+      draggable
+      onDragStart={() => handleDragStart(index)}
+      onDragOver={(e) => handleDragOver(index, e)}
+      onDragEnd={handleDragEnd}
+      style={{
+        border: image.is_featured_image ? '2px solid green' : '1px solid #ccc',
+        position: 'relative'
+      }}
+    >
+      {/* Показывать миниатюру для главного изображения */}
+      {image.is_featured_image ? (
+        <img
+          src={`http://localhost:5000${getThumbPath(image) || image.image_path}`}
+          alt={`Главная миниатюра`}
+          className={styles.image}
+        />
+      ) : (
+        <img
+          src={`http://localhost:5000${image.image_path}`}
+          alt={`Uploaded ${image.id}`}
+          className={styles.image}
+        />
+      )}
+      <div style={{ fontSize: 12, marginTop: 2 }}>
+        Порядок: {image.order}
       </div>
-      <div className={styles.imageList}>
-        {images.map((image) => (
-          <div key={image.id} className={styles.imageItem}>
-            <img src={`http://localhost:5000${image.image_path}`} alt={`Uploaded ${image.id}`} className={styles.image} />
-            <button type="button" onClick={() => deleteImage(image.id)} className={styles.deleteButton}>
-              Удалить
-            </button>
-          </div>
-        ))}
-      </div>
+      {image.is_featured_image && (
+        <div
+          style={{
+            color: 'green',
+            fontWeight: 'bold',
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            background: '#fff',
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontSize: 12
+          }}
+        >
+          Главное
+        </div>
+      )}
+      {/* Кнопка сделать главным, если не главное */}
+      {!image.is_featured_image && (
+        <button
+          type="button"
+          onClick={() => handleSetFeatured(image.id)}
+          style={{
+            marginTop: 6,
+            fontSize: 12,
+            background: '#eee',
+            border: '1px solid #ccc'
+          }}
+        >
+          Сделать главным
+        </button>
+      )}
+      <button
+        type="button"
+        onClick={() => deleteImage(image.id)}
+        className={styles.deleteButton}
+      >
+        Удалить
+      </button>
+        </div>
+      ))}
+    </div>
+
 
       <button type="button" className={styles.cancelButton} onClick={() => navigate('/')}>
         Отмена

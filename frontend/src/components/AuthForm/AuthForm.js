@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux'; // Хуки для взаимодействия с Redux
 import { registerUser, loginUser } from '../../slices/authSlice'; // Действия (thunks) для регистрации и входа
-import styles from './AuthForm.module.css'; // Импорт CSS-модуля для стилизации
+import styles from './AuthForm.module.scss'; // Импорт CSS-модуля для стилизации
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 

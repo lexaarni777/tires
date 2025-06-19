@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
 import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
-import styles from "../ProductCard/ProductCard.module.css";
+import styles from "./ProductDetailed.module.scss";
 import { deleteProduct } from "../../slices/productSlice";
 
 
@@ -22,6 +22,7 @@ const ProductDetailed = () => {
 
   // Стор
   const products = useSelector((state) => state.products.items);
+  
   const productsStatus = useSelector((state) => state.products.status);
   const stock = useSelector((state) => state.stock.items);
   const stockStatus = useSelector((state) => state.stock.status);
@@ -30,6 +31,7 @@ const ProductDetailed = () => {
 
   // Найдём нужный товар по id
   const product = products.find((p) => String(p.id) === String(id));
+  console.log('product.images', product.images);
   // Остатки только по этому товару
   const productStock = stock.filter((row) => String(row.tyre_id) === String(id));
 

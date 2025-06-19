@@ -1,0 +1,23 @@
+// === Цвета ===
+$primary: #0057B8;        // Основной синий
+$accent: #FF6B00;         // Акцентный оранжевый
+$background: #F4F6F8;     // Основной фон
+$text-primary: #1F1F1F;   // Основной текст
+$text-muted: #777777;     // Второстепенный текст
+$border-color: #D3D8DF;   // Границы, обводки
+$success: #27AE60;        // Успех
+$danger: #E74C3C;         // Ошибка
+
+// === Шрифт ===
+$font-family-base: 'Inter', sans-serif;
+
+// === Отступы (базовые шаги) ===
+$space-xs: 4px;
+$space-sm: 8px;
+$space-md: 16px;
+$space-lg: 24px;
+$space-xl: 32px;
+
+// === Тени ===
+$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
+$shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1);

@@ -1,26 +1,26 @@
-/**
- * CONFIG/MULTER.JS
- * Конфигурация для загрузки файлов с использованием Multer.
- * Функции:
- * - Настройка папки для хранения файлов.
- * - Создание уникальных имён для загружаемых файлов.
- */
-
 const multer = require('multer');
+const fs = require('fs');
+const path = require('path');
 
-// Настраиваем хранилище для изображений
 const imageStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, 'uploads/imageProducts/'); // Папка для сохранения изображений
+    // Получаем product_id из URL (req.params.id)
+    const productId = req.params.id;
+    if (!productId) {
+      return cb(new Error('product_id (id) не передан в url!'));
+    }
+    const uploadPath = path.join('uploads', 'imageProducts', productId.toString());
+    fs.mkdirSync(uploadPath, { recursive: true }); // Создаём папку если нет
+    cb(null, uploadPath);
   },
   filename: (req, file, cb) => {
-
+    // Можно добавить номер (индекс) или оставить только timestamp
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
-    cb(null, `${uniqueSuffix}-${file.originalname}`); // Генерируем уникальное имя файла
+    // Просто timestamp + original (лучше добавить {order}, но он появится только после вставки в БД)
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
   },
 });
 
-// Создаём middleware для обработки загрузки
 const uploadImage = multer({ storage: imageStorage });
 
 module.exports = uploadImage;

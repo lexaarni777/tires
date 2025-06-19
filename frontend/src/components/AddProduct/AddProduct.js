@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct, addStock, uploadProductsFromExcel } from '../../slices/productSlice';
-import styles from './AddProduct.module.css';
+import styles from './AddProduct.module.scss';
 
 /**
  * AddProduct — компонент для добавления новой шины вручную
@@ -294,7 +294,7 @@ const AddProduct = () => {
             ))}
           </div>
         </div>
-        <button type="submit">
+        <button className={styles.button} type="submit">
           Добавить вручную
         </button>
       </form>
@@ -309,7 +309,7 @@ const AddProduct = () => {
             onChange={handleFileChange}
           />
         </div>
-        <button type="submit">Загрузить из Excel</button>
+        <button className={styles.button} type="submit">Загрузить из Excel</button>
       </form>
 
       {error && <p className={styles.error}>{error}</p>}

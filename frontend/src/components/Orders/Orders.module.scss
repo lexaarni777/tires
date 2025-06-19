@@ -1,0 +1,113 @@
+@import '../../styles/variables.scss';  // Импорт переменных: цвета, отступы, шрифты
+@import '../../styles/mixins.scss';     // Импорт миксинов, включая адаптивность
+
+.orders__container {
+  max-width: 960px;                     // Ограничиваем ширину контейнера
+  margin: 0 auto;                       // Центрируем по горизонтали
+  padding: 24px;                        // Внутренние отступы
+}
+
+.orders__header {
+  font-size: 28px;                      // Крупный заголовок
+  font-weight: 700;                     // Жирный шрифт
+  text-align: center;                   // Центровка текста
+  margin-bottom: 32px;                  // Отступ снизу
+  color: $text-primary;                 // Основной цвет текста
+}
+
+.orders__card {
+  background-color: #fff;               // Белый фон карточки
+  border: 1px solid $border-color;      // Тонкая граница
+  border-radius: 8px;                   // Скруглённые углы
+  padding: 20px;                        // Отступ внутри карточки
+  margin-bottom: 20px;                  // Отступ между карточками
+  box-shadow: $shadow-light;            // Лёгкая тень по переменной
+  transition: box-shadow 0.2s ease;     // Плавная анимация при наведении
+
+  &:hover {
+    box-shadow: $shadow-hover;          // Более сильная тень при наведении
+  }
+}
+
+.orders__top {
+  display: flex;                        // Горизонтальное расположение
+  justify-content: space-between;      // Распределение по краям
+  align-items: center;                 // Вертикальное выравнивание
+  margin-bottom: 12px;                 // Отступ снизу
+}
+
+.orders__number {
+  font-weight: 600;                    // Жирный номер заказа
+  font-size: 18px;                     // Размер шрифта
+  color: $primary;                     // Основной синий
+}
+
+.orders__date {
+  font-size: 14px;                     // Меньше размер даты
+  color: $text-muted;                  // Серый текст
+}
+
+.orders__statusRow {
+  display: flex;                       // Горизонтальное расположение
+  justify-content: space-between;     // Раскидываем статус и сумму
+  align-items: center;                // Выравнивание по центру
+  margin-bottom: 16px;                // Отступ снизу
+}
+
+.orders__total {
+  font-weight: 600;                   // Жирный текст
+  font-size: 16px;                    // Размер шрифта
+  color: $text-primary;               // Основной цвет
+}
+
+.orders__items {
+  list-style: none;                   // Убираем маркеры списка
+  padding: 0;                         // Убираем отступы
+  margin: 0;                          // Обнуляем отступ
+}
+
+.orders__item {
+  display: flex;                      // Горизонтальное выравнивание
+  justify-content: space-between;    // Название и сумма по краям
+  padding: 6px 0;                     // Отступ сверху и снизу
+  border-top: 1px solid $border-color; // Разделитель между строками
+  font-size: 14px;                    // Меньший шрифт
+  color: $text-primary;               // Цвет текста
+
+  &:first-child {
+    border-top: none;                // Убираем верхнюю границу у первого элемента
+  }
+}
+
+.badge {
+  padding: 4px 10px;                 // Внутренний отступ
+  border-radius: 20px;              // Скругление — бейдж
+  font-size: 13px;                  // Размер текста
+  font-weight: 500;                 // Полужирный
+  color: #fff;                      // Белый текст
+  text-transform: capitalize;       // Приведение к виду "Слово"
+}
+
+// === Цветовые статусы для заказов ===
+.status__Ожидание {
+  background-color: $accent;        // Оранжевый бейдж — ожидается оплата
+}
+
+.status__Выполнен {
+  background-color: $success;       // Зелёный бейдж — выполнено
+}
+
+.status__Отменён {
+  background-color: $danger;        // Красный бейдж — отменён
+}
+
+// === Состояния загрузки, ошибки, пустоты ===
+.orders__loading,
+.orders__error,
+.orders__empty {
+  text-align: center;               // Центровка текста
+  margin-top: 40px;                 // Отступ сверху
+  font-size: 16px;                  // Размер шрифта
+  font-weight: bold;                // Жирный шрифт
+  color: $text-muted;               // Серый цвет
+}

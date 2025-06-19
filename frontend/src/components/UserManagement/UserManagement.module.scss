@@ -1,0 +1,75 @@
+@import '../../styles/variables.scss'; // Импорт переменных
+@import '../../styles/mixins.scss';    // Импорт миксинов
+
+.userManagement__container {
+  max-width: 800px;                      // Ширина блока
+  margin: 0 auto;                        // Центровка по горизонтали
+  padding: 20px;                         // Внутренний отступ
+  background-color: #fff;                // Фон
+  border-radius: 8px;                    // Скруглённые углы
+  box-shadow: $shadow-light;            // Тень
+}
+
+.userManagement__title {
+  font-size: 24px;                       // Заголовок
+  font-weight: 700;                      // Жирный
+  margin-bottom: 20px;                   // Отступ
+  text-align: center;                    // Центровка
+  color: $text-primary;                  // Основной цвет текста
+}
+
+.userManagement__table {
+  width: 100%;                           // Таблица на всю ширину
+  border-collapse: collapse;            // Без внутренних отступов
+}
+
+.userManagement__table th,
+.userManagement__table td {
+  border: 1px solid $border-color;       // Граница ячеек
+  padding: 10px;                          // Отступ в ячейках
+  text-align: left;                       // Выравнивание по левому краю
+  font-size: 14px;                        // Размер текста
+}
+
+.userManagement__table th {
+  background-color: #f4f4f4;              // Фон заголовков
+  color: $text-muted;                 // Цвет заголовков
+}
+
+.userManagement__table td {
+  background-color: #fff;                 // Фон строк
+  color: $text-primary;                   // Цвет текста
+}
+
+// === Кнопка: Назначить роль ===
+.userManagement__btn--assign {
+  margin-right: 8px;                      // Отступ справа
+  padding: 6px 12px;                      // Отступ внутри
+  font-size: 13px;                        // Размер текста
+  background-color: $accent;              // Оранжевый фон
+  color: #fff;                            // Белый текст
+  border: none;                           // Без рамки
+  border-radius: 4px;                     // Скругление
+  cursor: pointer;                        // Курсор при наведении
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: darken($accent, 8%); // Темнее при наведении
+  }
+}
+
+// === Кнопка: Удалить пользователя ===
+.userManagement__btn--delete {
+  padding: 6px 12px;                      // Отступ
+  font-size: 13px;                        // Размер текста
+  background-color: $danger;              // Красный фон
+  color: #fff;                            // Белый текст
+  border: none;                           // Без рамки
+  border-radius: 4px;                     // Скруглённые углы
+  cursor: pointer;                        // Курсор при наведении
+  transition: background-color 0.3s;
+
+  &:hover {
+    background-color: darken($danger, 10%); // Темнее при наведении
+  }
+}

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom'; // Для перенаправл
 // Импортируем асинхронные thunks из productSlice и stockSlice
 import { fetchProducts,deleteProduct} from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
-import styles from "./ProductList.module.css";
+import styles from "./ProductList.module.scss";
 /**
  * Компонент ProductList
  * 
@@ -110,6 +110,7 @@ const ProductList = () => {
           <div>Нет товаров по выбранным фильтрам.</div>
         )}
         {products.map((product) => (
+          console.log(product),
           <ProductCard
             key={product.id}
             product={product}
