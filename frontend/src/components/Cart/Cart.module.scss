@@ -91,6 +91,12 @@
   &:hover {
     background-color: darken($success, 7%); // Тёмно-зелёный при наведении
   }
+    &:disabled {
+    background-color: #bdbdbd; // Серый фон для disabled
+    color: #888;               // Тусклый текст
+    cursor: not-allowed;       // Курсор "запрещено"
+    opacity: 0.7;              // Полупрозрачность
+  }
 }
 
 .emptyCart {
@@ -121,5 +127,152 @@
   .productDetails {
     margin-left: 0;                      // Убираем отступ при вертикальном расположении
     margin-top: 10px;                    // Отступ сверху
+  }
+}
+
+// -----------------------------
+// Блок: итог заказа (summary)
+// -----------------------------
+
+.summary {
+  margin-top: 24px;                  // Отступ сверху
+  padding: 20px;                     // Внутренние отступы
+  background-color: #fff;           // Белый фон
+  border: 1px solid $border-color;  // Граница по переменной
+  border-radius: 8px;               // Скругление
+  box-shadow: $shadow-light;        // Лёгкая тень
+  font-size: 15px;                  // Базовый размер текста
+  color: $text-primary;             // Основной цвет текста
+}
+
+// Заголовок "Ваш заказ"
+.title {
+  font-size: 16px;                   // Размер заголовка
+  font-weight: 600;                  // Жирный шрифт
+  margin-bottom: 12px;              // Отступ снизу
+  color: $text-primary;             // Цвет из переменной
+}
+
+// Список товаров
+.itemList {
+  list-style: none;                 // Убираем стандартные маркеры списка
+  padding-left: 0;                  // Убираем отступ
+  margin-bottom: 16px;              // Отступ снизу перед итогом
+}
+
+// Один товар в списке
+.item {
+  margin-bottom: 4px;               // Промежуток между элементами
+  line-height: 1.5;                 // Межстрочный интервал
+}
+
+// Название товара
+.itemName {
+  font-weight: 600;                 // Жирное выделение имени
+}
+
+// Блок с общей информацией (кол-во и сумма)
+.total {
+  font-size: 15px;                  // Размер текста
+  font-weight: 500;                 // Полужирный стиль
+  color: $text-primary;             // Основной цвет
+}
+
+// -----------------------------
+// Блок: форма оформления заказа
+// -----------------------------
+
+.orderForm {
+  display: flex;                 // Формируем вертикальный флекс-контейнер
+  flex-direction: column;       // Расположение элементов сверху вниз
+  gap: 20px;                     // Вертикальные отступы между блоками
+  padding: 24px;                 // Внутренние отступы
+  background-color: #fff;       // Белый фон формы
+  border-radius: 8px;           // Скругление углов формы
+  box-shadow: $shadow-light;    // Тень по проектным переменным
+  margin-top: 32px;             // Отступ сверху от предыдущего блока
+}
+
+// Строка формы (один label + input/textarea/радио)
+.formRow {
+  display: flex;                // Горизонтальная компоновка
+  flex-direction: column;      // Каждый элемент — на своей строке
+  gap: 8px;                     // Отступ между label и полем
+}
+
+// Подпись к полю формы
+.formLabel {
+  font-weight: 500;            // Полужирный текст
+  font-size: 14px;             // Размер шрифта подписи
+  color: $text-primary;        // Цвет из переменных
+}
+
+// Общий стиль для input и select
+.input {
+  padding: 8px 12px;           // Внутренние отступы
+  border: 1px solid $border-color; // Цвет границы из переменных
+  border-radius: 4px;          // Скругление углов
+  font-size: 15px;             // Размер текста
+  width: 100%;                 // Полная ширина
+  box-sizing: border-box;      // Учитываем padding в ширину
+}
+
+// Текстовое поле
+.textarea {
+  @extend .input;              // Наследуем стили от input
+  resize: vertical;            // Разрешаем вертикальное изменение
+  min-height: 80px;            // Минимальная высота текстового поля
+}
+
+// Группа радиокнопок
+.radioGroup {
+  display: flex;               // Горизонтальное расположение
+  gap: 20px;                   // Промежуток между вариантами
+  flex-wrap: wrap;             // Перенос строк при узком экране
+
+  label {
+    display: flex;             // Горизонтальное выравнивание внутри label
+    align-items: center;       // Центр по вертикали
+    gap: 6px;                  // Промежуток между input и текстом
+    font-size: 14px;           // Размер текста
+    cursor: pointer;           // Курсор указывает на интерактивность
+  }
+}
+
+// Обёртка для кнопок "Отмена" и "Оплатить"
+.formActions {
+  display: flex;               // Горизонтальное размещение кнопок
+  justify-content: flex-end;  // Кнопки прижаты вправо
+  gap: 12px;                   // Расстояние между кнопками
+  margin-top: 20px;            // Отступ сверху
+}
+
+// Кнопка "Оплатить"
+.btnMain {
+  background-color: $primary; // Основной цвет кнопки
+  color: #fff;                // Белый текст
+  border: none;               // Без границы
+  padding: 10px 20px;         // Внутренние отступы
+  font-weight: 600;           // Жирный текст
+  border-radius: 4px;         // Скругление углов
+  cursor: pointer;            // Курсор-рука
+
+  &:hover {
+    background-color: darken($primary, 8%); // Затемнение при наведении
+  }
+}
+
+// Кнопка "Отмена"
+.btnOutline {
+  background-color: transparent;   // Прозрачный фон
+  border: 1px solid $primary;      // Граница по цвету проекта
+  color: $primary;                 // Текст совпадает с цветом рамки
+  padding: 10px 20px;              // Отступы
+  font-weight: 600;                // Жирный текст
+  border-radius: 4px;             // Скруглённые края
+  cursor: pointer;                // Курсор-рука
+
+  &:hover {
+    background-color: rgba($primary, 0.08); // Лёгкий фон при наведении
   }
 }

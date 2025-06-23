@@ -95,3 +95,17 @@ exports.removeFromCart = async (cart_id) => {
 exports.clearCart = async (userId) => {
   await pool.query('DELETE FROM cart WHERE user_id = $1', [userId]);
 };
+
+/**
+ * Массовое удаление товаров из корзины по массиву cart_id.
+ * @param {number[]} cart_ids - массив cart_id для удаления
+ */
+exports.removeManyFromCart = async (cart_ids) => {
+  console.log('Удаляем товары из корзины:', cart_ids);
+  if (!cart_ids.length) return;
+  // Удаляем все товары одним SQL-запросом
+  await pool.query(
+    'DELETE FROM cart WHERE id = ANY($1::int[])',
+    [cart_ids]
+  );
+};

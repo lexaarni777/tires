@@ -3,7 +3,7 @@
  * Теперь все действия — с учётом склада (stock_id) и цены (price).
  */
 
-const { addToCart, getCart, updateCartItem, removeFromCart, clearCart, getCartItem} = require('../models/cartModel');
+const { addToCart, getCart, updateCartItem, removeFromCart, clearCart, getCartItem, removeManyFromCart} = require('../models/cartModel');
 
 // Уменьшить количество товара в корзине (если quantity = 1 — удалить строку)
 exports.decrementCartItem = async (req, res) => {
@@ -15,7 +15,7 @@ exports.decrementCartItem = async (req, res) => {
 
   try {
     // Получить текущий cartItem
-    const cartItem = await require('../models/cartModel').getCartItem(userId, productId, stockId);
+    const cartItem = await getCartItem(userId, productId, stockId);
 
     if (!cartItem) {
       return res.status(404).json({ message: 'Товар не найден в корзине' });
@@ -115,5 +115,24 @@ exports.clearCart = async (req, res) => {
   } catch (err) {
     console.error('Ошибка очистки корзины:', err);
     res.status(500).send('Ошибка сервера');
+  }
+};
+
+/**
+ * Удалить несколько товаров из корзины по массиву cart_id.
+ * POST /api/cart/delete-many
+ * Тело запроса: { cart_ids: [1,2,3...] }
+ */
+exports.removeManyFromCart = async (req, res) => {
+  const { cart_ids } = req.body;
+  if (!Array.isArray(cart_ids) || cart_ids.length === 0) {
+    return res.status(400).json({ message: 'Не передан массив cart_ids' });
+  }
+  try {
+    await removeManyFromCart(cart_ids);
+    res.status(200).json({ message: 'Выбранные товары удалены из корзины', cart_ids });
+  } catch (err) {
+    console.error('Ошибка массового удаления из корзины:', err);
+    res.status(500).json({ message: 'Ошибка сервера' });
   }
 };

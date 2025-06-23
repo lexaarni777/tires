@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState, useEffect} from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementToCart } from "../../slices/cartSlice";
@@ -20,6 +20,17 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
 
   // Склад, выбранный пользователем для добавления в корзину (по умолчанию — первый)
   const [selectedStockId, setSelectedStockId] = useState(stock[0]?.id || null);
+  // Следим за изменением stock и корректируем выбранный склад
+  useEffect(() => {
+    if (stock.length > 0) {
+      setSelectedStockId((prev) =>
+        stock.some((s) => s.id === prev) ? prev : stock[0].id
+      );
+    } else {
+      setSelectedStockId(null);
+    }
+  }, [stock]);
+  
   // Количество — по умолчанию 1
   const [quantity, setQuantity] = useState(1);
   console.log('product.images', product.images);
@@ -28,6 +39,8 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   const handleClick = () => {
     navigate(`/productdetailed/${product.id}`);
   };
+
+  
 
   // Получить главное изображение шины
   const getFeaturedImage = () => {

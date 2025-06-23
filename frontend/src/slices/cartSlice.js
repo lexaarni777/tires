@@ -61,6 +61,7 @@ export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (i
  * (itemId — id строки корзины, не товара!)
  */
 export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (cart_id, { getState, dispatch }) => {
+    console.log('Удаление из корзины:', cart_id);
     const { auth } = getState();
     await fetch(`http://localhost:5000/api/cart/delete/${cart_id}`, {
         method: 'DELETE',
@@ -90,7 +91,7 @@ export const placeOrder = createAsyncThunk('cart/placeOrder', async (orderDetail
     });
     const data = await response.json();
     // После заказа — очистить корзину в redux и на сервере
-    dispatch(clearCartServerSide());
+    dispatch(removeManyFromCart(orderDetails.items.map(item => item.cart_id)));
     return data;
 });
 
@@ -113,6 +114,27 @@ export const clearCartServerSide = createAsyncThunk(
         dispatch(fetchCart());
     }
 );
+
+// Удалить несколько позиций из корзины по массиву cart_id
+export const removeManyFromCart = createAsyncThunk(
+  'cart/removeManyFromCart',
+  async (cartIds, { getState, dispatch }) => {
+    const { auth } = getState();
+    const response = await fetch('http://localhost:5000/api/cart/delete-many', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${auth.token}`,
+      },
+      body: JSON.stringify({ cart_ids: cartIds }),
+    });
+    if (!response.ok) throw new Error('Ошибка удаления выбранных товаров');
+    // После удаления обнови корзину
+    dispatch(fetchCart());
+    return cartIds;
+  }
+);
+
 
 const cartSlice = createSlice({
     name: 'cart',

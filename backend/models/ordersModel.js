@@ -8,16 +8,34 @@
 
 const pool = require('../config/db');
 
-// Создаём новый заказ для пользователя
-exports.createOrderInDB = async (userId) => {
+// Создаём новый заказ для пользователя с расширенными полями
+exports.createOrderInDB = async (
+  userId,
+  phone,
+  deliveryMethod,
+  pickupWarehouse,
+  address,
+  comment,
+  paymentMethod
+) => {
   const query = `
-    INSERT INTO orders (user_id, status, created_at, updated_at)
-    VALUES ($1, 'Ожидание оплаты', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    INSERT INTO orders 
+    (user_id, phone, delivery_method, pickup_warehouse, address, comment, payment_method, status, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, 'Ожидание оплаты', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     RETURNING id;
   `;
-  const { rows } = await pool.query(query, [userId]);
-  return rows[0]; // Возвращаем id созданного заказа
+  const { rows } = await pool.query(query, [
+    userId,
+    phone,
+    deliveryMethod,
+    pickupWarehouse,
+    address,
+    comment,
+    paymentMethod
+  ]);
+  return rows[0];
 };
+
 
 // Добавляем товары из корзины в таблицу order_items
 exports.addOrderItemsInDB = async (orderId, cartItems) => {

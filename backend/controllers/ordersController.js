@@ -10,19 +10,35 @@ const { createOrderInDB, addOrderItemsInDB, getUserOrders  } = require('../model
 // Создание нового заказа
 exports.createOrder = async (req, res) => {
   const userId = req.user.id; // Получаем ID пользователя из токена
-  const  cartItems  = req.body; // Получаем товары из тела запроса
-  console.log('createOrder req', req.body)
-  console.log('createOrder', userId, cartItems)
-  if (!cartItems || cartItems.length === 0) {
-    return res.status(400).json({ message: 'Корзина пуста. Невозможно создать заказ.' });
+  const {
+    items,
+    phone,
+    deliveryMethod,
+    pickupWarehouse,
+    address,
+    comment,
+    paymentMethod
+  } = req.body;
+
+  if (!items || !Array.isArray(items) || items.length === 0) {
+    return res.status(400).json({ message: 'Нет товаров для оформления заказа.' });
   }
+  if (!phone) return res.status(400).json({ message: 'Не указан телефон.' });
 
   try {
-    // Создаем заказ в таблице orders
-    const order = await createOrderInDB(userId);
+    // Создаём заказ с дополнительными полями (нужно расширить модель/таблицу orders)
+    const order = await createOrderInDB(
+      userId,
+      phone,
+      deliveryMethod,
+      pickupWarehouse,
+      address,
+      comment,
+      paymentMethod
+    );
 
-    // Добавляем товары заказа в таблицу order_items
-    await addOrderItemsInDB(order.id, cartItems);
+    // Добавляем товары заказа
+    await addOrderItemsInDB(order.id, items);
 
     res.status(201).json({
       message: 'Заказ успешно создан!',
@@ -33,6 +49,7 @@ exports.createOrder = async (req, res) => {
     res.status(500).json({ message: 'Ошибка сервера при создании заказа.' });
   }
 };
+
 // Получение всех заказов пользователя
 exports.getUserOrders = async (req, res) => {
   const userId = req.user.id; // Получаем ID текущего пользователя (после авторизации)

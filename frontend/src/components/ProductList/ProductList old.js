@@ -1,4 +1,9 @@
-import React, { useEffect } from 'react';
+import React  useEffect(() => {
+    console.log("Fetching cart items...");
+    dispatch(fetchCart())
+      .then(() => console.log("Cart items fetched successfully."))
+      .catch((error) => console.error("Failed to fetch cart items:", error)); // Обработка ошибок
+  }, [dispatch]);, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts, deleteProduct } from '../../slices/productSlice';
 import { fetchCart } from '../../slices/cartSlice';
@@ -10,12 +15,7 @@ const ProductList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate(); // Хук для работы с маршрутизацией
   
-  useEffect(() => {
-    console.log("Fetching cart items...");
-    dispatch(fetchCart())
-      .then(() => console.log("Cart items fetched successfully."))
-      .catch((error) => console.error("Failed to fetch cart items:", error)); // Обработка ошибок
-  }, [dispatch]);
+
 
   const products = useSelector((state) => state.products.items);
   console.log('Products:', products);
