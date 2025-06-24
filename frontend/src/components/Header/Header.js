@@ -4,10 +4,15 @@ import { FaShoppingCart } from 'react-icons/fa'; // Иконка корзины
 import { FaUser } from "react-icons/fa";
 import { NavLink, useNavigate } from 'react-router-dom'; // Для навигации
 import classes from './Header.module.scss';
+import { warehouseList } from '../../constants/warehouseList';
+import { setCity } from '../../slices/citySlice';
+import { useDispatch, useSelector } from 'react-redux';
 
 const Header = () => {
     const navigate = useNavigate(); // Хук для программной навигации
-
+    const cities = Array.from(new Set(warehouseList.map(w => w.city)));
+    const dispatch = useDispatch();
+    const selectedCity = useSelector(state => state.city.selectedCity);
     // Обработчик клика на иконку пользователя
     const handleUserClick = () => {
         navigate('/account'); // Переход на страницу Личного кабинета
@@ -32,6 +37,14 @@ const Header = () => {
                     </div>
                 </div>
                 <div className={classes.IconHeader}>
+                    <select
+                        value={selectedCity}
+                        onChange={e => dispatch(setCity(e.target.value))}
+                        >
+                        {cities.map(city => (
+                            <option key={city} value={city}>{city}</option>
+                        ))}
+                    </select>
                 <div className={classes.cartIcon}>
                         <FaShoppingCart size={24} 
                         onClick={handleCartClick}

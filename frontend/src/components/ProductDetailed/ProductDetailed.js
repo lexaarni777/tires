@@ -6,6 +6,8 @@ import { fetchStock } from "../../slices/stockSlice";
 import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
 import styles from "./ProductDetailed.module.scss";
 import { deleteProduct } from "../../slices/productSlice";
+import { warehouseList } from "../../constants/warehouseList";
+
 
 
 /**
@@ -28,15 +30,23 @@ const ProductDetailed = () => {
   const stockStatus = useSelector((state) => state.stock.status);
   const cartItems = useSelector((state) => state.cart.items);
   const auth = useSelector((state) => state.auth);
+  const selectedCity = useSelector(state => state.city.selectedCity);
+  const cityWarehouses = warehouseList
+  .filter(w => w.city === selectedCity)
+  .map(w => w.location);
+  
+
+
+
 
   // Найдём нужный товар по id
   const product = products.find((p) => String(p.id) === String(id));
   console.log('product.images', product.images);
   // Остатки только по этому товару
   const productStock = stock.filter((row) => String(row.tyre_id) === String(id));
-
+  const filteredProductStock = productStock.filter(s => cityWarehouses.includes(s.location));
   // Склад выбранный пользователем (по умолчанию — первый)
-  const [selectedStockId, setSelectedStockId] = useState(productStock[0]?.id || null);
+  const [selectedStockId, setSelectedStockId] = useState(filteredProductStock[0]?.id || null);
 
   // cartItem: позиция товара в корзине по productId и складу
   const cartItem = cartItems.find(
@@ -53,10 +63,12 @@ const ProductDetailed = () => {
 
   // Обновлять выбранный склад если поменялись productStock
   useEffect(() => {
-    if (productStock.length && !productStock.find(s => s.id === selectedStockId)) {
-      setSelectedStockId(productStock[0]?.id || null);
+    if (filteredProductStock.length && !filteredProductStock.find(s => s.id === selectedStockId)) {
+      setSelectedStockId(filteredProductStock[0]?.id || null);
     }
-  }, [productStock, selectedStockId]);
+  }, [filteredProductStock, selectedStockId]);
+
+
 
   // Главное изображение
   const getFeaturedImage = () => {
@@ -72,7 +84,7 @@ const ProductDetailed = () => {
   // Инкремент
   const handleIncrement = (e) => {
     e.stopPropagation();
-    const selectedStock = productStock.find((s) => s.id === selectedStockId);
+    const selectedStock = filteredProductStock.find((s) => s.id === selectedStockId);
     if (!selectedStock) return;
     if ((cartItem?.quantity || 0) < selectedStock.stock) {
       dispatch(
@@ -133,7 +145,7 @@ const handleDelete = (e) => {
 
 const handleAddToCart = (e) => {
   e.stopPropagation();
-  const selectedStock = productStock.find((s) => s.id === selectedStockId);
+  const selectedStock = filteredProductStock.find((s) => s.id === selectedStockId);
   if (!selectedStock) return;
   dispatch(
     addToCart({
@@ -162,7 +174,7 @@ const handleAddToCart = (e) => {
   }
 
   // Рендер
-  const selectedStock = productStock.find((s) => s.id === selectedStockId);
+  const selectedStock = filteredProductStock.find((s) => s.id === selectedStockId);
 
   return (
     <div className={styles.detailedWrap}>
@@ -195,7 +207,7 @@ const handleAddToCart = (e) => {
               </tr>
             </thead>
             <tbody>
-              {productStock.map((row) => (
+              {filteredProductStock.map((row) => (
                 <tr key={row.id}>
                   <td>{row.location}</td>
                   <td>{row.stock ?? "-"}</td>
@@ -209,13 +221,13 @@ const handleAddToCart = (e) => {
 
         {/* Управление для корзины и действия для админа */}
         <div className={styles.cartControls} onClick={(e) => e.stopPropagation()}>
-          {productStock.length > 1 && (
+          {filteredProductStock.length > 1 && (
             <select
               value={selectedStockId}
               onChange={(e) => setSelectedStockId(Number(e.target.value))}
               className={styles.select}
             >
-              {productStock.map((s) => (
+              {filteredProductStock.map((s) => (
                 <option key={s.id} value={s.id}>
                   {s.location} (в наличии: {s.stock} шт.)
                 </option>

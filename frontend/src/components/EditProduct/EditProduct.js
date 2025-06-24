@@ -1,12 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './EditProduct.module.scss';
-
-const warehouseList = [
-  { location: 'Москва-1' },
-  { location: 'Москва-2' },
-  { location: 'Волгоград' },
-];
+import { warehouseList } from '../../constants/warehouseList';
 
 const EditProduct = () => {
   const { id } = useParams();

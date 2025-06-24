@@ -2,17 +2,12 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct, addStock, uploadProductsFromExcel } from '../../slices/productSlice';
 import styles from './AddProduct.module.scss';
+import { warehouseList } from '../../constants/warehouseList';
 
 /**
  * AddProduct — компонент для добавления новой шины вручную
  * и для массовой загрузки каталога из Excel.
  */
-
-const warehouseList = [
-  { location: 'Москва-1' },
-  { location: 'Москва-2' },
-  { location: 'Волгоград' },
-];
 
 const AddProduct = () => {
   // Состояние для справочника шин (tyre_catalog)

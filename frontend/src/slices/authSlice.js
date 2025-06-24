@@ -50,12 +50,12 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { r
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
-        user: null,
-        token: null,
-        roles: [], // Добавляем массив для хранения ролей
+        user: JSON.parse(localStorage.getItem('user')) || null,
+        token: localStorage.getItem('token') || null,
+        roles: JSON.parse(localStorage.getItem('roles') || '[]'),
         status: 'idle',
         error: null,
-        id: null,
+        id: localStorage.getItem('id') || null,
     },
     reducers: {
         logout: (state) => {
@@ -63,7 +63,6 @@ const authSlice = createSlice({
             state.token = null;
             state.roles = [];
             state.id = null;
-
             localStorage.clear()
             //localStorage.removeItem('token'); // Удаляем токен из localStorage при выходе
         },
@@ -81,16 +80,15 @@ const authSlice = createSlice({
                 state.status = 'failed';
             })
             .addCase(loginUser.fulfilled, (state, action) => {
-                console.log('action', action)
-
                 state.user = action.payload.user;
-                state.id = action.payload.user.id; // Сохраняем id пользовател
+                state.id = action.payload.user.id;
                 state.token = action.payload.token;
-                state.roles = action.payload.user.roles; // Сохраняем роли при авторизации
+                state.roles = action.payload.user.roles;
                 state.status = 'succeeded';
-
-                // Сохраняем токен в localStorage при успешной авторизации
+                localStorage.setItem('user', JSON.stringify(action.payload.user));
                 localStorage.setItem('token', action.payload.token);
+                localStorage.setItem('roles', JSON.stringify(action.payload.user.roles));
+                localStorage.setItem('id', action.payload.user.id);
             })
 
 
