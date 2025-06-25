@@ -11,6 +11,7 @@ import UserManagement from './components/UserManagement/UserManagement'; // Им
 import Orders from './components/Orders/Orders'; // Импортируем компонент для управления пользователями (новый)
 import Cart from './components/Cart/Cart';
 import ProductDetailed from './components/ProductDetailed/ProductDetailed'; // Импортируем компонент для управления пользователями (новый)
+import Delivery from './components/Delivery/Delivery';
 
 function App() {
 
@@ -65,6 +66,12 @@ function App() {
       <Route path='/cart' element={
         <PrivateRoute rolesRequired={['buyer', 'admin']}>
           <Cart />
+        </PrivateRoute>
+      }/>
+        {/* Новый маршрут для управления пользователями - доступен только администраторам */}
+      <Route path='services/delivery' element={
+        <PrivateRoute>
+          <Delivery />
         </PrivateRoute>
       }/>
     </Routes>

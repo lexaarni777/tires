@@ -59,11 +59,15 @@ const authSlice = createSlice({
     },
     reducers: {
         logout: (state) => {
+            {console.log('logout', state)};
             state.user = null;
             state.token = null;
             state.roles = [];
             state.id = null;
-            localStorage.clear()
+            localStorage.removeItem('user');
+            localStorage.removeItem('token');
+            localStorage.removeItem('roles');
+            localStorage.removeItem('id');
             //localStorage.removeItem('token'); // Удаляем токен из localStorage при выходе
         },
     },
@@ -74,6 +78,13 @@ const authSlice = createSlice({
                 state.id = action.payload.user.id; // Сохраняем id пользователя
                 state.roles = action.payload.user.roles; // Сохраняем роли при регистрации
                 state.status = 'succeeded';
+                localStorage.setItem('user', JSON.stringify(action.payload.user));
+                localStorage.setItem('id', action.payload.user.id);
+                localStorage.setItem('roles', JSON.stringify(action.payload.user.roles));
+                if (action.payload.token) {
+                    state.token = action.payload.token;
+                    localStorage.setItem('token', action.payload.token);
+             }
             })
             .addCase(registerUser.rejected, (state, action) => {
                 state.error = action.payload;

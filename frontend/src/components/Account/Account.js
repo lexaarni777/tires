@@ -3,6 +3,7 @@ import classes from './Account.module.scss'; // Импортируем стил�
 import { useDispatch, useSelector } from 'react-redux'; // Импортируем хуки для работы с Redux
 import { NavLink } from 'react-router-dom'; // Импортируем NavLink для навигации между страницами
 import { logout } from '../../slices/authSlice'; // Импортируем действие для выхода из аккаунта
+import { clearCart } from '../../slices/cartSlice'; // Импортируем действие для очистки корзины
 
 const Account = () => {
     // Получаем данные пользователя из состояния Redux

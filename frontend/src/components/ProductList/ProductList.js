@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'; // Для перенаправл
 // Импортируем асинхронные thunks из productSlice и stockSlice
 import { fetchProducts,deleteProduct} from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
+import { fetchCart } from "../../slices/cartSlice"; // Импортируем экшен для загрузки корзины
 import styles from "./ProductList.module.scss";
 /**
  * Компонент ProductList
@@ -37,6 +38,17 @@ const ProductList = () => {
   if (brand) filters.brand = brand;
   if (size) filters.size = size;
   if (season) filters.season = season;
+
+    useEffect(() => {
+      // useEffect — хук для побочных эффектов, срабатывает при монтировании компонента и при изменении зависимостей
+      // Здесь: загружаем содержимое корзины при первом рендере
+      // [dispatch] — массив зависимостей, эффект выполнится один раз при загрузке страницы
+      console.log("Fetching cart items...");
+      dispatch(fetchCart())
+        // dispatch — отправляем экшен fetchCart для загрузки товаров из корзины с сервера
+        .then(() => console.log("Cart items fetched successfully."))
+        .catch((error) => console.error("Failed to fetch cart items:", error)); // Логируем ошибку, если не удалось загрузить корзину
+    }, [dispatch]);
 
   // Загружаем каталог и остатки при изменении фильтров
   useEffect(() => {

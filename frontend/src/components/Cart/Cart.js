@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 // useSelector — хук для получения данных из глобального Redux-хранилища
 // useDispatch — хук для отправки действий (actions), которые изменяют состояние в Redux
 
-import { fetchCart, removeFromCart, clearCart, placeOrder, clearCartServerSide } from '../../slices/cartSlice';
+import { fetchCart, removeFromCart, clearCart, placeOrder, clearCartServerSide, addToCart, decrementToCart} from '../../slices/cartSlice';
 // Импортируем экшены для работы с корзиной: загрузка, удаление товара, очистка, оформление заказа
 
 import { useNavigate } from 'react-router-dom';
@@ -34,7 +34,7 @@ const Cart = () => {
 
   const [selectAll, setSelectAll] = useState(true);
   // useState — создаём флаг "выбрать всё"
-  // Начальное значение — false (ничего не выбрано)
+  // Начальное значение — true (выбрать все)
   // Сбросится при обновлении страницы
 
   const [showModal, setShowModal] = useState(false);
@@ -62,15 +62,15 @@ const Cart = () => {
   const [comment, setComment] = useState('');
   // useState — комментарий к заказу, по умолчанию пусто
 
+  const auth = useSelector((state) => state.auth);
+  // useSelector — получаем данные пользователя из Redux (например, ID для заказа)
+
   useEffect(() => {
     // useEffect — хук для побочных эффектов, срабатывает при монтировании компонента и при изменении зависимостей
     // Здесь: загружаем содержимое корзины при первом рендере
     // [dispatch] — массив зависимостей, эффект выполнится один раз при загрузке страницы
-    console.log("Fetching cart items...");
     dispatch(fetchCart())
       // dispatch — отправляем экшен fetchCart для загрузки товаров из корзины с сервера
-      .then(() => console.log("Cart items fetched successfully."))
-      .catch((error) => console.error("Failed to fetch cart items:", error)); // Логируем ошибку, если не удалось загрузить корзину
   }, [dispatch]);
 
   useEffect(() => {
@@ -84,6 +84,41 @@ const Cart = () => {
       // Если убрали галочку "выбрать всё", а до этого были выбраны все — сбрасываем выбор
     }
   }, [selectAll, cartItems]);
+
+  // Увеличить количество товара
+const handleIncrement = (item) => {
+  dispatch(
+    addToCart({
+      userId: auth.id,
+      productId: item.product_id,
+      productName: item.product_name,
+      article: item.article,
+      image: item.product_image,
+      stockId: item.stock_id,
+      location: item.location,
+      price: item.price,
+      quantity: 1,
+      maxAvailable: item.stock,
+    })
+  );
+};
+
+// Уменьшить количество товара или удалить из корзины
+const handleDecrement = (item) => {
+  if (item.quantity > 1) {
+    dispatch(
+      decrementToCart({
+        userId: auth.id,
+        productId: item.product_id,
+        stockId: item.stock_id,
+        quantity: 1,
+      })
+    );
+  } else {
+    dispatch(removeFromCart(item.cart_id));
+  }
+};
+
 
   // Сбросить локальные поля после оформления заказа
   const resetForm = () => {
@@ -208,13 +243,26 @@ const Cart = () => {
               src={`http://localhost:5000${item.product_image}`}
               alt={item.name}
               className={styles.productImage}
+              onClick={() => navigate(`/productdetailed/${item.product_id}`)}
+// Картинка товара — при клике переходим на страницу товара по его ID
             />
             {/* Картинка товара */}
             <div className={styles.productDetails}>
               {/* Контейнер с деталями товара */}
               <h3>{item.name}</h3>
               <p>Склад: {item.location}</p>
-              <p>Количество: {item.quantity}</p>
+                <div className={styles.quantityControls}>
+                  <button onClick={() => handleIncrement(item)} disabled={item.quantity >= item.stock}>+</button>
+                  <input
+                    type="number"
+                    value={item.quantity}
+                    min={1}
+                    max={item.stock || 1}
+                    readOnly
+                    className={styles.qtyInput}
+                  />
+                  <button onClick={() => handleDecrement(item)} disabled={item.quantity==1}>-</button>
+                </div>          
               <p>Цена: {item.price} ₽</p>
             </div>
             <button

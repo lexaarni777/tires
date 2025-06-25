@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { logout } from './authSlice'; // если путь другой — поменяй
 
 /**
  * Асинхронное действие: получить корзину текущего пользователя с сервера.
@@ -196,8 +197,11 @@ const cartSlice = createSlice({
                 state.items = [];
                 state.totalAmount = 0;
             })
+            .addCase(logout, (state) => {
+                state.items = [];
+                state.totalAmount = 0;
+            });
             // Обработка ошибок (можно добавить обработку ошибок для каждого asyncThunk)
-            ;
     },
 });
 
