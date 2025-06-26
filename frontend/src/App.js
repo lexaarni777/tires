@@ -69,10 +69,8 @@ function App() {
         </PrivateRoute>
       }/>
         {/* Новый маршрут для управления пользователями - доступен только администраторам */}
-      <Route path='services/delivery' element={
-        <PrivateRoute>
+      <Route path='services/delivery' element={  
           <Delivery />
-        </PrivateRoute>
       }/>
     </Routes>
   )

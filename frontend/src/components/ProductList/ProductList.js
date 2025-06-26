@@ -123,6 +123,7 @@ const ProductList = () => {
         )}
         {products.map((product) => (
           console.log(product),
+          console.log("ProductCard render:", product, stockByTyreId[product.id]),
           <ProductCard
             key={product.id}
             product={product}
