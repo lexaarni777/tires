@@ -41,9 +41,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   // В результате — массив названий складов, которые есть в выбранном городе
   // Это нужно чтобы показывать только релевантные остатки
 
-  console.log('selectedCity', selectedCity);
-  console.log('cityWarehouses', cityWarehouses);
-
   const filteredStock = stock.filter(s => cityWarehouses.includes(s.location));
   // Оставляем только те склады, которые доступны в выбранном городе
   // В итоге — массив остатков для города пользователя
@@ -77,7 +74,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   // Сбрасывается при обновлении страницы
   // Начальное значение 1 — чтобы всегда можно было добавить хотя бы 1 товар
 
-  console.log('product.images', product.images);
 
   // Функция перехода на детальную карточку товара
   const handleClick = () => {
@@ -103,7 +99,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     return "https://via.placeholder.com/150";
     // Если изображений нет — возвращаем заглушку
   };
-  console.log('cartItems', cartItems);
+
 
   // Найти товар в корзине пользователя по productId и складу
   const cartItem = cartItems.find(
@@ -178,12 +174,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     // handleDecrement — обработчик для кнопки "-"
     // Уменьшает количество товара в корзине на 1
     e.stopPropagation();
-    console.log('decrement:', {
-      userId: auth.id,
-      productId: product.id,
-      stockId: selectedStockId,
-      cartItem,
-    });
     if (cartItem && cartItem.quantity > 1) {
       // Если товар есть в корзине и его больше 1
       dispatch(
@@ -267,7 +257,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
               </tr>
             </thead>
             <tbody>
-              {console.log('filteredStock', filteredStock)}
+
               {filteredStock.map((row) => (
                 <tr key={row.id}>
                   <td>{row.location}</td>
@@ -316,7 +306,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           )}
 
           {/* Если товар уже в корзине — управление количеством */}
-          {console.log('cartItem', cartItem)}
+
           {cartItem ? (
             // Если товар уже добавлен в корзину
             <div className={styles.BlockAddToCart}>

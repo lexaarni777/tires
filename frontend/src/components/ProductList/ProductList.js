@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard";
 import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
+import { warehouseList } from "../../constants/warehouseList";
 
 // Импортируем асинхронные thunks из productSlice и stockSlice
 import { fetchProducts,deleteProduct} from "../../slices/productSlice";
@@ -24,6 +25,7 @@ const ProductList = () => {
   const [brand, setBrand] = useState("");
   const [size, setSize] = useState("");
   const [season, setSeason] = useState("");
+  const [inStockOnly, setInStockOnly] = useState(true);
 
   // Получаем данные из Redux: список шин и их статусы
   const products = useSelector((state) => state.products.items);
@@ -32,6 +34,31 @@ const ProductList = () => {
   // Получаем данные из Redux: все остатки по складам
   const stock = useSelector((state) => state.stock.items);
   const stockStatus = useSelector((state) => state.stock.status);
+
+  
+  const stockByTyreId = React.useMemo(() => {
+    const map = {};
+    for (const row of stock) {
+      if (!map[row.tyre_id]) map[row.tyre_id] = [];
+      map[row.tyre_id].push(row);
+    }
+    return map;
+  }, [stock]);
+
+  const selectedCity = useSelector(state => state.city.selectedCity);
+
+  const cityWarehouses = warehouseList
+  .filter(w => w.city === selectedCity)
+  .map(w => w.location);
+
+  const filteredProducts = products.filter(product => {
+  if (!inStockOnly) return true;
+  const stockRows = stockByTyreId[product.id] || [];
+  // Фильтруем остатки только по складам нужного города и stock > 0
+  return stockRows.some(row =>
+    cityWarehouses.includes(row.location) && Number(row.stock) > 0
+  );
+});
 
   // Формируем объект фильтров для отправки на backend
   const filters = {};
@@ -43,11 +70,7 @@ const ProductList = () => {
       // useEffect — хук для побочных эффектов, срабатывает при монтировании компонента и при изменении зависимостей
       // Здесь: загружаем содержимое корзины при первом рендере
       // [dispatch] — массив зависимостей, эффект выполнится один раз при загрузке страницы
-      console.log("Fetching cart items...");
       dispatch(fetchCart())
-        // dispatch — отправляем экшен fetchCart для загрузки товаров из корзины с сервера
-        .then(() => console.log("Cart items fetched successfully."))
-        .catch((error) => console.error("Failed to fetch cart items:", error)); // Логируем ошибку, если не удалось загрузить корзину
     }, [dispatch]);
 
   // Загружаем каталог и остатки при изменении фильтров
@@ -68,14 +91,7 @@ const ProductList = () => {
 
   // Группируем остатки по id шины для быстрого доступа
   // { 1: [остатки], 2: [остатки], ... }
-  const stockByTyreId = React.useMemo(() => {
-    const map = {};
-    for (const row of stock) {
-      if (!map[row.tyre_id]) map[row.tyre_id] = [];
-      map[row.tyre_id].push(row);
-    }
-    return map;
-  }, [stock]);
+
 
     // Функция удаления товара
     const handleDelete = (id) => {
@@ -92,6 +108,13 @@ const ProductList = () => {
     <div className={styles.wrapper}>
       {/* Фильтр каталога шин */}
       <div className={styles.filterBar}>
+
+        <input
+          type="checkbox"
+          placeholder="Есть в наличии"
+          checked={inStockOnly}
+          onChange={e => setInStockOnly(e.target.checked)}
+        />
         <input
           type="text"
           placeholder="Бренд"
@@ -121,9 +144,8 @@ const ProductList = () => {
         {products.length === 0 && productsStatus === "succeeded" && (
           <div>Нет товаров по выбранным фильтрам.</div>
         )}
-        {products.map((product) => (
-          console.log(product),
-          console.log("ProductCard render:", product, stockByTyreId[product.id]),
+        {filteredProducts.map((product) => (
+
           <ProductCard
             key={product.id}
             product={product}
