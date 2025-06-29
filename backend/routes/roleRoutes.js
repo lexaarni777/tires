@@ -1,5 +1,7 @@
 const express = require('express');
-const { assignRoleToUser, getAllRoles } = require('../controllers/roleController');
+const { getAllRoles } = require('../controllers/roleController');
+const { assignRoleToUser } = require('../models/roleModel'); // Функция для назначения роли пользователю
+
 const {  verifyToken, verifyAdmin } = require('../middleware/authMiddleware'); // Middleware для проверки прав администратора
 
 const router = express.Router();

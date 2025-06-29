@@ -23,29 +23,6 @@ exports.findUserByEmail = async (email) => {
   return rows[0];
 };
 
-/**
- * assignRoleToUser(userId, roleName):
-Получает ID роли из таблицы roles, используя имя роли.
-Назначает эту роль пользователю, добавляя запись в таблицу user_roles.
-Использует SQL-запрос ON CONFLICT DO NOTHING, 
-чтобы избежать дублирования записей (в случае, если роль уже назначена).
- */
-// Назначить роль пользователю
-exports.assignRoleToUser = async (userId, roleName) => {
-    // Получаем ID роли
-    const roleQuery = 'SELECT id FROM roles WHERE name = $1';
-    const roleResult = await pool.query(roleQuery, [roleName]);
-  
-    if (roleResult.rows.length === 0) {
-      throw new Error(`Роль "${roleName}" не найдена`);
-    }
-    const roleId = roleResult.rows[0].id;
-  
-    // Привязываем роль к пользователю
-    const assignQuery = 'INSERT INTO user_roles (user_id, role_id) VALUES ($1, $2) ON CONFLICT DO NOTHING';
-    await pool.query(assignQuery, [userId, roleId]);
-  };
-
   /**
  * getUserWithRoles(userId):
 Выполняет SQL-запрос для получения пользователя и его ролей.
@@ -77,3 +54,52 @@ exports.assignRoleToUser = async (userId, roleName) => {
   
     return user;
   };
+
+  // Сохраняем телефон и SMS-код подтверждения
+exports.savePhoneAndCode = async (userId, phone, code) => {
+  const query = 'UPDATE users SET phone = $1, reset_code = $2 WHERE id = $3';
+  await pool.query(query, [phone, code, userId]);
+};
+
+// Проверяем код, подтверждаем телефон
+exports.verifyPhoneCode = async (userId, code) => {
+  const query = 'SELECT reset_code FROM users WHERE id = $1';
+  const { rows } = await pool.query(query, [userId]);
+  if (rows.length === 0 || rows[0].reset_code !== code) return false;
+  // Обновляем статус подтверждения
+  await pool.query('UPDATE users SET phone_verified = TRUE, reset_code = NULL WHERE id = $1', [userId]);
+  return true;
+};
+
+// Сохраняем код для восстановления пароля
+exports.saveResetCode = async (userId, code) => {
+  const query = 'UPDATE users SET reset_code = $1 WHERE id = $2';
+  await pool.query(query, [code, userId]);
+};
+
+// Найти пользователя по номеру телефона
+exports.findUserByPhone = async (phone) => {
+  const query = 'SELECT * FROM users WHERE phone = $1';
+  const { rows } = await pool.query(query, [phone]);
+  return rows[0];
+};
+
+// Проверяем код, сбрасываем пароль
+exports.resetPasswordWithCode = async (phone, code, newHashedPassword) => {
+  const query = 'SELECT reset_code FROM users WHERE phone = $1';
+  const { rows } = await pool.query(query, [phone]);
+  if (rows.length === 0 || rows[0].reset_code !== code) return false;
+  await pool.query(
+    'UPDATE users SET password = $1, reset_code = NULL WHERE phone = $2',
+    [newHashedPassword, phone]
+  );
+  return true;
+};
+
+// Создать пользователя только с телефоном (без пароля и email)
+exports.createUserWithPhone = async (phone) => {
+  const query = 'INSERT INTO users (phone) VALUES ($1) RETURNING *';
+  const { rows } = await pool.query(query, [phone]);
+  return rows[0];
+};
+

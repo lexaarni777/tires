@@ -22,6 +22,24 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (userDat
     }
 });
 
+export const sendSmsCode = createAsyncThunk('auth/sendSmsCode', async ({ phone }, { rejectWithValue }) => {
+    try {
+        const response = await fetch('http://localhost:5000/api/auth/send-sms', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ phone }),
+        });
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Ошибка при отправке кода');
+        }
+        return response.json();
+    } catch (error) {
+        return rejectWithValue(error.message);
+    }
+});
+
+
 // Асинхронное действие для авторизации
 export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { rejectWithValue }) => {
     try {
@@ -52,7 +70,14 @@ const authSlice = createSlice({
     initialState: {
         user: JSON.parse(localStorage.getItem('user')) || null,
         token: localStorage.getItem('token') || null,
-        roles: JSON.parse(localStorage.getItem('roles') || '[]'),
+        roles: (() => {
+            const data = localStorage.getItem('roles');
+            try {
+                return data && data !== 'undefined' ? JSON.parse(data) : [];
+            } catch {
+                return [];
+            }
+            })(),
         status: 'idle',
         error: null,
         id: localStorage.getItem('id') || null,

@@ -1,17 +1,5 @@
-const { assignRoleToUser, getAllRolesFromDB } = require('../models/roleModel');
-
-// Назначить роль пользователю
-exports.assignRoleToUser = async (req, res) => {
-  const { userId, roleName } = req.body;
-
-  try {
-    await assignRoleToUser(userId, roleName);
-    res.status(200).json({ message: `Роль "${roleName}" успешно назначена пользователю с ID ${userId}` });
-  } catch (err) {
-    console.error('Ошибка при назначении роли:', err);
-    res.status(500).json({ error: 'Ошибка при назначении роли пользователю' });
-  }
-};
+const { getAllRolesFromDB } = require('../models/roleModel');
+const { assignRoleToUser } = require('../models/userModel');
 
 // Получить список всех ролей
 exports.getAllRoles = async (req, res) => {
