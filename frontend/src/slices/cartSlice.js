@@ -81,7 +81,7 @@ export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getSt
 export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (item, { getState, dispatch }) => {
     const { auth } = getState();
     if (!auth.token) {
-      dispatch(localDecrement({ productId: item.productId, stockId: item.stockId }));
+      dispatch(localDecrement({ product_id: item.product_id, stock_id: item.stockId }));
       return item;
     }
     const response = await fetch('http://localhost:5000/api/cart/decrement', {
@@ -208,37 +208,64 @@ const cartSlice = createSlice({
         },
         localAdd: (state, action) => {
             const item = action.payload;
-            // Проверяем, есть ли уже такая позиция
+            // Ищем, есть ли такая позиция в корзине (по product_id и stock_id)
             const existing = state.items.find(
-                i => i.productId === item.productId && i.stockId === item.stockId
+            i => i.product_id === item.productId && i.stock_id === item.stockId
             );
+
             if (existing) {
-                existing.quantity += item.quantity;
+            // Если есть — просто увеличиваем количество
+            existing.quantity += item.quantity;
             } else {
-                state.items.push(item);
+            // Если нет — добавляем НОВЫЙ объект, полностью имитируя структуру serverCart
+            const cart_id = `${item.productId}-${item.stockId}-${Date.now()}`; // уникальный cart_id для гостя
+            const newItem = {
+                cart_id, // уникальный id позиции
+                product_id: item.productId,
+                product_name: item.productName,
+                product_image: item.image,
+                stock_id: item.stockId,
+                location: item.location,
+                price: item.price,
+                quantity: item.quantity,
+                stock: item.maxAvailable,
+                article: item.article,
+                // можно добавить другие поля, если они используются на сервере
+            };
+            state.items.push(newItem);
             }
             state.totalAmount = state.items.reduce((s, i) => s + i.price * i.quantity, 0);
             localStorage.setItem('guestCart', JSON.stringify(state.items));
-            },
+        },
         localRemove: (state, action) => {
-            const { productId, stockId } = action.payload;
-            state.items = state.items.filter(i => !(i.productId === productId && i.stockId === stockId));
+            const { cart_id, product_id, stock_id } = action.payload;
+
+            state.items = state.items.filter(i => {
+            if (cart_id) return i.cart_id !== cart_id;
+            // Фоллбек для старого формата (удалить по паре)
+            return !(i.product_id === product_id && i.stock_id === stock_id);
+            });
+
             state.totalAmount = state.items.reduce((s, i) => s + i.price * i.quantity, 0);
             localStorage.setItem('guestCart', JSON.stringify(state.items));
-            },
+        },
         localDecrement: (state, action) => {
-            const { productId, stockId } = action.payload;
-            const item = state.items.find(i => i.productId === productId && i.stockId === stockId);
+            const { cart_id, product_id, stock_id } = action.payload;
+            const item = state.items.find(i => {
+            if (cart_id) return i.cart_id === cart_id;
+            return i.product_id === product_id && i.stock_id === stock_id;
+            });
             if (item) {
                 if (item.quantity > 1) {
-                item.quantity -= 1;
+                    item.quantity -= 1;
                 } else {
-                state.items = state.items.filter(i => !(i.productId === productId && i.stockId === stockId));
+                    // Если quantity стал 0 — удалить через localRemove
+                    state.items = state.items.filter(i => i.cart_id !== item.cart_id);
                 }
                 state.totalAmount = state.items.reduce((s, i) => s + i.price * i.quantity, 0);
                 localStorage.setItem('guestCart', JSON.stringify(state.items));
             }
-            },
+        },
         clearGuestCart: (state) => {
             state.items = [];
             state.totalAmount = 0;
