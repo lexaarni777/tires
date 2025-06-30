@@ -103,3 +103,14 @@ exports.createUserWithPhone = async (phone) => {
   return rows[0];
 };
 
+// Сброс пароля по email
+exports.resetPasswordWithEmail = async (email, code, newHashedPassword) => {
+  const query = 'SELECT reset_code FROM users WHERE email = $1';
+  const { rows } = await pool.query(query, [email]);
+  if (rows.length === 0 || rows[0].reset_code !== code) return false;
+  await pool.query(
+    'UPDATE users SET password = $1, reset_code = NULL WHERE email = $2',
+    [newHashedPassword, email]
+  );
+  return true;
+};

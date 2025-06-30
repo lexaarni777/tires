@@ -64,6 +64,50 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { r
     }
 });
 
+// Отправка кода для сброса (универсально)
+export const sendResetCode = createAsyncThunk(
+  'auth/sendResetCode',
+  async ({ phone, email }, { rejectWithValue }) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/send-reset-code', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(phone ? { phone } : { email }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Ошибка при отправке кода');
+      }
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Сброс пароля (универсально)
+export const resetPassword = createAsyncThunk(
+  'auth/resetPassword',
+  async ({ phone, email, code, newPassword }, { rejectWithValue }) => {
+    try {
+      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(phone ? { phone, code, newPassword } : { email, code, newPassword }),
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || 'Ошибка при сбросе пароля');
+      }
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+
+
 /// Слайс для аутентификации
 const authSlice = createSlice({
     name: 'auth',

@@ -6,18 +6,22 @@
  * - Авторизация пользователя.
  */
 
-const { registerUserInDB, findUserByEmail, getUserWithRoles, savePhoneAndCode, verifyPhoneCode, saveResetCode, findUserByPhone, resetPasswordWithCode, createUserWithPhone } = require('../models/userModel');
+const { registerUserInDB, findUserByEmail, getUserWithRoles, savePhoneAndCode, verifyPhoneCode, saveResetCode, findUserByPhone, resetPasswordWithCode, createUserWithPhone, resetPasswordWithEmail } = require('../models/userModel');
 const { assignRoleToUser } = require('../models/roleModel');
 
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db'); 
 const axios = require('axios');
+const nodemailer = require('nodemailer');
 
 const SMS_GATEWAY_URL = process.env.SMS_GATEWAY_URL;
 const SMS_GATEWAY_USER = process.env.SMS_GATEWAY_USER;
 const SMS_GATEWAY_PASS = process.env.SMS_GATEWAY_PASS;
-
+const SMTP_HOST = process.env.SMTP_HOST;  
+const SMTP_PORT = process.env.SMTP_PORT;
+const SMTP_USER = process.env.SMTP_USER;
+const SMTP_PASS = process.env.SMTP_PASS;
 
 
 // Генерация случайного проверочного кода
@@ -27,53 +31,77 @@ const generateVerificationCode = () => {
 
 // Регистрация пользователя по номеру телефона с подтверждением через SMS
 exports.registerUser = async (req, res) => {
-  // Логируем тело запроса для отладки
   console.log('req.body', req.body);
-
-  // Извлекаем данные из запроса
-  const { phone, password, code } = req.body;
+  const { email, password, phone, code } = req.body;
 
   try {
-    // 1. Проверка: все необходимые поля присутствуют?
-    if (!phone || !password || !code) {
-      return res.status(400).json({ error: 'Необходимо указать телефон, пароль и код из SMS' });
+    // 1. Если есть email (и нет телефона) — регистрация по email (простая)
+    if (email && password && !phone) {
+      // Проверка уникальности email
+      const exists = await findUserByEmail(email);
+      if (exists) return res.status(409).json({ error: 'Email уже зарегистрирован' });
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const newUser = await registerUserInDB(email, hashedPassword);
+      await assignRoleToUser(newUser.id, 'buyer');
+
+      // Добавим получение ролей и токен, если нужно сразу авторизовать:
+      const userWithRoles = await getUserWithRoles(newUser.id);
+      const token = jwt.sign(
+        { id: userWithRoles.id, roles: userWithRoles.roles },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      return res.status(201).json({
+        message: 'Пользователь успешно зарегистрирован',
+        user: userWithRoles,
+        token,
+      });
     }
 
-    // 2. Находим пользователя по номеру телефона
-    const user = await findUserByPhone(phone);
-    if (!user) {
-      return res.status(404).json({ error: 'Пользователь с таким телефоном не найден. Сначала запросите код!' });
+    // 2. Если есть phone+password+code — регистрация через СМС
+    if (phone && password && code) {
+      // ...твой код регистрации по телефону...
+      // (оставь здесь текущий вариант с проверкой кода)
+      const user = await findUserByPhone(phone);
+      if (!user) {
+        return res.status(404).json({ error: 'Пользователь с таким телефоном не найден. Сначала запросите код!' });
+      }
+
+      if (!user.reset_code || user.reset_code !== code) {
+        return res.status(400).json({ error: 'Неверный или просроченный код' });
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+      await pool.query(
+        'UPDATE users SET password = $1, reset_code = NULL, phone_verified = TRUE WHERE id = $2',
+        [hashedPassword, user.id]
+      );
+
+      await assignRoleToUser(user.id, 'buyer');
+      const userWithRoles = await getUserWithRoles(user.id);
+      const token = jwt.sign(
+        { id: userWithRoles.id, roles: userWithRoles.roles },
+        process.env.JWT_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      return res.status(201).json({
+        message: 'Регистрация завершена, телефон подтверждён',
+        user: userWithRoles,
+        token,
+      });
     }
 
-    // 3. Проверяем введённый код (он должен совпадать с сохранённым и быть актуальным)
-    if (!user.reset_code || user.reset_code !== code) {
-      return res.status(400).json({ error: 'Неверный или просроченный код' });
-    }
-
-    // 4. Хэшируем пароль для сохранения в базе
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    // 5. Обновляем данные пользователя: сохраняем пароль, сбрасываем код, подтверждаем телефон
-    await pool.query(
-      'UPDATE users SET password = $1, reset_code = NULL, phone_verified = TRUE WHERE id = $2',
-      [hashedPassword, user.id]
-    );
-
-    // 6. Назначаем роль (если нужно)
-    await assignRoleToUser(user.id, 'buyer');
-
-    // 7. Возвращаем успешный ответ
-    const userWithRoles = await getUserWithRoles(user.id);
-    return res.status(201).json({
-      message: 'Регистрация завершена, телефон подтверждён',
-      user: userWithRoles
-    });
+    // 3. Нет необходимых данных
+    res.status(400).json({ error: 'Неверные данные для регистрации' });
   } catch (err) {
-    // Логируем и отправляем ошибку
     console.error('Ошибка при регистрации пользователя:', err);
     res.status(500).json({ error: 'Ошибка при регистрации пользователя' });
   }
 };
+
 
 
 // Авторизация пользователя
@@ -180,28 +208,50 @@ exports.verifyPhone = async (req, res) => {
 };
 
 exports.sendResetCode = async (req, res) => {
-  const { phone } = req.body;
+  const { phone, email } = req.body;
   const code = Math.floor(100000 + Math.random() * 900000).toString();
+
   try {
-    // Найти пользователя по телефону
-    const user = await findUserByPhone(phone);
-    if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
+    let user;
+    if (phone) {
+      user = await findUserByPhone(phone);
+      if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
+      await saveResetCode(user.id, code);
 
-    await saveResetCode(user.id, code);
+      // SMS как раньше
+      await axios.post(
+        `${SMS_GATEWAY_URL}/messages`,
+        {
+          message: `Код для сброса пароля: ${code}`,
+          phoneNumbers: [phone]
+        },
+        { auth: { username: SMS_GATEWAY_USER, password: SMS_GATEWAY_PASS } }
+      );
+    } else if (email) {
+      user = await findUserByEmail(email);
+      if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
+      await saveResetCode(user.id, code);
 
-    await axios.post(
-      `${SMS_GATEWAY_URL}/messages`,
-      {
-        message: `Код для сброса пароля: ${code}`,
-        phoneNumbers: [phone]
-      },
-      {
+      // nodemailer: подготовка и отправка письма
+      const transporter = nodemailer.createTransport({
+        host: SMTP_HOST,
+        port: SMTP_PORT,
+        secure: true, // true для 465, false для других портов
         auth: {
-          username: SMS_GATEWAY_USER,
-          password: SMS_GATEWAY_PASS
+          user: SMTP_USER,
+          pass: SMTP_PASS
         }
-      }
-    );
+      });
+
+      await transporter.sendMail({
+        from: SMTP_USER,
+        to: email,
+        subject: 'Код для сброса пароля',
+        text: `Код для сброса пароля: ${code}`
+      });
+    } else {
+      return res.status(400).json({ message: 'Укажите телефон или email' });
+    }
     res.status(200).json({ message: 'Код для восстановления отправлен' });
   } catch (err) {
     console.error('Ошибка при отправке кода для восстановления:', err);
@@ -210,11 +260,22 @@ exports.sendResetCode = async (req, res) => {
 };
 
 exports.resetPassword = async (req, res) => {
-  const { phone, code, newPassword } = req.body;
+  const { phone, email, code, newPassword } = req.body;
   try {
     const hashed = await bcrypt.hash(newPassword, 10);
-    const ok = await resetPasswordWithCode(phone, code, hashed);
+    let ok = false;
+
+    if (phone) {
+      ok = await resetPasswordWithCode(phone, code, hashed);
+    } else if (email) {
+      // Реализовать функцию в userModel.js
+      ok = await resetPasswordWithEmail(email, code, hashed);
+    } else {
+      return res.status(400).json({ message: 'Укажите телефон или email' });
+    }
     if (!ok) return res.status(400).json({ message: 'Неверный код' });
+
+    // (по желанию) сразу логинить — выдать token как loginUser
 
     res.status(200).json({ message: 'Пароль сброшен' });
   } catch (err) {
@@ -222,4 +283,5 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ error: 'Ошибка при сбросе пароля' });
   }
 };
+
 

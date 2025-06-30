@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser, loginUser, sendSmsCode } from '../../slices/authSlice';
+import { registerUser, loginUser, sendSmsCode, sendResetCode, resetPassword } from '../../slices/authSlice';
 import styles from './AuthForm.module.scss';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -20,6 +20,18 @@ const AuthForm = () => {
     const [isCodeSent, setIsCodeSent] = useState(false);
     const [useEmail, setUseEmail] = useState(false);
     const [showMergeModal, setShowMergeModal] = useState(false);
+
+    const [isResetting, setIsResetting] = useState(false);
+    const [resetStep, setResetStep] = useState('request'); // request, verify, change
+    const [resetPhone, setResetPhone] = useState('');
+    const [resetEmail, setResetEmail] = useState('');
+    const [resetCode, setResetCode] = useState('');
+    const [newPass1, setNewPass1] = useState('');
+    const [newPass2, setNewPass2] = useState('');
+    const [resetError, setResetError] = useState('');
+
+
+
 
     const dispatch = useDispatch();
     const { status, error } = useSelector((state) => state.auth);
@@ -217,6 +229,134 @@ const AuthForm = () => {
       {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
     </button>
   </form>
+  {!isResetting && (
+  <button
+    type="button"
+    className={styles.forgotButton}
+    onClick={() => {
+      setIsResetting(true);
+      setResetStep('request');
+      setResetPhone('');
+      setResetEmail('');
+      setResetCode('');
+      setNewPass1('');
+      setNewPass2('');
+      setResetError('');
+    }}
+  >
+    Забыли пароль?
+  </button>
+)}
+{isResetting && (
+  <div className={styles.resetBlock}>
+    {resetStep === 'request' && (
+      <>
+        <h3>Восстановление пароля</h3>
+        <input
+          type="tel"
+          value={resetPhone}
+          onChange={e => setResetPhone(e.target.value)}
+          placeholder="Телефон (+7...)"
+          className={styles.input}
+          disabled={!!resetEmail}
+        />
+        <input
+          type="email"
+          value={resetEmail}
+          onChange={e => setResetEmail(e.target.value)}
+          placeholder="Email"
+          className={styles.input}
+          disabled={!!resetPhone}
+        />
+        <button
+          onClick={async () => {
+            setResetError('');
+            if (!resetPhone && !resetEmail) return setResetError('Введите телефон или email');
+            const res = await dispatch(sendResetCode({ phone: resetPhone, email: resetEmail }));
+            if (res.meta.requestStatus === 'fulfilled') setResetStep('verify');
+            else setResetError(res.payload || 'Ошибка отправки кода');
+          }}
+          className={styles.button}
+        >
+          Получить код
+        </button>
+        <button className={styles.toggleButton} onClick={() => setIsResetting(false)}>Назад</button>
+        {resetError && <div className={styles.error}>{resetError}</div>}
+      </>
+    )}
+
+    {resetStep === 'verify' && (
+      <>
+        <h3>Введите код</h3>
+        <input
+          type="text"
+          value={resetCode}
+          onChange={e => setResetCode(e.target.value)}
+          className={styles.input}
+          placeholder="Код из SMS/email"
+        />
+        <button
+          onClick={() => setResetStep('change')}
+          className={styles.button}
+        >
+          Проверить код
+        </button>
+        <button className={styles.toggleButton} onClick={() => setResetStep('request')}>Назад</button>
+      </>
+    )}
+
+    {resetStep === 'change' && (
+      <>
+        <h3>Смена пароля</h3>
+        <input
+          type="password"
+          value={newPass1}
+          onChange={e => setNewPass1(e.target.value)}
+          className={styles.input}
+          placeholder="Новый пароль"
+        />
+        <input
+          type="password"
+          value={newPass2}
+          onChange={e => setNewPass2(e.target.value)}
+          className={styles.input}
+          placeholder="Повторите пароль"
+        />
+        <button
+          onClick={async () => {
+            setResetError('');
+            if (newPass1 !== newPass2) return setResetError('Пароли не совпадают');
+            const res = await dispatch(resetPassword({
+              phone: resetPhone || undefined,
+              email: resetEmail || undefined,
+              code: resetCode,
+              newPassword: newPass1,
+            }));
+            if (res.meta.requestStatus === 'fulfilled') {
+              setIsResetting(false);
+              setResetStep('request');
+              setResetError('');
+              // Можно сразу вызвать loginUser
+              dispatch(loginUser({
+                phone: resetPhone || undefined,
+                email: resetEmail || undefined,
+                password: newPass1
+              }));
+            } else {
+              setResetError(res.payload || 'Ошибка сброса пароля');
+            }
+          }}
+          className={styles.button}
+        >
+          Сменить пароль и войти
+        </button>
+        <button className={styles.toggleButton} onClick={() => setResetStep('verify')}>Назад</button>
+        {resetError && <div className={styles.error}>{resetError}</div>}
+      </>
+    )}
+  </div>
+)}
+
   {showMergeModal && (
   <div className={styles.modal}>
     <div className={styles.modalContent}>
