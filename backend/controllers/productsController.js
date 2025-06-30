@@ -12,8 +12,8 @@ const productModel = require('../models/productModel');
 // Получить все товары каталога с фильтрацией по параметрам запроса
 exports.getAllTyres = async (req, res) => {
   try {
-    // Если нужны фильтры — нужно доработать модель, но базовая логика такая:
-    const products = await productModel.getProductsFromDB();
+    // req.query содержит все фильтры как строки
+    const products = await productModel.getProductsFromDB(req.query);
     res.json(products);
   } catch (err) {
     console.error('Ошибка при получении каталога шин:', err);

@@ -12,17 +12,68 @@
 const pool = require('../config/db');
 
 // Получить все шины с изображениями
-exports.getProductsFromDB = async () => {
-const query = `
-    SELECT 
-      t.*,  
+exports.getProductsFromDB = async (filters = {}) => {
+  // Базовый SELECT с LEFT JOIN для картинок
+  let query = `
+    SELECT
+      t.*,
       COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images
     FROM tyre_catalog t
     LEFT JOIN productsimages pi ON t.id = pi.product_id
-    GROUP BY t.id
-    ORDER BY t.id ASC
   `;
-  const { rows } = await pool.query(query);
+
+  // WHERE-условия накапливаем в массив
+  const where = [];
+  const values = [];
+
+  // Динамическое построение WHERE
+  if (filters.brand) {
+    values.push(filters.brand);
+    where.push(`t.brand = $${values.length}`);
+  }
+  if (filters.section_width) {
+    values.push(filters.section_width);
+    where.push(`t.section_width = $${values.length}`);
+  }
+  if (filters.profile) {
+    values.push(filters.profile);
+    where.push(`t.profile = $${values.length}`);
+  }
+  if (filters.diameter) {
+    values.push(filters.diameter);
+    where.push(`t.diameter = $${values.length}`);
+  }
+  if (filters.load_index) {
+    values.push(filters.load_index);
+    where.push(`t.load_index = $${values.length}`);
+  }
+  if (filters.speed_index) {
+    values.push(filters.speed_index);
+    where.push(`t.speed_index = $${values.length}`);
+  }
+  if (filters.season) {
+    values.push(filters.season);
+    where.push(`t.season = $${values.length}`);
+  }
+  if (filters.studs !== undefined) {
+    values.push(filters.studs === 'true' || filters.studs === true); // поддержка string и boolean
+    where.push(`t.studs = $${values.length}`);
+  }
+  if (filters.country) {
+    values.push(filters.country);
+    where.push(`t.country = $${values.length}`);
+  }
+  // Можно добавить другие фильтры по аналогии
+
+  // Добавляем WHERE если есть фильтры
+  if (where.length > 0) {
+    query += " WHERE " + where.join(" AND ");
+  }
+
+  query += " GROUP BY t.id ORDER BY t.id ASC";
+
+  // Выполняем запрос
+  const { rows } = await pool.query(query, values);
   return rows;
 };
 

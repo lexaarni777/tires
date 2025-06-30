@@ -25,6 +25,13 @@ const ProductList = () => {
   const [brand, setBrand] = useState("");
   const [size, setSize] = useState("");
   const [season, setSeason] = useState("");
+  const [sectionWidth, setSectionWidth] = useState("");
+  const [profile, setProfile] = useState("");
+  const [diameter, setDiameter] = useState("");
+  const [loadIndex, setLoadIndex] = useState("");
+  const [speedIndex, setSpeedIndex] = useState("");
+  const [studs, setStuds] = useState(""); // "true", "false", ""
+  const [country, setCountry] = useState("");
   const [inStockOnly, setInStockOnly] = useState(true);
 
   // Получаем данные из Redux: список шин и их статусы
@@ -62,9 +69,15 @@ const ProductList = () => {
 
   // Формируем объект фильтров для отправки на backend
   const filters = {};
-  if (brand) filters.brand = brand;
-  if (size) filters.size = size;
+  if (sectionWidth) filters.section_width = sectionWidth;
+  if (profile) filters.profile = profile;
+  if (diameter) filters.diameter = diameter;
+  if (loadIndex) filters.load_index = loadIndex;
+  if (speedIndex) filters.speed_index = speedIndex;
   if (season) filters.season = season;
+  if (studs !== "") filters.studs = studs;
+  if (country) filters.country = country;
+  if (brand) filters.brand = brand;
 
     useEffect(() => {
       // useEffect — хук для побочных эффектов, срабатывает при монтировании компонента и при изменении зависимостей
@@ -76,7 +89,7 @@ const ProductList = () => {
   // Загружаем каталог и остатки при изменении фильтров
   useEffect(() => {
     dispatch(fetchProducts(filters)); // грузим шины с фильтрацией
-  }, [dispatch, brand, size, season]);
+  }, [dispatch, brand, size, season, sectionWidth, profile, diameter, loadIndex, speedIndex, studs, country, inStockOnly]);
 
   // Загружаем все остатки после загрузки каталога
   useEffect(() => {
@@ -108,33 +121,69 @@ const ProductList = () => {
     <div className={styles.wrapper}>
       {/* Фильтр каталога шин */}
       <div className={styles.filterBar}>
-
         <input
           type="checkbox"
           placeholder="Есть в наличии"
           checked={inStockOnly}
           onChange={e => setInStockOnly(e.target.checked)}
         />
-        <input
-          type="text"
-          placeholder="Бренд"
-          value={brand}
-          onChange={(e) => setBrand(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Размер (например, 205/55R16)"
-          value={size}
-          onChange={(e) => setSize(e.target.value)}
-        />
-        <input
-          type="text"
-          placeholder="Сезон (например, Зимние)"
-          value={season}
-          onChange={(e) => setSeason(e.target.value)}
-        />
-        {/* Здесь можно добавить кнопки, селекты и любые фильтры */}
+        {/* Ширина */}
+        <select value={sectionWidth} onChange={e => setSectionWidth(e.target.value)}>
+          <option value="">Неважно</option>
+          {/* Добавь значения ширины из данных */}
+          <option value="205">205</option>
+          {/* ... */}
+        </select>
+        {/* Профиль */}
+        <select value={profile} onChange={e => setProfile(e.target.value)}>
+          <option value="">Неважно</option>
+          {/* Добавь значения профиля */}
+          <option value="55">55</option>
+          {/* ... */}
+        </select>
+        {/* Диаметр */}
+        <select value={diameter} onChange={e => setDiameter(e.target.value)}>
+          <option value="">Неважно</option>
+          <option value="16">16</option>
+          {/* ... */}
+        </select>
+        {/* Индекс нагрузки */}
+        <select value={loadIndex} onChange={e => setLoadIndex(e.target.value)}>
+          <option value="">Неважно</option>
+          <option value="91">91</option>
+          {/* ... */}
+        </select>
+        {/* Индекс скорости */}
+        <select value={speedIndex} onChange={e => setSpeedIndex(e.target.value)}>
+          <option value="">Неважно</option>
+          <option value="H">H</option>
+          {/* ... */}
+        </select>
+        {/* Сезон */}
+        <select value={season} onChange={e => setSeason(e.target.value)}>
+          <option value="">Неважно</option>
+          <option value="Зимние">Зимние</option>
+          <option value="Летние">Летние</option>
+          {/* ... */}
+        </select>
+        {/* Шипы */}
+        <select value={studs} onChange={e => setStuds(e.target.value)}>
+          <option value="">Неважно</option>
+          <option value="true">Есть шипы</option>
+          <option value="false">Без шипов</option>
+        </select>
+        {/* Страна */}
+        <select value={country} onChange={e => setCountry(e.target.value)}>
+          <option value="">Неважно</option>
+          {/* ... */}
+        </select>
+        {/* Бренд */}
+        <select value={brand} onChange={e => setBrand(e.target.value)}>
+          <option value="">Неважно</option>
+          {/* ... */}
+        </select>
       </div>
+
       {/* Выводим статус загрузки каталога/остатков */}
       {(productsStatus === "loading" || stockStatus === "loading") && (
         <div>Загрузка товаров...</div>
