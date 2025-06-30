@@ -25,6 +25,8 @@ const EditProduct = () => {
     diameter: '',
     country: '',
     description: '',
+    studs: '',
+    profile: ''
   });
 
   const [stocks, setStocks] = useState([]); // Остатки по складам
@@ -260,6 +262,27 @@ const getThumbPath = (image) => {
         <div className={styles.formGroup}>
           <label>Описание:</label>
           <textarea name="description" value={catalog.description || ''} onChange={handleCatalogChange} />
+        </div>
+        <div className={styles.formGroup}>
+          <label>Профиль:</label>
+          <input
+            type="number"
+            name="profile"
+            value={catalog.profile || ''}
+            onChange={handleCatalogChange}
+          />
+        </div>
+        <div className={styles.formGroup}>
+          <label>Шипы:</label>
+          <select
+            name="studs"
+            value={catalog.studs || ''}
+            onChange={handleCatalogChange}
+          >
+            <option value="">Не указано</option>
+            <option value="true">Есть шипы</option>
+            <option value="false">Без шипов</option>
+          </select>
         </div>
         <button type="submit" className={styles.saveButton}>
           Сохранить товар

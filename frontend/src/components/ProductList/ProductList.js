@@ -33,9 +33,12 @@ const ProductList = () => {
   const [studs, setStuds] = useState(""); // "true", "false", ""
   const [country, setCountry] = useState("");
   const [inStockOnly, setInStockOnly] = useState(true);
+ 
+
 
   // Получаем данные из Redux: список шин и их статусы
   const products = useSelector((state) => state.products.items);
+  const [allProducts, setAllProducts] = useState([]);
   const productsStatus = useSelector((state) => state.products.status);
 
   // Получаем данные из Redux: все остатки по складам
@@ -88,8 +91,10 @@ const ProductList = () => {
 
   // Загружаем каталог и остатки при изменении фильтров
   useEffect(() => {
-    dispatch(fetchProducts(filters)); // грузим шины с фильтрацией
-  }, [dispatch, brand, size, season, sectionWidth, profile, diameter, loadIndex, speedIndex, studs, country, inStockOnly]);
+  dispatch(fetchProducts({})).then(action => {
+    if (action.payload) setAllProducts(action.payload);
+  });
+}, [dispatch]);
 
   // Загружаем все остатки после загрузки каталога
   useEffect(() => {
@@ -101,6 +106,12 @@ const ProductList = () => {
       dispatch(fetchStock());
     }
   }, [dispatch, products]);
+
+  useEffect(() => {
+  dispatch(fetchProducts(filters));
+}, [dispatch, brand, sectionWidth, profile, diameter, loadIndex, speedIndex, season, studs, country]);
+
+
 
   // Группируем остатки по id шины для быстрого доступа
   // { 1: [остатки], 2: [остатки], ... }
@@ -115,73 +126,184 @@ const ProductList = () => {
     // Переход на страницу редактирования товара
     navigate(`/edit/${product.id}`, { state: { product } });
   };
+  const getOptions = (field) =>
+  [...new Set(allProducts.map(p => p[field]).filter(Boolean))]
+  .sort((a, b) => (!isNaN(Number(a)) && !isNaN(Number(b))) ? Number(a) - Number(b) : String(a).localeCompare(String(b), "ru"));
+
+  const getOptionStates = (field) => {
+  const options = [...new Set(allProducts.map(p => p[field]).filter(Boolean))];
+  return options.map(opt => {
+    // Виртуально подставляем эту опцию, остальные фильтры берем из текущего state
+    const virtualFilters = { ...filters, [field]: opt };
+    const filtered = allProducts.filter(p =>
+      Object.entries(virtualFilters).every(([k, v]) => !v || String(p[k]) === String(v))
+    );
+    return { value: opt, enabled: filtered.length > 0 };
+  });
+};
+
 
   // Примитивный фильтр — можно сделать выпадающие списки, чекбоксы и т.д.
   return (
     <div className={styles.wrapper}>
       {/* Фильтр каталога шин */}
       <div className={styles.filterBar}>
-        <input
-          type="checkbox"
-          placeholder="Есть в наличии"
-          checked={inStockOnly}
-          onChange={e => setInStockOnly(e.target.checked)}
-        />
-        {/* Ширина */}
-        <select value={sectionWidth} onChange={e => setSectionWidth(e.target.value)}>
-          <option value="">Неважно</option>
-          {/* Добавь значения ширины из данных */}
-          <option value="205">205</option>
-          {/* ... */}
-        </select>
-        {/* Профиль */}
-        <select value={profile} onChange={e => setProfile(e.target.value)}>
-          <option value="">Неважно</option>
-          {/* Добавь значения профиля */}
-          <option value="55">55</option>
-          {/* ... */}
-        </select>
-        {/* Диаметр */}
-        <select value={diameter} onChange={e => setDiameter(e.target.value)}>
-          <option value="">Неважно</option>
-          <option value="16">16</option>
-          {/* ... */}
-        </select>
-        {/* Индекс нагрузки */}
-        <select value={loadIndex} onChange={e => setLoadIndex(e.target.value)}>
-          <option value="">Неважно</option>
-          <option value="91">91</option>
-          {/* ... */}
-        </select>
-        {/* Индекс скорости */}
-        <select value={speedIndex} onChange={e => setSpeedIndex(e.target.value)}>
-          <option value="">Неважно</option>
-          <option value="H">H</option>
-          {/* ... */}
-        </select>
-        {/* Сезон */}
-        <select value={season} onChange={e => setSeason(e.target.value)}>
-          <option value="">Неважно</option>
-          <option value="Зимние">Зимние</option>
-          <option value="Летние">Летние</option>
-          {/* ... */}
-        </select>
-        {/* Шипы */}
-        <select value={studs} onChange={e => setStuds(e.target.value)}>
-          <option value="">Неважно</option>
-          <option value="true">Есть шипы</option>
-          <option value="false">Без шипов</option>
-        </select>
-        {/* Страна */}
-        <select value={country} onChange={e => setCountry(e.target.value)}>
-          <option value="">Неважно</option>
-          {/* ... */}
-        </select>
-        {/* Бренд */}
-        <select value={brand} onChange={e => setBrand(e.target.value)}>
-          <option value="">Неважно</option>
-          {/* ... */}
-        </select>
+     <div className={styles.filterBar}>
+  <label>
+    В наличии
+    <input
+      type="checkbox"
+      checked={inStockOnly}
+      onChange={e => setInStockOnly(e.target.checked)}
+    />
+  </label>
+
+  <label>
+    Ширина
+    <select value={sectionWidth} onChange={e => setSectionWidth(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('section_width').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+
+  <label>
+    Профиль
+    <select value={profile} onChange={e => setProfile(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('profile').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+
+  <label>
+    Диаметр
+    <select value={diameter} onChange={e => setDiameter(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('diameter').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+
+  <label>
+    Индекс нагрузки
+    <select value={loadIndex} onChange={e => setLoadIndex(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('load_index').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+
+  <label>
+    Индекс скорости
+    <select value={speedIndex} onChange={e => setSpeedIndex(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('speed_index').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+
+  <label>
+    Сезон
+    <select value={season} onChange={e => setSeason(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('season').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+
+  <label>
+    Шипы
+    <select value={studs} onChange={e => setStuds(e.target.value)}>
+      <option value="">Неважно</option>
+      <option value="true">Есть шипы</option>
+      <option value="false">Без шипов</option>
+    </select>
+  </label>
+
+  <label>
+    Страна
+    <select value={country} onChange={e => setCountry(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('country').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+
+  <label>
+    Бренд
+    <select value={brand} onChange={e => setBrand(e.target.value)}>
+      <option value="">Неважно</option>
+      {getOptionStates('brand').map(({ value, enabled }) =>
+        <option
+          key={value}
+          value={value}
+          disabled={!enabled}
+          style={!enabled ? { color: "#bbb" } : {}}
+        >
+          {value}
+        </option>
+      )}
+    </select>
+  </label>
+</div>
+
       </div>
 
       {/* Выводим статус загрузки каталога/остатков */}

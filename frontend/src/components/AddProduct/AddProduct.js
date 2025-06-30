@@ -27,6 +27,8 @@ const AddProduct = () => {
     diameter: '',
     country: '',
     description: '',
+    studs: '',   
+    profile: '', 
   });
 
   // Остатки и цены по складам (tyre_stock)
@@ -156,6 +158,8 @@ const AddProduct = () => {
         diameter: '',
         country: '',
         description: '',
+        studs: '',
+        profile: ''
       });
       setStocks(
         warehouseList.map((wh) => ({
@@ -244,6 +248,29 @@ const AddProduct = () => {
             onChange={handleCatalogChange}
           />
         </div>
+        <div className={styles.formGroup}>
+          <label>Профиль:</label>
+          <input
+            type="number"
+            name="profile"
+            value={catalog.profile}
+            onChange={handleCatalogChange}
+          />
+        </div>
+        <div className={styles.formGroup}>
+        <label>Шипы:</label>
+        <select
+          name="studs"
+          value={catalog.studs}
+          onChange={handleCatalogChange}
+        >
+          <option value="">Не указано</option>
+          <option value="true">Есть шипы</option>
+          <option value="false">Без шипов</option>
+        </select>
+      </div>
+
+
 
         <h3>Остатки и цены по складам</h3>
         {stocks.map((stock, idx) => (

@@ -82,7 +82,7 @@ exports.createProductInDB = async (productData) => {
   // Ожидаются все нужные поля из tyre_catalog (без id, если SERIAL)
   const query = `
     INSERT INTO tyre_catalog 
-      (article, name, brand, model, size, load_index, speed_index, season, vehicle_type, tread_depth, section_width, recommended_rim_width, diameter, country, description)
+      (article, name, brand, model, size, load_index, speed_index, season, vehicle_type, tread_depth, section_width, recommended_rim_width, diameter, country, description, studs, profile)
     VALUES 
       ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
     RETURNING *;
@@ -103,7 +103,9 @@ exports.createProductInDB = async (productData) => {
     productData.recommended_rim_width,
     productData.diameter,
     productData.country,
-    productData.description
+    productData.description,
+    productData.studs,
+    productData.profile
   ];
 
   try {
@@ -136,6 +138,8 @@ exports.updateProductInDB = async (productId, productData) => {
       diameter = $13,
       country = $14,
       description = $15
+      studs = $16,
+      profile = $17
     WHERE id = $16
     RETURNING *;
   `;
@@ -156,7 +160,9 @@ exports.updateProductInDB = async (productId, productData) => {
     productData.diameter,
     productData.country,
     productData.description,
-    productId
+    productId,
+    productData.studs,
+    productData.profile
   ];
 
   const { rows } = await pool.query(query, values);

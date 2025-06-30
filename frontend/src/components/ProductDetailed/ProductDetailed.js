@@ -192,6 +192,12 @@ const handleAddToCart = (e) => {
           {product.load_index && <span>Индекс нагрузки: {product.load_index}</span>}
           {product.speed_index && <span>Индекс скорости: {product.speed_index}</span>}
           {product.model && <span>Модель: {product.model}</span>}
+          {product.profile && <span>Профиль: {product.profile}</span>}
+          {product.studs !== undefined && product.studs !== null && (
+            <span>
+              Шипы: {product.studs === true || product.studs === "true" ? "есть" : "нет"}
+            </span>
+)}
         </div>
         <div className={styles.description}>{product.description}</div>
         {/* Таблица остатков */}
