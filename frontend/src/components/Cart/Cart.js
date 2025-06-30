@@ -288,7 +288,13 @@ const handleDecrement = (item) => {
         </button>
         <button
           className={styles.checkoutButton}
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            if (!auth.token) {
+              navigate('/authform'); // или '/auth', если у тебя другой путь для формы
+            } else {
+              setShowModal(true);
+            }
+          }}
           disabled={!selectedIds.length}
         >
           {/* Кнопка "Оформить заказ" — открывает модальное окно, если выбран хотя бы один товар */}

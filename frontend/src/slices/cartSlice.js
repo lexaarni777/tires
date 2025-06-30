@@ -55,6 +55,7 @@ export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { getState
  * item — объект CartItem с деталями выбранного склада и количества.
  */
 export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getState, dispatch }) => {
+    console.log(item)
     const { auth } = getState();
         if (!auth.token) {
         dispatch(localAdd(item)); // Новый localAdd
@@ -80,8 +81,9 @@ export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getSt
  */
 export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (item, { getState, dispatch }) => {
     const { auth } = getState();
+    console.log(item)
     if (!auth.token) {
-      dispatch(localDecrement({ product_id: item.product_id, stock_id: item.stockId }));
+      dispatch(localDecrement({ productId: item.productId, stockId: item.stockId }));
       return item;
     }
     const response = await fetch('http://localhost:5000/api/cart/decrement', {
@@ -266,6 +268,7 @@ const cartSlice = createSlice({
                 localStorage.setItem('guestCart', JSON.stringify(state.items));
             }
         },
+
         clearGuestCart: (state) => {
             state.items = [];
             state.totalAmount = 0;
