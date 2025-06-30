@@ -109,3 +109,9 @@ exports.removeManyFromCart = async (cart_ids) => {
     [cart_ids]
   );
 };
+
+exports.addMultipleToCart = async (userId, items) => {
+  for (const it of items) {
+    await exports.addToCart(userId, it.productId, it.stockId, it.price, it.quantity);
+  }
+};

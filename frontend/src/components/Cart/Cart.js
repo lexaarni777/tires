@@ -5,7 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 // useSelector — хук для получения данных из глобального Redux-хранилища
 // useDispatch — хук для отправки действий (actions), которые изменяют состояние в Redux
 
-import { fetchCart, removeFromCart, clearCart, placeOrder, clearCartServerSide, addToCart, decrementToCart} from '../../slices/cartSlice';
+import { fetchCart, removeFromCart, clearCart, placeOrder, clearCartServerSide, addToCart, decrementToCart, clearGuestCart } from '../../slices/cartSlice';
 // Импортируем экшены для работы с корзиной: загрузка, удаление товара, очистка, оформление заказа
 
 import { useNavigate } from 'react-router-dom';
@@ -66,12 +66,11 @@ const Cart = () => {
   // useSelector — получаем данные пользователя из Redux (например, ID для заказа)
 
   useEffect(() => {
-    // useEffect — хук для побочных эффектов, срабатывает при монтировании компонента и при изменении зависимостей
-    // Здесь: загружаем содержимое корзины при первом рендере
-    // [dispatch] — массив зависимостей, эффект выполнится один раз при загрузке страницы
-    dispatch(fetchCart())
-      // dispatch — отправляем экшен fetchCart для загрузки товаров из корзины с сервера
-  }, [dispatch]);
+    if (auth.token) {
+      dispatch(fetchCart());
+    }
+    // Для гостей ничего не делаем, корзина уже в Redux из localStorage
+  }, [auth.token, dispatch]);
 
   useEffect(() => {
     // useEffect — следим за изменениями selectAll и cartItems
@@ -179,6 +178,10 @@ const handleDecrement = (item) => {
       resetForm(); // Сбрасываем форму и выбранные товары
       setShowModal(false); // Закрываем модальное окно
       navigate('/orders'); // useNavigate — переходим на страницу заказов
+      // 👇 Чистим корзину гостя, если пользователь не авторизован
+      if (!auth.token) {
+        dispatch(clearGuestCart());
+      }
     } else {
       alert(result.payload || 'Ошибка при оформлении заказа');
       // Показываем ошибку, если заказ не оформлен

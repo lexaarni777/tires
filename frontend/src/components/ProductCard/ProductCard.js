@@ -123,7 +123,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
 
     dispatch(
       addToCart({
-        userId: auth.id,
+        userId: auth.id || 0,
         productId: product.id,
         productName: product.name,
         article: product.article,
@@ -153,7 +153,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
       // Проверяем, что количество в корзине меньше чем доступно на складе
       dispatch(
         addToCart({
-          userId: auth.id,
+          userId: auth.id || 0,
           productId: product.id,
           productName: product.name,
           article: product.article,
@@ -178,7 +178,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
       // Если товар есть в корзине и его больше 1
       dispatch(
         decrementToCart({
-          userId: auth.id,
+          userId: auth.id || 0,
           productId: product.id,
           stockId: selectedStockId,
           quantity: 1, // –1

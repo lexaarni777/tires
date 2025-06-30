@@ -1,5 +1,28 @@
+
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { logout } from './authSlice'; // если путь другой — поменяй
+const initialGuestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+
+export const mergeLocalCartWithServer = createAsyncThunk(
+  'cart/mergeLocalCartWithServer',
+  async (_, { getState, dispatch }) => {
+    const { auth, cart } = getState();
+    const items = cart.items; // Все товары из guestCart
+    if (!items.length) return { items: [] };
+    const response = await fetch('http://localhost:5000/api/cart/merge', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${auth.token}`,
+      },
+      body: JSON.stringify({ items }),
+    });
+    const data = await response.json();
+    dispatch(clearGuestCart());
+    dispatch(fetchCart());
+    return data;
+  }
+);
 
 /**
  * Асинхронное действие: получить корзину текущего пользователя с сервера.
@@ -24,6 +47,10 @@ export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { getState
  */
 export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getState, dispatch }) => {
     const { auth } = getState();
+        if (!auth.token) {
+        dispatch(localAdd(item)); // Новый localAdd
+        return item;
+    }
     const response = await fetch('http://localhost:5000/api/cart/add', {
         method: 'POST',
         headers: {
@@ -44,6 +71,10 @@ export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getSt
  */
 export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (item, { getState, dispatch }) => {
     const { auth } = getState();
+    if (!auth.token) {
+      dispatch(localDecrement({ productId: item.productId, stockId: item.stockId }));
+      return item;
+    }
     const response = await fetch('http://localhost:5000/api/cart/decrement', {
         method: 'POST',
         headers: {
@@ -62,8 +93,12 @@ export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (i
  * (itemId — id строки корзины, не товара!)
  */
 export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (cart_id, { getState, dispatch }) => {
-    console.log('Удаление из корзины:', cart_id);
     const { auth } = getState();
+
+    if (!auth.token) {
+      dispatch(localRemove(cart_id)); // payload: { productId, stockId }
+      return cart_id;
+    }
     await fetch(`http://localhost:5000/api/cart/delete/${cart_id}`, {
         method: 'DELETE',
         headers: {
@@ -103,6 +138,10 @@ export const clearCartServerSide = createAsyncThunk(
     'cart/clearCartServerSide',
     async (_, { getState, dispatch }) => {
         const { auth } = getState();
+            if (!auth.token) {
+                dispatch(clearGuestCart()); // Очищаем только guestCart
+                return;
+              }
         await fetch('http://localhost:5000/api/cart/delete', {
             method: 'DELETE',
             headers: {
@@ -121,6 +160,13 @@ export const removeManyFromCart = createAsyncThunk(
   'cart/removeManyFromCart',
   async (cartIds, { getState, dispatch }) => {
     const { auth } = getState();
+    if (!auth.token) {
+      // Для гостя ids — массив { productId, stockId }
+      cartIds.forEach(({ productId, stockId }) => {
+        dispatch(localRemove({ productId, stockId }));
+      });
+      return cartIds;
+    }
     const response = await fetch('http://localhost:5000/api/cart/delete-many', {
       method: 'POST',
       headers: {
@@ -140,35 +186,59 @@ export const removeManyFromCart = createAsyncThunk(
 const cartSlice = createSlice({
     name: 'cart',
     initialState: {
-        /**
-         * Массив объектов CartItem:
-         * {
-         *   id: number,              // id строки в таблице cart (если нужен для удаления)
-         *   productId: number,       // id товара (шины)
-         *   productName: string,     // название для UI
-         *   article: string,         // артикул
-         *   image: string,           // ссылка на миниатюру
-         *   stockId: number,         // id остатка (tyre_stock)
-         *   location: string,        // склад
-         *   price: number,           // розничная цена на момент добавления
-         *   quantity: number,        // кол-во в корзине
-         *   maxAvailable: number     // сколько максимально доступно (для UI)
-         * }
-         */
-        items: [],
-        totalAmount: 0,
-        status: 'idle',
-        error: null,
-    },
+    items: initialGuestCart,
+    totalAmount: initialGuestCart.reduce((s, i) => s + i.price * i.quantity, 0),
+    status: 'idle',
+    error: null,
+},
     reducers: {
         // Очистить корзину в redux (вызывается из UI при необходимости)
         clearCart(state) {
             state.items = [];
             state.totalAmount = 0;
         },
-    },
-    extraReducers: (builder) => {
-        builder
+        localAdd: (state, action) => {
+            const item = action.payload;
+            // Проверяем, есть ли уже такая позиция
+            const existing = state.items.find(
+                i => i.productId === item.productId && i.stockId === item.stockId
+            );
+            if (existing) {
+                existing.quantity += item.quantity;
+            } else {
+                state.items.push(item);
+            }
+            state.totalAmount = state.items.reduce((s, i) => s + i.price * i.quantity, 0);
+            localStorage.setItem('guestCart', JSON.stringify(state.items));
+            },
+        localRemove: (state, action) => {
+            const { productId, stockId } = action.payload;
+            state.items = state.items.filter(i => !(i.productId === productId && i.stockId === stockId));
+            state.totalAmount = state.items.reduce((s, i) => s + i.price * i.quantity, 0);
+            localStorage.setItem('guestCart', JSON.stringify(state.items));
+            },
+        localDecrement: (state, action) => {
+            const { productId, stockId } = action.payload;
+            const item = state.items.find(i => i.productId === productId && i.stockId === stockId);
+            if (item) {
+                if (item.quantity > 1) {
+                item.quantity -= 1;
+                } else {
+                state.items = state.items.filter(i => !(i.productId === productId && i.stockId === stockId));
+                }
+                state.totalAmount = state.items.reduce((s, i) => s + i.price * i.quantity, 0);
+                localStorage.setItem('guestCart', JSON.stringify(state.items));
+            }
+            },
+        clearGuestCart: (state) => {
+            state.items = [];
+            state.totalAmount = 0;
+            localStorage.removeItem('guestCart');
+            },
+
+          },
+            extraReducers: (builder) => {
+                builder
             // Получить корзину с сервера
             .addCase(fetchCart.fulfilled, (state, action) => {
                 // action.payload — массив CartItem с серверными полями
@@ -200,10 +270,16 @@ const cartSlice = createSlice({
             .addCase(logout, (state) => {
                 state.items = [];
                 state.totalAmount = 0;
+            })
+            .addCase(mergeLocalCartWithServer.fulfilled, (state, action) => {
+                state.items = action.payload.items || [];
+                state.totalAmount = state.items.reduce((s, i) => s + i.price * i.quantity, 0);
+                localStorage.removeItem('guestCart');
             });
+
             // Обработка ошибок (можно добавить обработку ошибок для каждого asyncThunk)
     },
 });
 
-export const { clearCart } = cartSlice.actions;
+export const { localAdd, localRemove, localDecrement, clearGuestCart, clearCart  } = cartSlice.actions;
 export default cartSlice.reducer;

@@ -64,9 +64,7 @@ function App() {
 
       {/* Новый маршрут для управления пользователями - доступен только администраторам */}
       <Route path='/cart' element={
-        <PrivateRoute rolesRequired={['buyer', 'admin']}>
           <Cart />
-        </PrivateRoute>
       }/>
         {/* Новый маршрут для управления пользователями - доступен только администраторам */}
       <Route path='services/delivery' element={  

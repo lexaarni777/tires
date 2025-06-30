@@ -4,11 +4,13 @@ import { registerUser, loginUser, sendSmsCode } from '../../slices/authSlice';
 import styles from './AuthForm.module.scss';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
+import { mergeLocalCartWithServer, clearGuestCart } from '../../slices/cartSlice';
+
 
 const AuthForm = () => {
     const user = useSelector((state) => state.auth.user);
     const navigate = useNavigate();
-    useEffect(() => { if (user) navigate('/cart'); }, [user, navigate]);
+   
 
     const [isRegistering, setIsRegistering] = useState(false);
     const [phone, setPhone] = useState('');
@@ -17,9 +19,37 @@ const AuthForm = () => {
     const [code, setCode] = useState('');
     const [isCodeSent, setIsCodeSent] = useState(false);
     const [useEmail, setUseEmail] = useState(false);
+    const [showMergeModal, setShowMergeModal] = useState(false);
 
     const dispatch = useDispatch();
     const { status, error } = useSelector((state) => state.auth);
+
+    const auth = useSelector((state) => state.auth);
+    useEffect(() => {
+    // Только если нет guestCart, сразу переходим на /cart
+        if (user && !localStorage.getItem('guestCart')) {
+            navigate('/cart');
+        }
+    }, [user, navigate]);
+    useEffect(() => {
+    // Если появился токен и в localStorage есть guestCart, показываем модалку
+    if (auth.token && localStorage.getItem('guestCart')) {
+        setShowMergeModal(true);
+    }
+    }, [auth.token]);
+
+
+    const handleMerge = () => {
+        dispatch(mergeLocalCartWithServer());
+        setShowMergeModal(false);
+        navigate('/cart');
+    };
+    const handleClear = () => {
+        dispatch(clearGuestCart());
+        setShowMergeModal(false);
+        navigate('/cart');
+    };
+
 
     // Отправка кода на телефон (регистрация)
     const handleSendCode = async (e) => {
@@ -187,6 +217,16 @@ const AuthForm = () => {
       {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
     </button>
   </form>
+  {showMergeModal && (
+  <div className={styles.modal}>
+    <div className={styles.modalContent}>
+      <p>У вас осталась корзина гостя. Объединить с корзиной аккаунта?</p>
+      <button onClick={handleMerge}>Объединить</button>
+      <button onClick={handleClear}>Очистить гостевую корзину</button>
+    </div>
+  </div>
+)}
+
 </div>
 
     );

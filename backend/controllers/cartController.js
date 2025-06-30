@@ -3,7 +3,7 @@
  * Теперь все действия — с учётом склада (stock_id) и цены (price).
  */
 
-const { addToCart, getCart, updateCartItem, removeFromCart, clearCart, getCartItem, removeManyFromCart} = require('../models/cartModel');
+const { addToCart, getCart, updateCartItem, removeFromCart, clearCart, getCartItem, removeManyFromCart, addMultipleToCart} = require('../models/cartModel');
 
 // Уменьшить количество товара в корзине (если quantity = 1 — удалить строку)
 exports.decrementCartItem = async (req, res) => {
@@ -134,5 +134,18 @@ exports.removeManyFromCart = async (req, res) => {
   } catch (err) {
     console.error('Ошибка массового удаления из корзины:', err);
     res.status(500).json({ message: 'Ошибка сервера' });
+  }
+};
+
+exports.mergeCart = async (req, res) => {
+  const userId = req.user.id; // или req.body.userId, если нет авторизации через middleware
+  const items = req.body.items || [];
+  try {
+    await addMultipleToCart(userId, items);
+    const cartItems = await getCart(userId);
+    res.status(200).json({ items: cartItems });
+  } catch (err) {
+    console.error('Ошибка при объединении корзины:', err);
+    res.status(500).send('Ошибка сервера');
   }
 };
