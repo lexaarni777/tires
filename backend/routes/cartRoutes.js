@@ -10,7 +10,9 @@
 
 const express = require('express');
 const { addProductToCart, getCart, updateCartItem, removeFromCart, clearCart, decrementCartItem, removeManyFromCart, mergeCart } = require('../controllers/cartController');
+const { verifyToken } = require('../middleware/authMiddleware');
 const router = express.Router();
+
 
 // POST /api/cart/add - добавть товар в козину
 router.post('/add', addProductToCart );
@@ -33,7 +35,8 @@ router.delete('/delete', clearCart);
 // Удалить несколько товаров из корзины
 router.post('/delete-many', removeManyFromCart);
 
-router.post('/merge', mergeCart);
+router.post('/merge', verifyToken, mergeCart);
+
 
 
 

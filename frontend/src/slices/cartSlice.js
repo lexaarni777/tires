@@ -5,10 +5,11 @@ const initialGuestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
 
 export const mergeLocalCartWithServer = createAsyncThunk(
   'cart/mergeLocalCartWithServer',
-  async (_, { getState, dispatch }) => {
+  async (_, { getState, dispatch, rejectWithValue }) => {
     const { auth, cart } = getState();
-    const items = cart.items; // Все товары из guestCart
+    const items = cart.items;
     if (!items.length) return { items: [] };
+
     const response = await fetch('http://localhost:5000/api/cart/merge', {
       method: 'POST',
       headers: {
@@ -17,12 +18,20 @@ export const mergeLocalCartWithServer = createAsyncThunk(
       },
       body: JSON.stringify({ items }),
     });
+
+    // Проверка на ошибку
+    if (!response.ok) {
+      const error = await response.text();
+      return rejectWithValue(error);
+    }
+
     const data = await response.json();
     dispatch(clearGuestCart());
     dispatch(fetchCart());
     return data;
   }
 );
+
 
 /**
  * Асинхронное действие: получить корзину текущего пользователя с сервера.
