@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { registerUser, loginUser, sendSmsCode, sendResetCode, resetPassword } from '../../slices/authSlice';
+import { registerUser, loginUser, sendSmsCode, sendResetCode, resetPassword, sendEmailCode, verifyEmail  } from '../../slices/authSlice';
 import styles from './AuthForm.module.scss';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
@@ -29,6 +29,9 @@ const AuthForm = () => {
     const [newPass1, setNewPass1] = useState('');
     const [newPass2, setNewPass2] = useState('');
     const [resetError, setResetError] = useState('');
+
+    const [isEmailCodeSent, setIsEmailCodeSent] = useState(false); // Код уже отправлен?
+    const [emailCode, setEmailCode] = useState('');                // Введённый пользователем код
 
 
 
@@ -74,15 +77,12 @@ const AuthForm = () => {
     // Регистрация пользователя (телефон/код/пароль/или email)
     const handleRegister = (e) => {
         e.preventDefault();
-        // Требуется хотя бы телефон или email!
+        // Только регистрация по телефону (старый flow)
         if (!phone && !email) return alert('Укажите телефон или email');
-        // Если телефон и код — flow по SMS
         if (phone && isCodeSent) {
             dispatch(registerUser({ phone, email, password, code }));
-        } else if (email && !phone) {
-            // Классическая регистрация по email
-            dispatch(registerUser({ email, password }));
         }
+        // else if (email && !phone) — удалить! Это больше не актуально!
     };
 
     // Логин (можно по телефону или email)
@@ -91,6 +91,27 @@ const AuthForm = () => {
         if (!phone && !email) return alert('Укажите телефон или email');
         dispatch(loginUser({ phone, email, password }));
     };
+
+    const handleSendEmailCode = async (e) => {
+    e.preventDefault();
+        if (!email) return alert('Введите email');
+        const res = await dispatch(sendEmailCode({ email }));
+        if (res.meta.requestStatus === 'fulfilled') setIsEmailCodeSent(true);
+    };
+
+const handleVerifyEmail = async (e) => {
+    e.preventDefault();
+    if (!email || !emailCode || !password) return alert('Все поля обязательны');
+    const res = await dispatch(verifyEmail({ email, code: emailCode, password }));
+    if (res.meta.requestStatus === 'fulfilled') {
+        // После успешной верификации — логин!
+        await dispatch(loginUser({ email, password }));
+        // navigate('/cart') не нужен, useEffect сам сработает на user
+    }
+};
+
+
+
 
     return (
 <div className={styles.authForm}>
@@ -175,19 +196,69 @@ const AuthForm = () => {
       </>
     )}
 
-    {/* Регистрация по email или телефон (до получения кода): только пароль */}
-    {isRegistering && (useEmail || (!useEmail && (!phone || !isCodeSent))) && (
-      <div className={styles.fieldGroup}>
-        <label className={styles.label}>Пароль:</label>
-        <input
-          type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
-          className={styles.input}
-        />
-      </div>
+    {/* Регистрация по email с подтверждением кода */}
+{isRegistering && useEmail && (
+  <>
+    {!isEmailCodeSent ? (
+      // Первый шаг — отправить код
+      <>
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>Email:</label>
+          <input
+            type="email"
+            value={email}
+            onChange={e => setEmail(e.target.value)}
+            className={styles.input}
+            placeholder="you@example.com"
+            autoFocus
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleSendEmailCode}
+          className={styles.button}
+          disabled={status === 'loading'}
+        >
+          Получить код на email
+        </button>
+      </>
+    ) : (
+      // Второй шаг — ввод кода и пароля
+      <>
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>Код из email:</label>
+          <input
+            type="text"
+            value={emailCode}
+            onChange={e => setEmailCode(e.target.value)}
+            className={styles.input}
+            placeholder="4-значный код"
+            autoFocus
+          />
+        </div>
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>Пароль:</label>
+          <input
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            className={styles.input}
+            placeholder="Придумайте пароль"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleVerifyEmail}
+          className={styles.button}
+          disabled={status === 'loading'}
+        >
+          Завершить регистрацию
+        </button>
+      </>
     )}
+  </>
+)}
+
 
     {/* Вход — телефон/email + пароль */}
     {!isRegistering && (

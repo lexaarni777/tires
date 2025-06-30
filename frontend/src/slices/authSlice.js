@@ -106,6 +106,43 @@ export const resetPassword = createAsyncThunk(
   }
 );
 
+// Отправить email-код
+export const sendEmailCode = createAsyncThunk('auth/sendEmailCode', async ({ email }, { rejectWithValue }) => {
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/send-email-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Ошибка отправки кода');
+    }
+    return response.json();
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
+});
+
+// Подтверждение email и завершение регистрации
+export const verifyEmail = createAsyncThunk('auth/verifyEmail', async ({ email, code, password }, { rejectWithValue }) => {
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, code, password }),
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.message || 'Ошибка подтверждения');
+    }
+    return response.json();
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
+});
+
+
 
 
 /// Слайс для аутентификации

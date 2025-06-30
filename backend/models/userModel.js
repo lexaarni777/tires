@@ -114,3 +114,16 @@ exports.resetPasswordWithEmail = async (email, code, newHashedPassword) => {
   );
   return true;
 };
+
+// Сохраняет код подтверждения email
+exports.saveEmailVerificationCode = async (userId, code) => {
+  await pool.query('UPDATE users SET email_code = $1 WHERE id = $2', [code, userId]);
+};
+
+// Проверяет email-код, подтверждает email
+exports.verifyEmailCode = async (userId, code) => {
+  const { rows } = await pool.query('SELECT email_code FROM users WHERE id = $1', [userId]);
+  if (rows.length === 0 || rows[0].email_code !== code) return false;
+  await pool.query('UPDATE users SET email_verified = TRUE, email_code = NULL WHERE id = $1', [userId]);
+  return true;
+};

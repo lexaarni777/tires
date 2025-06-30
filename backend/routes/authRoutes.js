@@ -15,7 +15,9 @@ const {
   sendSmsCode,     // Отправить SMS-код для подтверждения
   verifyPhone,     // Подтвердить телефон (опционально, если регистрация разбита на шаги)
   sendResetCode,   // Отправить SMS-код для сброса пароля
-  resetPassword    // Сбросить пароль по коду из SMS
+  resetPassword,    // Сбросить пароль по коду из SMS
+  sendEmailCode,   // Отправить код на email для подтверждения
+  verifyEmail      // Подтвердить email по коду
 } = require('../controllers/authController');
 const router = express.Router();
 
@@ -53,5 +55,9 @@ router.post('/send-reset-code', sendResetCode);
  * req.body: { phone, code, newPassword }
  */
 router.post('/reset-password', resetPassword);
+router.post('/send-email-code', sendEmailCode);
+router.post('/verify-email', verifyEmail);
+
+
 
 module.exports = router;

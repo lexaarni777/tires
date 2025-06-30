@@ -24,11 +24,6 @@ const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 
 
-// Генерация случайного проверочного кода
-const generateVerificationCode = () => {
-  return Math.floor(100000 + Math.random() * 900000); // Генерируем 6-значный код
-};
-
 // Регистрация пользователя по номеру телефона с подтверждением через SMS
 exports.registerUser = async (req, res) => {
   console.log('req.body', req.body);
@@ -156,7 +151,7 @@ exports.loginUser = async (req, res) => {
 
 exports.sendSmsCode = async (req, res) => {
   const { phone } = req.body; // убираем userId!
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = Math.floor(100000 + Math.random() * 9000).toString();
 
   try {
     // 1. Найти пользователя по телефону
@@ -209,7 +204,7 @@ exports.verifyPhone = async (req, res) => {
 
 exports.sendResetCode = async (req, res) => {
   const { phone, email } = req.body;
-  const code = Math.floor(100000 + Math.random() * 900000).toString();
+  const code = Math.floor(100000 + Math.random() * 9000).toString();
 
   try {
     let user;
@@ -285,3 +280,77 @@ exports.resetPassword = async (req, res) => {
 };
 
 
+exports.sendEmailCode = async (req, res) => {
+  const { email } = req.body;
+  if (!email) return res.status(400).json({ message: 'Email обязателен' });
+  const code = Math.floor(1000 + Math.random() * 9000).toString();
+
+  try {
+    // Найти или создать пользователя
+    let user = await findUserByEmail(email);
+    if (!user) {
+      // Создаём "черновик" пользователя (email, но без пароля, не подтверждён)
+      const { rows } = await pool.query(
+        'INSERT INTO users (email, email_code, email_verified) VALUES ($1, $2, FALSE) RETURNING *',
+        [email, code]
+      );
+      user = rows[0];
+    } else {
+      await exports.saveEmailVerificationCode(user.id, code);
+    }
+
+    // Отправка кода через nodemailer
+    const transporter = nodemailer.createTransport({
+      host: SMTP_HOST,
+      port: SMTP_PORT,
+      secure: true,
+      auth: { user: SMTP_USER, pass: SMTP_PASS }
+    });
+    await transporter.sendMail({
+      from: SMTP_USER,
+      to: email,
+      subject: 'Код подтверждения email',
+      text: `Ваш код подтверждения: ${code}`
+    });
+    res.status(200).json({ message: 'Код отправлен на e-mail' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка при отправке кода' });
+  }
+};
+
+exports.verifyEmail = async (req, res) => {
+  const { email, code, password } = req.body;
+  if (!email || !code || !password)
+    return res.status(400).json({ message: 'Необходимы email, код и пароль' });
+
+  try {
+    const user = await findUserByEmail(email);
+    if (!user) return res.status(404).json({ message: 'Пользователь не найден' });
+    if (user.email_verified) return res.status(400).json({ message: 'Email уже подтверждён' });
+
+    // Проверяем код
+    if (user.email_code !== code) return res.status(400).json({ message: 'Неверный код' });
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    await pool.query(
+      'UPDATE users SET password = $1, email_verified = TRUE, email_code = NULL WHERE id = $2',
+      [hashedPassword, user.id]
+    );
+    await assignRoleToUser(user.id, 'buyer');
+    const userWithRoles = await getUserWithRoles(user.id);
+    const token = jwt.sign(
+      { id: userWithRoles.id, roles: userWithRoles.roles },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+    res.status(201).json({
+      message: 'Регистрация завершена, email подтверждён',
+      user: userWithRoles,
+      token,
+    });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Ошибка при подтверждении email' });
+  }
+};
