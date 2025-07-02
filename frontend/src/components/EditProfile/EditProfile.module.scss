@@ -1,0 +1,92 @@
+.editProfile {
+  padding: 16px;
+}
+
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 16px;
+}
+
+.sectionSubtitle {
+  font-size: 18px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 12px;
+}
+
+.successMsg {
+  background: #F9F9F9;
+  color: #333333;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.errorMsg {
+  background: #F9F9F9;
+  color: #D32F2F;
+  padding: 12px;
+  border-radius: 4px;
+  margin-bottom: 16px;
+}
+
+.profileForm, .emailBlock, .phoneBlock, .passwordBlock, .addressForm {
+  background: #F9F9F9;
+  padding: 16px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.formLabel {
+  display: block;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.inputField {
+  width: 100%;
+  max-width: 250px;
+  height: 50px;
+  padding: 0 12px;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.button {
+  background: #F57C00;
+  color: #fff;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  width: 160px;
+  height: 44px;
+  cursor: pointer;
+}
+
+.inlineGroup {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.addressesBlock {
+  padding: 16px;
+  background: #F9F9F9;
+  border-radius: 4px;
+}
+
+.addressList {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 16px 0;
+}
+
+.addressItem {
+  font-size: 14px;
+  margin-bottom: 8px;
+}

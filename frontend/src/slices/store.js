@@ -5,6 +5,7 @@ import cartReducer from './cartSlice';
 import ordersReducer from './ordersSlice';
 import stockReducer from './stockSlice'; 
 import cityReducer from './citySlice'; // Импорт редюсера для города
+import profileReducer from './profileSlice';
 
 const store = configureStore({
     reducer: {
@@ -13,7 +14,8 @@ const store = configureStore({
         cart: cartReducer,
         orders: ordersReducer,
         stock: stockReducer,
-        city:cityReducer, // Добавляем редюсер для города
+        city:cityReducer, 
+        profile: profileReducer,
     },
 });
 

@@ -7,7 +7,13 @@ export const mergeLocalCartWithServer = createAsyncThunk(
   'cart/mergeLocalCartWithServer',
   async (_, { getState, dispatch, rejectWithValue }) => {
     const { auth, cart } = getState();
-    const items = cart.items;
+    const items = cart.items.map(it => ({
+        productId: it.productId ?? it.product_id,
+        stockId:  it.stockId  ?? it.stock_id,
+        price:    it.price,
+        quantity: it.quantity,
+    }));
+
     if (!items.length) return { items: [] };
 
     const response = await fetch('http://localhost:5000/api/cart/merge', {

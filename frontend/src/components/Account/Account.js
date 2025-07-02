@@ -1,7 +1,7 @@
 import React from 'react';
 import classes from './Account.module.scss'; // Импортируем стили
 import { useDispatch, useSelector } from 'react-redux'; // Импортируем хуки для работы с Redux
-import { NavLink } from 'react-router-dom'; // Импортируем NavLink для навигации между страницами
+import { NavLink, useNavigate} from 'react-router-dom'; // Импортируем NavLink для навигации между страницами
 import { logout } from '../../slices/authSlice'; // Импортируем действие для выхода из аккаунта
 import { clearCart } from '../../slices/cartSlice'; // Импортируем действие для очистки корзины
 
@@ -10,6 +10,7 @@ const Account = () => {
     const user = useSelector((state) => state.auth.user); // Данные текущего пользователя
     const roles = useSelector((state) => state.auth.roles); // Роли текущего пользователя
     const dispatch = useDispatch(); // Хук для отправки действий в Redux
+    const navigate = useNavigate(); // Хук для навигации между страницами
 
     // Если пользователь не авторизован, отображаем сообщение
     if (!user) {
@@ -27,7 +28,10 @@ const Account = () => {
             </div>
             {/* Действия пользователя */}
             <div className={classes.actions}>
-                <button className={classes.button}>Редактировать профиль</button>
+                <button 
+                    className={classes.button}
+                    onClick={() => navigate('/account/edit')}
+                >Редактировать профиль</button>
                 {/* Ссылки на другие страницы */}
                 <NavLink to="/addproduct">Добавить продукт</NavLink>
                 <NavLink to="/usermanagement">Менеджер пользователей</NavLink>

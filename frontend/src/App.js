@@ -12,7 +12,7 @@ import Orders from './components/Orders/Orders'; // Импортируем ко�
 import Cart from './components/Cart/Cart';
 import ProductDetailed from './components/ProductDetailed/ProductDetailed'; // Импортируем компонент для управления пользователями (новый)
 import Delivery from './components/Delivery/Delivery';
-
+import EditProfile from './components/EditProfile/EditProfile';
 function App() {
 
   let routes = (
@@ -69,6 +69,11 @@ function App() {
         {/* Новый маршрут для управления пользователями - доступен только администраторам */}
       <Route path='services/delivery' element={  
           <Delivery />
+      }/>
+      <Route path='/account/edit' element={
+      <PrivateRoute rolesRequired={['buyer', 'admin']}>
+        <EditProfile />
+      </PrivateRoute>
       }/>
     </Routes>
   )
