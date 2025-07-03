@@ -48,8 +48,6 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const session = require('express-session');
 
-// Импортируем подключение к базе данных
-const { Pool } = require('./config/db');
 
 // Импортируем маршруты
 const productRoutes = require('./routes/productsRoutes');

@@ -8,7 +8,7 @@ export const fetchProfile = createAsyncThunk('profile/fetchProfile', async (_, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}` }
     });
-    if (!response.ok) throw new Error('Ошибка получения профиля');
+    if (!response.ok) throw new Error('Ошибка получения профиля 2');
     return response.json();
   } catch (error) {
     return rejectWithValue(error.message);
@@ -107,7 +107,7 @@ export const requestEmailChange = createAsyncThunk('profile/requestEmailChange',
 });
 
 // Подтверждение email (шаг 2)
-export const confirmEmailChange = createAsyncThunk('profile/confirmEmailChange', async ({ code }, { getState, rejectWithValue }) => {
+export const confirmEmailChange = createAsyncThunk('profile/confirmEmailChange', async ({ code, newEmail }, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
     const response = await fetch('http://localhost:5000/api/user/confirm-email-change', {
@@ -116,7 +116,7 @@ export const confirmEmailChange = createAsyncThunk('profile/confirmEmailChange',
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ code })
+      body: JSON.stringify({ code, newEmail  })
     });
     if (!response.ok) throw new Error('Ошибка подтверждения email');
     return response.json();
@@ -151,7 +151,7 @@ export const requestPhoneChange = createAsyncThunk(
 // Подтвердить код и завершить смену телефона (шаг 2)
 export const confirmPhoneChange = createAsyncThunk(
   'profile/confirmPhoneChange',
-  async ({ code }, { getState, rejectWithValue }) => {
+  async ({ code, newPhone }, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
       const response = await fetch('http://localhost:5000/api/user/confirm-phone-change', {
@@ -160,7 +160,7 @@ export const confirmPhoneChange = createAsyncThunk(
           Authorization: `Bearer ${token}`,
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ code, newPhone }) // для телефона
       });
       if (!response.ok) throw new Error('Ошибка подтверждения телефона');
       return response.json();
@@ -185,7 +185,6 @@ const profileSlice = createSlice({
   reducers: {
     // Можно добавить reset'ы или обработку ошибок
     resetProfileState: (state) => {
-      state.user = null;
       state.status = 'idle';
       state.error = null;
     }
@@ -205,9 +204,9 @@ const profileSlice = createSlice({
       })
       // обновление профиля
       .addCase(updateProfile.fulfilled, (state, action) => {
-        state.user = action.payload.user;
+        state.user = { ...state.user, ...action.payload.user };
         state.status = 'succeeded';
-      })
+     })
       .addCase(updateProfile.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.payload;

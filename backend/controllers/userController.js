@@ -5,23 +5,33 @@ const { getUserWithRoles } = require('../models/userModel');
 
 // Получить профиль и адреса
 exports.getProfile = async (req, res) => {
+    console.log("getProfile called", req.user);
   try {
     const userId = req.user.id;
     const user = await getUserWithRoles(userId);
+    console.log("getProfile user: ", user)
     const addressesRes = await pool.query(
-      'SELECT id, city, street, house, flat, postcode FROM addresses WHERE user_id = $1',
-      [userId]
-    );
+  'SELECT id, address FROM addresses WHERE user_id = $1',
+  [userId]
+);
     res.json({
       user: {
         ...user,
-        name: user.name,
+        name: user.name,  
         phone: user.phone,
       },
       addresses: addressesRes.rows
     });
+    console.log("getProfile response data: ", {
+        user: {
+            ...user,
+            name: user.name,
+            phone: user.phone,
+        },
+        addresses: addressesRes.rows
+        });
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка получения профиля' });
+    res.status(500).json({ message: 'Ошибка получения профиля 1' });
   }
 };
 
@@ -31,7 +41,8 @@ exports.updateProfile = async (req, res) => {
     const userId = req.user.id;
     const { name } = req.body;
     await pool.query('UPDATE users SET name = $1 WHERE id = $2', [name, userId]);
-    res.json({ message: 'Профиль обновлен', user: { id: userId, name } });
+   const result = await pool.query('SELECT id, name, email, phone FROM users WHERE id = $1', [userId]);
+    res.json({ user: result.rows[0] });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка обновления профиля' });
   }
@@ -59,10 +70,15 @@ exports.changePassword = async (req, res) => {
 exports.getAddresses = async (req, res) => {
   try {
     const userId = req.user.id;
-    const result = await pool.query('SELECT id, city, street, house, flat, postcode FROM addresses WHERE user_id = $1', [userId]);
+    console.log("getAddresses called", userId);
+    const result = await pool.query(
+  'SELECT id, address FROM addresses WHERE user_id = $1',
+  [userId]
+);
+
     res.json({ addresses: result.rows });
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка получения адресов' });
+    res.status(500).json({ message: 'Ошибка получения адресов 1' });
   }
 };
 
@@ -70,11 +86,12 @@ exports.getAddresses = async (req, res) => {
 exports.addAddress = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { city, street, house, flat, postcode } = req.body;
-    const result = await pool.query(
-      'INSERT INTO addresses (user_id, city, street, house, flat, postcode) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
-      [userId, city, street, house, flat, postcode]
-    );
+    const { address } = req.body;
+const result = await pool.query(
+  'INSERT INTO addresses (user_id, address) VALUES ($1, $2) RETURNING *',
+  [userId, address]
+);
+
     res.json({ address: result.rows[0] });
   } catch (error) {
     res.status(500).json({ message: 'Ошибка добавления адреса' });
@@ -85,11 +102,11 @@ exports.addAddress = async (req, res) => {
 exports.updateAddress = async (req, res) => {
   try {
     const userId = req.user.id;
-    const addressId = req.params.id;
-    const { city, street, house, flat, postcode } = req.body;
+    const { addressId } = req.params.id;
+    const { address } = req.body;
     await pool.query(
-      'UPDATE addresses SET city = $1, street = $2, house = $3, flat = $4, postcode = $5 WHERE id = $6 AND user_id = $7',
-      [city, street, house, flat, postcode, addressId, userId]
+    'UPDATE addresses SET address = $1 WHERE id = $2 AND user_id = $3',
+    [address, addressId, userId]
     );
     res.json({ message: 'Адрес обновлен' });
   } catch (error) {

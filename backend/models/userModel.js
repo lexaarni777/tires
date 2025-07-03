@@ -32,7 +32,7 @@ exports.findUserByEmail = async (email) => {
 // Получить пользователя с его ролями
   exports.getUserWithRoles = async (userId) => {
     const query = `
-      SELECT u.id, u.email, r.name AS role
+      SELECT u.id, u.email, u.name, u.phone, r.name AS role
       FROM users u
       LEFT JOIN user_roles ur ON u.id = ur.user_id
       LEFT JOIN roles r ON ur.role_id = r.id
@@ -48,8 +48,11 @@ exports.findUserByEmail = async (email) => {
     const user = {
       id: rows[0].id,
       email: rows[0].email,
+      name: rows[0].name,     // добавь name
+      phone: rows[0].phone,   // добавь phone
       roles: rows.map(row => row.role).filter(role => role !== null),
     };
+
     console.log("UserModel User: ", user)
   
     return user;

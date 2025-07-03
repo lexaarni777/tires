@@ -20,6 +20,7 @@ const EditProfile = () => {
   const addresses = useSelector((state) => state.profile.addresses) || [];
   const error = useSelector((state) => state.profile.error);
 
+
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -32,13 +33,6 @@ const EditProfile = () => {
     repeat: '',
   });
 
-  const [newAddress, setNewAddress] = useState({
-    city: '',
-    street: '',
-    house: '',
-    flat: '',
-    postcode: '',
-  });
 
   const [phoneStep, setPhoneStep] = useState(1);
   const [newPhone, setNewPhone] = useState('');
@@ -50,20 +44,34 @@ const EditProfile = () => {
 
   const [successMsg, setSuccessMsg] = useState('');
 
+  const [newAddress, setNewAddress] = useState({ address: '' });
+
+
+
   useEffect(() => {
     dispatch(fetchProfile());
     dispatch(fetchAddresses());
   }, [dispatch]);
 
-  useEffect(() => {
-    if (user) {
-      setForm({
+useEffect(() => {
+  if (user) {
+    setForm(prev => {
+      if (
+        prev.name === (user.name || '') &&
+        prev.email === (user.email || '') &&
+        prev.phone === (user.phone || '')
+      ) {
+        return prev;
+      }
+      return {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
-      });
-    }
-  }, [user]);
+      };
+    });
+  }
+}, [user]);
+
 
   const handleFormChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -93,18 +101,20 @@ const EditProfile = () => {
     });
   };
 
-  const handleAddressChange = (e) => {
-    setNewAddress((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+const handleAddressChange = (e) => {
+  setNewAddress({ address: e.target.value });
   if (error) dispatch(resetProfileState());
 };
 
   const handleAddAddress = (e) => {
     e.preventDefault();
     dispatch(addAddress(newAddress)).then((res) => {
-      if (!res.error) setSuccessMsg('Адрес добавлен');
-      setNewAddress({ city: '', street: '', house: '', flat: '', postcode: '' });
+  if (!res.error) {
+    setSuccessMsg('Адрес добавлен');
+    setNewAddress({ address: '' });
+    }
     });
-  };
+ };
 
   const handleRequestPhoneCode = (e) => {
     e.preventDefault();
@@ -260,54 +270,21 @@ const EditProfile = () => {
         <ul className={classes.addressList}>
           {addresses.map((a) => (
             <li key={a.id} className={classes.addressItem}>
-              {a.city}, {a.street}, д.{a.house}
-              {a.flat ? `, кв.${a.flat}` : ''}
-              {a.postcode ? ` (${a.postcode})` : ''}
+            {a.address}
             </li>
           ))}
         </ul>
         <form onSubmit={handleAddAddress} className={classes.addressForm}>
           <input
-            type="text"
-            name="city"
-            value={newAddress.city}
-            onChange={handleAddressChange}
-            placeholder="Город"
-            className={classes.inputField}
-          />
-          <input
-            type="text"
-            name="street"
-            value={newAddress.street}
-            onChange={handleAddressChange}
-            placeholder="Улица"
-            className={classes.inputField}
-          />
-          <input
-            type="text"
-            name="house"
-            value={newAddress.house}
-            onChange={handleAddressChange}
-            placeholder="Дом"
-            className={classes.inputField}
-          />
-          <input
-            type="text"
-            name="flat"
-            value={newAddress.flat}
-            onChange={handleAddressChange}
-            placeholder="Квартира"
-            className={classes.inputField}
-          />
-          <input
-            type="text"
-            name="postcode"
-            value={newAddress.postcode}
-            onChange={handleAddressChange}
-            placeholder="Индекс"
-            className={classes.inputField}
-          />
-          <button type="submit" className={classes.button}>Добавить адрес</button>
+                type="text"
+                name="address"
+                value={newAddress.address}
+                onChange={(e) => setNewAddress({ address: e.target.value })}
+                placeholder="Введите полный адрес"
+                className={classes.inputField}
+            />
+          <button type="submit" className={classes.button} onChange={handleAddressChange}
+>Добавить адрес</button>
         </form>
       </div>
     </div>
