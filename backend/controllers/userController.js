@@ -2,6 +2,12 @@ const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { getUserWithRoles } = require('../models/userModel');
+const axios = require('axios');
+const SMS_GATEWAY_URL = process.env.SMS_GATEWAY_URL;
+const SMS_GATEWAY_USER = process.env.SMS_GATEWAY_USER;
+const SMS_GATEWAY_PASS = process.env.SMS_GATEWAY_PASS;
+
+
 
 // Получить профиль и адреса
 exports.getProfile = async (req, res) => {
@@ -123,12 +129,31 @@ exports.requestPhoneChange = async (req, res) => {
     const userId = req.user.id;
     const { newPhone } = req.body;
     const code = Math.floor(100000 + Math.random() * 900000).toString();
+
     await pool.query('UPDATE users SET reset_code = $1 WHERE id = $2', [code, userId]);
-    res.json({ message: 'Код сформирован' });
+
+    await axios.post(
+      `${SMS_GATEWAY_URL}/messages`,
+      {
+        message: `Ваш код подтверждения: ${code}`,
+        phoneNumbers: [newPhone]
+      },
+      {
+        auth: {
+          username: SMS_GATEWAY_USER,
+          password: SMS_GATEWAY_PASS
+        }
+      }
+    );
+
+    res.json({ message: 'Код сформирован и SMS отправлено' });
   } catch (error) {
-    res.status(500).json({ message: 'Ошибка формирования кода' });
+    console.error('Ошибка при отправке SMS:', error.response?.data || error.message);
+    res.status(500).json({ message: 'Ошибка отправки SMS' });
   }
 };
+
+
 
 exports.confirmPhoneChange = async (req, res) => {
   try {

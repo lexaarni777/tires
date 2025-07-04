@@ -24,7 +24,10 @@ exports.createOrder = async (req, res) => {
     return res.status(400).json({ message: 'Нет товаров для оформления заказа.' });
   }
   if (!phone) return res.status(400).json({ message: 'Не указан телефон.' });
-
+  const phoneRegex = /^\+?[0-9]{10,15}$/;
+if (!phoneRegex.test(phone)) {
+  return res.status(400).json({ message: 'Неверный формат телефона.' });
+}
   try {
     // Создаём заказ с дополнительными полями (нужно расширить модель/таблицу orders)
     const order = await createOrderInDB(
@@ -39,6 +42,19 @@ exports.createOrder = async (req, res) => {
 
     // Добавляем товары заказа
     await addOrderItemsInDB(order.id, items);
+    const pool = require('../config/db');
+    if (deliveryMethod === 'delivery' && address) {
+      const check = await pool.query(
+        'SELECT id FROM addresses WHERE user_id = $1 AND address = $2',
+        [userId, address]
+      );
+      if (check.rows.length === 0) {
+        await pool.query(
+          'INSERT INTO addresses (user_id, address) VALUES ($1, $2)',
+          [userId, address]
+        );
+      }
+    }
 
     res.status(201).json({
       message: 'Заказ успешно создан!',

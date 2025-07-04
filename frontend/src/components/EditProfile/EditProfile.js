@@ -283,7 +283,7 @@ const handleAddressChange = (e) => {
                 placeholder="Введите полный адрес"
                 className={classes.inputField}
             />
-          <button type="submit" className={classes.button} onChange={handleAddressChange}
+          <button type="submit" className={classes.button}
 >Добавить адрес</button>
         </form>
       </div>

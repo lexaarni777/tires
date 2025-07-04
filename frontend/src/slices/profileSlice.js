@@ -140,7 +140,11 @@ export const requestPhoneChange = createAsyncThunk(
         },
         body: JSON.stringify({ newPhone })
       });
-      if (!response.ok) throw new Error('Ошибка отправки SMS-кода');
+      if (!response.ok) {
+  const error = await response.json();
+  throw new Error(error.message || 'Ошибка отправки SMS-кода');
+}
+
       return response.json();
     } catch (error) {
       return rejectWithValue(error.message);
