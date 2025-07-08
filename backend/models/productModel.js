@@ -13,20 +13,28 @@ const pool = require('../config/db');
 
 // Получить все шины с изображениями
 exports.getProductsFromDB = async (filters = {}) => {
-  // Базовый SELECT с LEFT JOIN для картинок
+  const where = [];
+  const values = [];
+
   let query = `
-    SELECT
-      t.*,
-      COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images
+    SELECT 
+      t.id, t.article, t.name, t.brand, t.model, t.size, t.load_index, 
+      t.speed_index, t.season, t.vehicle_type, t.tread_depth, 
+      t.section_width, t.recommended_rim_width, t.diameter, 
+      t.country, t.description, t.studs, t.profile,
+      COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images,
+      COALESCE(
+        (
+          SELECT json_agg(mi ORDER BY mi."order", mi.id)
+          FROM model_images mi
+          WHERE mi.brand = t.brand AND mi.model = t.model
+        ), '[]'
+      ) AS model_images
     FROM tyre_catalog t
     LEFT JOIN productsimages pi ON t.id = pi.product_id
   `;
 
-  // WHERE-условия накапливаем в массив
-  const where = [];
-  const values = [];
-
-  // Динамическое построение WHERE
+  // Фильтры
   if (filters.brand) {
     values.push(filters.brand);
     where.push(`t.brand = $${values.length}`);
@@ -56,26 +64,31 @@ exports.getProductsFromDB = async (filters = {}) => {
     where.push(`t.season = $${values.length}`);
   }
   if (filters.studs !== undefined) {
-    values.push(filters.studs === 'true' || filters.studs === true); // поддержка string и boolean
+    values.push(filters.studs === 'true' || filters.studs === true);
     where.push(`t.studs = $${values.length}`);
   }
   if (filters.country) {
     values.push(filters.country);
     where.push(`t.country = $${values.length}`);
   }
-  // Можно добавить другие фильтры по аналогии
 
-  // Добавляем WHERE если есть фильтры
   if (where.length > 0) {
     query += " WHERE " + where.join(" AND ");
   }
 
-  query += " GROUP BY t.id ORDER BY t.id ASC";
+  query += `
+    GROUP BY 
+      t.id, t.article, t.name, t.brand, t.model, t.size, t.load_index, 
+      t.speed_index, t.season, t.vehicle_type, t.tread_depth, 
+      t.section_width, t.recommended_rim_width, t.diameter, 
+      t.country, t.description, t.studs, t.profile
+    ORDER BY t.id ASC
+  `;
 
-  // Выполняем запрос
   const { rows } = await pool.query(query, values);
   return rows;
 };
+
 
 // Создать новую шину (товар) — принимает объект productData с нужными полями
 exports.createProductInDB = async (productData) => {
@@ -187,7 +200,23 @@ exports.getProductByIdFromDB = async (productId) => {
     WHERE t.id = $1
     GROUP BY t.id;
   `;
+
   const { rows } = await pool.query(query, [productId]);
-  return rows[0];
+  if (rows.length === 0) return null;
+
+  const product = rows[0];
+
+  // Подгружаем model_images
+  const modelImagesQuery = `
+    SELECT * FROM model_images 
+    WHERE brand = $1 AND model = $2 
+    ORDER BY "order" ASC, id ASC
+  `;
+  const modelImagesResult = await pool.query(modelImagesQuery, [product.brand, product.model]);
+
+  product.model_images = modelImagesResult.rows;
+
+  return product;
 };
+
 

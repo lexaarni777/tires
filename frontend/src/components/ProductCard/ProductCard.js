@@ -85,20 +85,20 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
 
   // Получить главное изображение шины
   const getFeaturedImage = () => {
-    // getFeaturedImage — функция для получения ссылки на главное изображение товара
-    if (product.images && product.images.length > 0) {
-      // Если у товара есть изображения
-      const featured = product.images.find((img) => img.is_featured_image);
-      // Ищем изображение с флагом is_featured_image
-      return featured
-        ? `http://localhost:5000${featured.image_path}`
-        // Если такое есть — возвращаем его путь
-        : `http://localhost:5000${product.images[0].image_path}`;
-        // Если нет — берём первое изображение
-    }
-    return "https://via.placeholder.com/150";
-    // Если изображений нет — возвращаем заглушку
-  };
+  if (product.images && product.images.length > 0) {
+    const featured = product.images.find((img) => img.is_featured_image);
+    return featured
+      ? `http://localhost:5000${featured.image_path}`
+      : `http://localhost:5000${product.images[0].image_path}`;
+  }
+  if (product.model_images && product.model_images.length > 0) {
+    const featured = product.model_images.find((img) => img.is_featured_image);
+    return featured
+      ? `http://localhost:5000${featured.image_path}`
+      : `http://localhost:5000${product.model_images[0].image_path}`;
+  }
+  return 'https://via.placeholder.com/150';
+};
 
 
   // Найти товар в корзине пользователя по productId и складу

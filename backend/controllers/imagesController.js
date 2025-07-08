@@ -8,6 +8,9 @@
  */
 
 const { addImageToDB, deleteImageFromDB, getImagesForProductFromDB, updateFeaturedImage  } = require('../models/imageModel');
+const {  addModelImage,  deleteModelImage,  getModelImages,  updateModelFeaturedImage,  batchUpdateModelImageOrder} = require('../models/modelImageModel');
+const path = require('path');
+const sharp = require('sharp');
 const fs = require('fs');
 
 // Удалить изображение
@@ -113,10 +116,6 @@ exports.uploadProductImage = async (req, res) => {
  * - Если это первое изображение — сразу делается главным.
  */
 
-
-const sharp = require('sharp'); // для генерации миниатюры
-const path = require('path');
-
 // Установить главное изображение для товара
 exports.setFeaturedImage = async (req, res) => {
   const { productId } = req.params;
@@ -159,24 +158,28 @@ exports.setFeaturedImage = async (req, res) => {
  */
 
 // Массовое обновление порядка изображений (при сортировке)
-exports.batchUpdateImageOrder = async (orderArray) => {
-  // orderArray = [{id: 12, order: 1}, ...]
+exports.batchUpdateImageOrder = async (req, res) => {
+  const orderArray = req.body; // [{id, order}]
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     for (const { id, order } of orderArray) {
-      await client.query('UPDATE productsimages SET "order" = $1 WHERE id = $2', [order, id]);
+      await client.query(
+        'UPDATE productsimages SET "order" = $1 WHERE id = $2',
+        [order, id]
+      );
     }
     await client.query('COMMIT');
-    return true;
+    res.json({ message: 'Порядок обновлён' });
   } catch (err) {
     await client.query('ROLLBACK');
     console.error('Ошибка при массовом обновлении порядка:', err);
-    throw err;
+    res.status(500).send('Ошибка при обновлении порядка');
   } finally {
     client.release();
   }
 };
+
 /**
  * - Использовать для сохранения изменений порядка с фронта.
  */
@@ -209,5 +212,104 @@ exports.setFeaturedImageById = async (productId, imageId) => {
     throw err;
   } finally {
     client.release();
+  }
+};
+
+// Загрузить эталонное изображение
+exports.uploadModelImage = async (req, res) => {
+  const { brand, model } = req.params;
+  const filename = req.file.filename;
+  const imagePath = `/uploads/modelImages/${brand}/${model}/${filename}`;
+
+  try {
+    const existing = await getModelImages(brand, model);
+    const maxOrder = existing.length > 0 ? Math.max(...existing.map(img => img.order || 0)) : 0;
+    const newOrder = maxOrder + 1;
+
+    const newImage = await addModelImage(brand, model, imagePath, newOrder);
+
+    if (existing.length === 0) {
+      await updateModelFeaturedImage(brand, model, newImage.id);
+      const absPath = path.join('.', imagePath);
+      const ext = path.extname(absPath);
+      const thumbPath = absPath.replace(ext, `_thumb${ext}`);
+      await sharp(absPath).resize(150, 150).toFile(thumbPath);
+    }
+
+    res.status(201).json(newImage);
+  } catch (err) {
+    console.error('Ошибка при загрузке эталонного изображения:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
+// Получить список эталонных изображений
+exports.getModelImages = async (req, res) => {
+  const { brand, model } = req.params;
+  try {
+    const images = await getModelImages(brand, model);
+    res.json(images);
+  } catch (err) {
+    console.error('Ошибка при получении эталонных изображений:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
+// Установить главное эталонное изображение
+exports.setModelFeaturedImage = async (req, res) => {
+  const { brand, model } = req.params;
+  const { imageId } = req.body;
+  try {
+    const result = await updateModelFeaturedImage(brand, model, imageId);
+    if (result) {
+      const images = await getModelImages(brand, model);
+      const mainImg = images.find(img => img.id == imageId);
+      if (mainImg) {
+        const absPath = path.join('.', mainImg.image_path);
+        const ext = path.extname(absPath);
+        const thumbPath = absPath.replace(ext, `_thumb${ext}`);
+        if (fs.existsSync(thumbPath)) fs.unlinkSync(thumbPath);
+        await sharp(absPath).resize(150, 150).toFile(thumbPath);
+      }
+      res.json({ message: 'Главное эталонное изображение обновлено' });
+    } else {
+      res.status(404).json({ message: 'Изображение не найдено' });
+    }
+  } catch (err) {
+    console.error('Ошибка при установке главного эталонного изображения:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
+// Массовое обновление порядка эталонных изображений
+exports.updateModelImageOrder = async (req, res) => {
+  const { brand, model } = req.params;
+  const orderArray = req.body;
+  try {
+    await batchUpdateModelImageOrder(brand, model, orderArray);
+    res.json({ message: 'Порядок обновлён' });
+  } catch (err) {
+    console.error('Ошибка при обновлении порядка эталонных изображений:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
+// Удалить эталонное изображение
+exports.deleteModelImage = async (req, res) => {
+  const { imageId } = req.params;
+  try {
+    const image = await deleteModelImage(imageId);
+    if (image) {
+      const filePath = `.${image.image_path}`;
+      if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+      const thumbPath = filePath.replace(/(\.[^.]+)$/, '_thumb$1');
+      if (fs.existsSync(thumbPath)) fs.unlinkSync(thumbPath);
+      res.json({ message: 'Эталонное изображение удалено' });
+    } else {
+      res.status(404).json({ message: 'Изображение не найдено' });
+    }
+  } catch (err) {
+    console.error('Ошибка при удалении эталонного изображения:', err);
+    res.status(500).send('Ошибка сервера');
   }
 };

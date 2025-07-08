@@ -46,7 +46,11 @@ export const changePassword = createAsyncThunk('profile/changePassword', async (
       },
       body: JSON.stringify({ oldPassword, newPassword })
     });
-    if (!response.ok) throw new Error('Ошибка смены пароля');
+    if (!response.ok) {
+  const errorData = await response.json().catch(() => ({}));
+  throw new Error(errorData.message || 'Ошибка смены пароля');
+}
+;
     return response.json();
   } catch (error) {
     return rejectWithValue(error.message);

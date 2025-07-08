@@ -8,8 +8,19 @@
  */
 
 const express = require('express');
-const uploadImage = require('../config/multer');
-const { deleteImage, getImagesForProduct, uploadProductImage, setFeaturedImage, batchUpdateImageOrder, getFeaturedImageThumb } = require('../controllers/imagesController');
+const { uploadImage, uploadModelImage } = require('../config/multer');
+const {
+  deleteImage,
+  getImagesForProduct,
+  uploadProductImage,
+  setFeaturedImage,
+  batchUpdateImageOrder,
+  uploadModelImage: uploadModelImageHandler,
+  getModelImages: getModelImagesHandler,
+  setModelFeaturedImage: setModelFeaturedImageHandler,
+  updateModelImageOrder: updateModelImageOrderHandler,
+  deleteModelImage: deleteModelImageHandler
+} = require('../controllers/imagesController');
 const router = express.Router();
 
 router.post('/:id/upload-image', uploadImage.single('image'), uploadProductImage);
@@ -25,6 +36,12 @@ router.put('/:productId/featured-image', setFeaturedImage);
 
 // PUT: /api/images/:productId/order
 router.put('/:productId/order', batchUpdateImageOrder);
+
+router.post('/model/:brand/:model', uploadModelImage.single('image'), uploadModelImageHandler);
+router.get('/model/:brand/:model', getModelImagesHandler);
+router.put('/model/:brand/:model/featured-image', setModelFeaturedImageHandler);
+router.put('/model/:brand/:model/order', updateModelImageOrderHandler);
+router.delete('/model/:brand/:model/:imageId', deleteModelImageHandler);
 
 
 

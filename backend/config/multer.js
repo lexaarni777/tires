@@ -21,6 +21,27 @@ const imageStorage = multer.diskStorage({
   },
 });
 
-const uploadImage = multer({ storage: imageStorage });
+// 🔑 Новая конфигурация для эталонных фото
+const modelImageStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const { brand, model } = req.params;
+    if (!brand || !model) {
+      return cb(new Error('brand и model обязательны в url'));
+    }
+    const uploadPath = path.join('uploads', 'modelImages', brand, model);
+    fs.mkdirSync(uploadPath, { recursive: true });
+    cb(null, uploadPath);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, `${uniqueSuffix}-${file.originalname}`);
+  },
+});
 
-module.exports = uploadImage;
+const uploadImage = multer({ storage: imageStorage });
+const uploadModelImage = multer({ storage: modelImageStorage });
+
+module.exports = {
+  uploadImage,
+  uploadModelImage
+};

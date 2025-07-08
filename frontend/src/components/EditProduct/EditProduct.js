@@ -32,34 +32,41 @@ const EditProduct = () => {
   const [stocks, setStocks] = useState([]); // Остатки по складам
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [useAsReference, setUseAsReference] = useState(false);
+  const [modelImages, setModelImages] = useState([]);
+
 
   // Получаем инфу о товаре и остатках по id
   useEffect(() => {
     const fetchData = async () => {
-      try {
-        // Получаем данные из каталога
-        const productRes = await fetch(`http://localhost:5000/api/products/catalog/${id}`);
-        if (!productRes.ok) throw new Error('Ошибка при получении товара');
-        const productData = await productRes.json();
-        setCatalog(productData);
+  try {
+    // Получаем данные из каталога
+    const productRes = await fetch(`http://localhost:5000/api/products/catalog/${id}`);
+    if (!productRes.ok) throw new Error('Ошибка при получении товара');
+    const productData = await productRes.json();
+    setCatalog(productData);
 
-        // Получаем остатки по складам
-        const stockRes = await fetch(`http://localhost:5000/api/products/stock?tyre_id=${id}`);
-        if (!stockRes.ok) throw new Error('Ошибка при получении остатков');
-        const stockData = await stockRes.json();
-        setStocks(stockData);
+    // Получаем остатки по складам
+    const stockRes = await fetch(`http://localhost:5000/api/products/stock?tyre_id=${id}`);
+    if (!stockRes.ok) throw new Error('Ошибка при получении остатков');
+    const stockData = await stockRes.json();
+    setStocks(stockData);
 
-        // Получаем изображения
-        const imagesRes = await fetch(`http://localhost:5000/api/products/${id}/images`);
-        if (imagesRes.ok) setImages(await imagesRes.json());
-        setLoading(false);
-      } catch (err) {
-        alert('Ошибка загрузки данных: ' + err.message);
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, [id]);
+    // Получаем изображения
+    const imagesRes = await fetch(`http://localhost:5000/api/products/${id}/images`);
+    if (imagesRes.ok) setImages(await imagesRes.json());
+
+    // ✅ ВОТ ЗДЕСЬ ДОБАВЬ ЗАГРУЗКУ ЭТАЛОННЫХ ФОТО
+    const modelImagesRes = await fetch(`http://localhost:5000/api/images/model/${productData.brand}/${productData.model}`);
+    const modelImages = modelImagesRes.ok ? await modelImagesRes.json() : [];
+    setModelImages(modelImages);
+
+    setLoading(false);
+  } catch (err) {
+    alert('Ошибка загрузки данных: ' + err.message);
+    setLoading(false);
+  }
+};fetchData();}, [id]);
 
   // Обработка изменений каталога шин
   const handleCatalogChange = (e) => {
@@ -135,15 +142,23 @@ const EditProduct = () => {
   const uploadImage = async (file) => {
     const formData = new FormData();
     formData.append('image', file);
+    const url = useAsReference
+  ? `http://localhost:5000/api/images/model/${catalog.brand}/${catalog.model}`
+  : `http://localhost:5000/api/images/${id}/upload-image`;
 
     try {
-      const response = await fetch(`http://localhost:5000/api/images/${id}/upload-image`, {
-        method: 'POST',
-        body: formData,
+      const response = await fetch(url, {
+      method: 'POST',
+      body: formData,
       });
       if (response.ok) {
         const data = await response.json();
-        setImages((prevImages) => [...prevImages, data]);
+        if (useAsReference) {
+          const res = await fetch(`http://localhost:5000/api/images/model/${catalog.brand}/${catalog.model}`);
+          if (res.ok) setModelImages(await res.json());
+        } else {
+          setImages((prevImages) => [...prevImages, data]);
+        }
       }
     } catch (err) {
       alert('Ошибка загрузки изображения: ' + err.message);
@@ -231,6 +246,25 @@ const getThumbPath = (image) => {
   return parts.join('.');
 };
 
+const handleSetModelFeatured = async (imageId) => {
+  await fetch(`http://localhost:5000/api/images/model/${catalog.brand}/${catalog.model}/featured-image`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ imageId }),
+  });
+  // Обнови список
+  const res = await fetch(`http://localhost:5000/api/images/model/${catalog.brand}/${catalog.model}`);
+  if (res.ok) setModelImages(await res.json());
+};
+
+const handleDeleteModelImage = async (imageId) => {
+  await fetch(`http://localhost:5000/api/images/model/${catalog.brand}/${catalog.model}/${imageId}`, {
+    method: 'DELETE',
+  });
+  // Обнови список
+  const res = await fetch(`http://localhost:5000/api/images/model/${catalog.brand}/${catalog.model}`);
+  if (res.ok) setModelImages(await res.json());
+};
 
 
 
@@ -331,6 +365,11 @@ const getThumbPath = (image) => {
 >
   <p>Перетащите фотографии сюда для загрузки</p>
 </div>
+    <input
+      type="checkbox"
+      checked={useAsReference}
+      onChange={(e) => setUseAsReference(e.target.checked)}
+    /> Использовать как эталонное фото
 <div className={styles.imageList}>
   {images.map((image, index) => (
     <div
@@ -404,6 +443,49 @@ const getThumbPath = (image) => {
         </div>
       ))}
     </div>
+    <h2>Эталонные изображения</h2>
+<div className={styles.imageList}>
+  {modelImages.map((image) => (
+    <div key={image.id} className={styles.imageItem}>
+      <img
+        src={`http://localhost:5000${image.image_path}`}
+        alt={`Model ${image.id}`}
+        className={styles.image}
+      />
+      <div style={{ fontSize: 12 }}>Порядок: {image.order}</div>
+      {image.is_featured_image && (
+        <div
+          style={{
+            color: 'green',
+            fontWeight: 'bold',
+            background: '#fff',
+            padding: '2px 6px',
+            borderRadius: 4,
+            fontSize: 12
+          }}
+        >
+          Главное
+        </div>
+      )}
+      <button
+        type="button"
+        onClick={() => handleSetModelFeatured(image.id)}
+        style={{ fontSize: 12 }}
+      >
+        Сделать главным
+      </button>
+      <button
+        type="button"
+        onClick={() => handleDeleteModelImage(image.id)}
+        className={styles.deleteButton}
+      >
+        Удалить
+      </button>
+    </div>
+  ))}
+</div>
+
+
 
 
       <button type="button" className={styles.cancelButton} onClick={() => navigate('/')}>

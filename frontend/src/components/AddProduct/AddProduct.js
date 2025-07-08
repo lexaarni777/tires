@@ -46,6 +46,7 @@ const AddProduct = () => {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
   const dispatch = useDispatch();
+  const [useAsReference, setUseAsReference] = useState(false);
 
   // Получаем пользователя (если нужно для проверки прав)
   const user = useSelector((state) => state.auth.user);
@@ -87,20 +88,21 @@ const AddProduct = () => {
    * Загрузка изображений для товара
    * (вызывается после успешного создания товара)
    */
-  const uploadImages = async (productId) => {
-    for (const file of images) {
-      const formData = new FormData();
-      formData.append('image', file);
-      try {
-        await fetch(`http://localhost:5000/api/images/${productId}/upload-image`, {
-          method: 'POST',
-          body: formData,
-        });
-      } catch (err) {
-        console.error('Ошибка при загрузке изображения:', err);
-      }
-    }
-  };
+const uploadImages = async (productId, brand, model) => {
+  for (const file of images) {
+    const formData = new FormData();
+    formData.append('image', file);
+
+    const url = useAsReference
+      ? `http://localhost:5000/api/images/model/${brand}/${model}`
+      : `http://localhost:5000/api/images/${productId}/upload-image`;
+
+    await fetch(url, {
+      method: 'POST',
+      body: formData,
+    });
+  }
+};
 
   /**
    * Добавить новый товар вручную (tyre_catalog + tyre_stock)
@@ -136,7 +138,7 @@ const AddProduct = () => {
 
       // 3. Загружаем фотографии (если есть)
       if (images.length > 0) {
-        await uploadImages(productId);
+        await uploadImages(productId, catalog.brand, catalog.model);
       }
 
       setSuccess(true);
@@ -315,6 +317,11 @@ const AddProduct = () => {
               </div>
             ))}
           </div>
+          <input
+            type="checkbox"
+            checked={useAsReference}
+            onChange={(e) => setUseAsReference(e.target.checked)}
+          /> Использовать как эталонное фото
         </div>
         <button className={styles.button} type="submit">
           Добавить вручную
