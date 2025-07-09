@@ -6,6 +6,7 @@
  */
 
 const { createOrderInDB, addOrderItemsInDB, getUserOrders  } = require('../models/ordersModel');
+const pool = require('../config/db');
 
 // Создание нового заказа
 exports.createOrder = async (req, res) => {
@@ -75,5 +76,24 @@ exports.getUserOrders = async (req, res) => {
   } catch (err) {
     console.error('Ошибка получения заказов:', err);
     res.status(500).send('Ошибка сервера');
+  }
+};
+
+exports.cancelOrder = async (req, res) => {
+  const orderId = req.params.id;
+  const userId = req.user.id;
+
+  try {
+    const { rowCount } = await pool.query(
+      'UPDATE orders SET status = $1 WHERE id = $2 AND user_id = $3 AND status = $4',
+      ['Отменён', orderId, userId, 'В обработке']
+    );
+    if (rowCount === 0) {
+      return res.status(400).json({ message: 'Отмена невозможна' });
+    }
+    res.json({ message: 'Заказ отменён' });
+  } catch (err) {
+    console.error('Ошибка при отмене заказа:', err);
+    res.status(500).json({ message: 'Ошибка сервера' });
   }
 };

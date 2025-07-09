@@ -89,17 +89,118 @@
 }
 
 // === Цветовые статусы для заказов ===
-.status__Ожидание {
-  background-color: $accent;        // Оранжевый бейдж — ожидается оплата
+.status__В\20обработке {
+  background-color: orange;
+  color: white;
 }
 
-.status__Выполнен {
-  background-color: $success;       // Зелёный бейдж — выполнено
+.status__Готов\20к\20выдаче {
+  background-color: dodgerblue;
+  color: white;
+}
+
+.status__Доставлен {
+  background-color: green;
+  color: white;
 }
 
 .status__Отменён {
-  background-color: $danger;        // Красный бейдж — отменён
+  background-color: crimson;
+  color: white;
 }
+.orders__deliveryInfo {
+  margin-top: 0.5rem;
+  font-size: 0.95rem;
+  color: #444;
+}
+
+.orders__toggle {
+  background: none;
+  border: none;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #005bbb;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 4px;
+}
+
+.orders__details {
+  margin-top: 8px;
+  padding: 8px 12px;
+  background: #f9f9f9;
+  border-radius: 8px;
+  animation: slideDown 0.2s ease-out;
+}
+
+.orders__actions {
+  margin-top: 12px;
+  display: flex;
+  gap: 8px;
+}
+
+.btn {
+  background-color: #005bbb;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.btnOutline {
+  background-color: transparent;
+  color: #aa0000;
+  border: 1px solid #aa0000;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.orders__item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 8px 0;
+  padding: 8px;
+  background: #f0f0f0;
+  border-radius: 6px;
+}
+
+.orders__itemImage {
+  width: 60px;
+  height: 60px;
+  object-fit: contain;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.orders__itemDetails {
+  flex: 1;
+}
+
+.orders__itemName {
+  font-weight: bold;
+  margin-bottom: 2px;
+}
+
+.orders__itemBrand,
+.orders__itemQty {
+  font-size: 0.9rem;
+  color: #555;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 
 // === Состояния загрузки, ошибки, пустоты ===
 .orders__loading,

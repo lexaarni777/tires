@@ -316,7 +316,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
               {/* Кнопка "Перейти в корзину" — вызывает handleGoToCart */}
 
               <div className={styles.BlockAddToCartBut}>
-                <button onClick={handleIncrement} disabled={cartItem.quantity >= selectedStock.stock}>+</button>
+                <button onClick={handleIncrement} disabled={!selectedStock || cartItem.quantity >= selectedStock.stock}>+</button>
                 {/* Кнопка "+" — вызывает handleIncrement; дизейблится если достигнут максимум по складу */}
                 <input
                   type="number"
@@ -337,21 +337,19 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
               <input
                 type="number"
                 min={1}
-                max={selectedStock?.stock  || 1}
+                max={selectedStock?.stock || 1}
                 value={quantity}
                 onChange={(e) => {
-                  // Обработчик изменения количества
-                  // Позволяет пользователю выбрать число в допустимом диапазоне
                   let val = Number(e.target.value);
-                  if (val > (selectedStock?.stock || 1)) val = selectedStock.stock;
+                  const maxStock = selectedStock?.stock || 1;
+                  if (val > maxStock) val = maxStock;
                   if (val < 1) val = 1;
                   setQuantity(val);
-                  // Ограничиваем значение минимумом и максимумом по складу
                 }}
                 className={styles.qtyInput}
                 onClick={(e) => e.stopPropagation()}
-                // Останавливаем всплытие, чтобы клик по input не сработал на карточке
               />
+
               <button
                 className={styles.addToCartBtn}
                 onClick={handleAddToCart}
