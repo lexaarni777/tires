@@ -42,17 +42,32 @@ exports.registerUser = async (req, res) => {
 
       // Добавим получение ролей и токен, если нужно сразу авторизовать:
       const userWithRoles = await getUserWithRoles(newUser.id);
-      const token = jwt.sign(
+
+      const accessToken = jwt.sign(
         { id: userWithRoles.id, roles: userWithRoles.roles },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN }
       );
+
+      const refreshToken = jwt.sign(
+        { id: userWithRoles.id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+      );
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'Strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
+      });
 
       return res.status(201).json({
         message: 'Пользователь успешно зарегистрирован',
         user: userWithRoles,
-        token,
+        accessToken,
       });
+
     }
 
     // 2. Если есть phone+password+code — регистрация через СМС
@@ -76,17 +91,32 @@ exports.registerUser = async (req, res) => {
 
       await assignRoleToUser(user.id, 'buyer');
       const userWithRoles = await getUserWithRoles(user.id);
-      const token = jwt.sign(
+
+      const accessToken = jwt.sign(
         { id: userWithRoles.id, roles: userWithRoles.roles },
         process.env.JWT_SECRET,
-        { expiresIn: '1h' }
+        { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN }
       );
 
-      return res.status(201).json({
-        message: 'Регистрация завершена, телефон подтверждён',
-        user: userWithRoles,
-        token,
+      const refreshToken = jwt.sign(
+        { id: userWithRoles.id },
+        process.env.JWT_REFRESH_SECRET,
+        { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+      );
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'Strict',
+        maxAge: 30 * 24 * 60 * 60 * 1000,
       });
+
+      return res.status(201).json({
+        message: 'Пользователь успешно зарегистрирован',
+        user: userWithRoles,
+        accessToken,
+      });
+
     }
 
     // 3. Нет необходимых данных
@@ -128,17 +158,38 @@ exports.loginUser = async (req, res) => {
     const userWithRoles = await getUserWithRoles(user.id);
 
     // Генерируем JWT
-    const token = jwt.sign(
-      { id: userWithRoles.id, roles: userWithRoles.roles },
-      process.env.JWT_SECRET,
-      { expiresIn: '1h' }
-    );
+    const accessToken = jwt.sign(
+    { id: userWithRoles.id, roles: userWithRoles.roles },
+    process.env.JWT_SECRET,
+    { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN }
+  );
 
-    res.json({
-      message: 'Авторизация успешна',
-      token,
-      user: { id: userWithRoles.id, email: userWithRoles.email, phone: userWithRoles.phone, roles: userWithRoles.roles },
-    });
+  const refreshToken = jwt.sign(
+    { id: userWithRoles.id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+  );
+
+  // Отправляем refreshToken как httpOnly cookie
+  res.cookie('refreshToken', refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: 'Strict',
+    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
+  });
+
+
+res.json({
+  message: 'Авторизация успешна',
+  accessToken,
+  user: {
+    id: userWithRoles.id,
+    email: userWithRoles.email,
+    phone: userWithRoles.phone,
+    roles: userWithRoles.roles
+  }
+});
+
 
   } catch (err) {
     console.error('Ошибка при авторизации:', err);
@@ -352,5 +403,24 @@ exports.verifyEmail = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: 'Ошибка при подтверждении email' });
+  }
+};
+
+exports.refreshAccessToken = async (req, res) => {
+  const token = req.cookies.refreshToken;
+  if (!token) return res.status(401).json({ message: 'Нет refresh токена' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_SECRET);
+    const userWithRoles = await getUserWithRoles(decoded.id);
+
+    const accessToken = jwt.sign(
+      { id: userWithRoles.id, roles: userWithRoles.roles },
+      process.env.JWT_SECRET,
+      { expiresIn: process.env.JWT_ACCESS_EXPIRES_IN }
+    );
+    res.json({ accessToken });
+  } catch (err) {
+    return res.status(403).json({ message: 'Неверный refresh токен' });
   }
 };

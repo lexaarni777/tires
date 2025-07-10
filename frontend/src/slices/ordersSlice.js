@@ -1,20 +1,51 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addToCart } from './cartSlice';
 // Thunk для получения заказов
-export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { getState }) => {
+export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { getState, dispatch, rejectWithValue }) => {
   const { auth } = getState();
-  const response = await fetch('http://localhost:5000/api/orders', {
+  let token = auth.token;
+
+  // 1. Первый запрос — с текущим accessToken
+  let response = await fetch('http://localhost:5000/api/orders', {
     headers: {
-      Authorization: `Bearer ${auth.token}`, // Передаем токен пользователя
+      Authorization: `Bearer ${token}`,
     },
   });
 
-  if (!response.ok) {
-    throw new Error('Не удалось загрузить заказы');
+  // 2. Если токен истёк — пробуем обновить через refresh
+  if (response.status === 401) {
+    const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include', // чтобы отправить httpOnly cookie
+    });
+
+    if (!refreshResp.ok) {
+      return rejectWithValue('Не удалось обновить токен');
+    }
+
+    const data = await refreshResp.json();
+    token = data.accessToken;
+
+    // Обновляем Redux (в authSlice добавим редьюсер ниже)
+    dispatch({ type: 'auth/tokenRefreshed', payload: token });
+    localStorage.setItem('token', token);
+
+    // Повторяем запрос
+    response = await fetch('http://localhost:5000/api/orders', {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    });
   }
 
-  return await response.json(); // Возвращаем данные заказов
+  // 3. Проверяем финальный результат
+  if (!response.ok) {
+    return rejectWithValue('Не удалось загрузить заказы');
+  }
+
+  return await response.json();
 });
+
 
 export const repeatOrder = (items) => async (dispatch, getState) => {
   const { auth } = getState(); // получаем userId

@@ -43,6 +43,7 @@ project/
  */
 
 // Импортируем модули
+const cookieParser = require('cookie-parser');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
@@ -66,6 +67,7 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors()); // Разрешаем запросы из других источников
 app.use(express.json()); // Для обработки JSON в теле запросов
+app.use(cookieParser()); // Для обработки cookies
 app.use('/uploads', express.static('uploads')); // Статические файлы для изображений
 app.use(session({
   secret: 'ваш_секретный_ключ', // Используйте секретный ключ для шифрования сессий

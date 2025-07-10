@@ -5,6 +5,7 @@ exports.verifyToken = (req, res, next) => {
   console.log('verifyToken req: ', req)
     const authHeader = req.headers.authorization;
     console.log('verifyToken: ', authHeader)
+    console.log('verifyToken req.headers: ', req.headers)
    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(403).json({ message: 'Доступ запрещен' });
@@ -17,6 +18,9 @@ exports.verifyToken = (req, res, next) => {
       req.user = decoded; // Добавляем информацию о пользователе в запрос
       next(); // Переход к следующей функции в маршруте
     } catch (err) {
+            if (err.name === 'TokenExpiredError') {
+        return res.status(401).json({ message: 'Access token истёк' });
+      }
       console.error('Ошибка при проверке токена:', err);
       res.status(401).json({ message: 'Неверный токен' });
     }

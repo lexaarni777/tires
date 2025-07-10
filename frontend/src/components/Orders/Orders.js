@@ -9,10 +9,17 @@ const Orders = () => {
   const { items: orders, loading, error } = useSelector((state) => state.orders);
   const [openOrderId, setOpenOrderId] = useState(null); // ← ДОБАВЬ ЭТО
   const navigate = useNavigate();
+  const auth = useSelector((state) => state.auth);
+
 
   useEffect(() => {
-    dispatch(fetchOrders());
-  }, [dispatch]);
+    if (auth.token) {
+      dispatch(fetchOrders());
+    }
+  }, [auth.token, dispatch]);
+
+
+
 
   if (loading) return <p className={styles.orders__loading}>Загрузка заказов...</p>;
   if (error) return <p className={styles.orders__error}>Ошибка: {error}</p>;

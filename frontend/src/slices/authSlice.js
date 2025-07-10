@@ -38,6 +38,20 @@ export const sendSmsCode = createAsyncThunk('auth/sendSmsCode', async ({ phone }
         return rejectWithValue(error.message);
     }
 });
+export const refreshAccessToken = createAsyncThunk('auth/refreshToken', async (_, { rejectWithValue }) => {
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include', // чтобы отправить httpOnly cookie
+    });
+    if (!response.ok) throw new Error('Ошибка обновления токена');
+    const data = await response.json();
+    return data.accessToken;
+  } catch (error) {
+    return rejectWithValue(error.message);
+  }
+});
+
 
 
 // Асинхронное действие для авторизации
@@ -150,7 +164,11 @@ const authSlice = createSlice({
     name: 'auth',
     initialState: {
         user: JSON.parse(localStorage.getItem('user')) || null,
-        token: localStorage.getItem('token') || null,
+        token: (() => {
+        const raw = localStorage.getItem('token');
+        return raw && raw !== 'undefined' ? raw : null;
+        })(),
+
         roles: (() => {
             const data = localStorage.getItem('roles');
             try {
@@ -176,6 +194,10 @@ const authSlice = createSlice({
             localStorage.removeItem('id');
             //localStorage.removeItem('token'); // Удаляем токен из localStorage при выходе
         },
+        tokenRefreshed: (state, action) => {
+        state.token = action.payload;
+  },
+        
     },
     extraReducers: (builder) => {
         builder
@@ -187,9 +209,9 @@ const authSlice = createSlice({
                 localStorage.setItem('user', JSON.stringify(action.payload.user));
                 localStorage.setItem('id', action.payload.user.id);
                 localStorage.setItem('roles', JSON.stringify(action.payload.user.roles));
-                if (action.payload.token) {
-                    state.token = action.payload.token;
-                    localStorage.setItem('token', action.payload.token);
+                if (action.payload.accessToken) {
+                    state.token = action.payload.accessToken;
+                    localStorage.setItem('token', action.payload.accessToken);
              }
             })
             .addCase(registerUser.rejected, (state, action) => {
@@ -199,11 +221,11 @@ const authSlice = createSlice({
             .addCase(loginUser.fulfilled, (state, action) => {
                 state.user = action.payload.user;
                 state.id = action.payload.user.id;
-                state.token = action.payload.token;
+                state.token = action.payload.accessToken;
                 state.roles = action.payload.user.roles;
                 state.status = 'succeeded';
                 localStorage.setItem('user', JSON.stringify(action.payload.user));
-                localStorage.setItem('token', action.payload.token);
+                localStorage.setItem('token', action.payload.accessToken);
                 localStorage.setItem('roles', JSON.stringify(action.payload.user.roles));
                 localStorage.setItem('id', action.payload.user.id);
             })
@@ -221,6 +243,15 @@ const authSlice = createSlice({
             .addCase(loginUser.pending, (state) => {
                 state.status = 'loading';
                 state.error = null;
+            })
+            .addCase(refreshAccessToken.fulfilled, (state, action) => {
+                state.token = action.payload;
+                localStorage.setItem('token', action.payload);
+            })
+            .addCase(refreshAccessToken.rejected, (state, action) => {
+                state.token = null;
+                localStorage.removeItem('token');
+                state.error = action.payload;
             });
     },
 });
