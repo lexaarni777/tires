@@ -9,6 +9,8 @@
 
 const { addImageToDB, deleteImageFromDB, getImagesForProductFromDB, updateFeaturedImage  } = require('../models/imageModel');
 const {  addModelImage,  deleteModelImage,  getModelImages,  updateModelFeaturedImage,  batchUpdateModelImageOrder} = require('../models/modelImageModel');
+const { generateThumbnail } = require('../utils/generateThumbnail');
+
 const path = require('path');
 const sharp = require('sharp');
 const fs = require('fs');
@@ -131,7 +133,7 @@ exports.setFeaturedImage = async (req, res) => {
       const mainImg = images.find(img => img.id == imageId);
       if (mainImg) {
         // Путь до оригинала и миниатюры
-        const absPath = path.join('.', mainImg.image_path);
+        const absPath = path.join(__dirname, '..', mainImg.image_path.replace(/^\/+/, ''));
         const ext = path.extname(absPath);
         const thumbPath = absPath.replace(ext, `_thumb${ext}`);
         if (fs.existsSync(thumbPath)) fs.unlinkSync(thumbPath);
@@ -226,9 +228,14 @@ exports.uploadModelImage = async (req, res) => {
 
     if (existing.length === 0) {
       await updateModelFeaturedImage(brand, model, newImage.id);
-      const absPath = path.join('.', imagePath);
+    }
+
+    // Генерация миниатюры только если изображение — главное
+    if (newImage.is_featured_image) {
+      const absPath = path.join(__dirname, '..', newImage.image_path.replace(/^\/+/, ''));
       await generateThumbnail(absPath);
     }
+
 
     res.status(201).json(newImage);
   } catch (err) {
@@ -259,7 +266,7 @@ exports.setModelFeaturedImage = async (req, res) => {
       const images = await getModelImages(brand, model);
       const mainImg = images.find(img => img.id == imageId);
       if (mainImg) {
-        const absPath = path.join('.', mainImg.image_path);
+        const absPath = path.join(__dirname, '..', mainImg.image_path.replace(/^\/+/, ''));
         await generateThumbnail(absPath);
       }
       res.json({ message: 'Главное эталонное изображение обновлено' });

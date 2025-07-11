@@ -63,6 +63,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { r
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(userData),
+            credentials: 'include',
         });
 
         console.log(response.ok)
