@@ -134,12 +134,8 @@ exports.setFeaturedImage = async (req, res) => {
         const absPath = path.join('.', mainImg.image_path);
         const ext = path.extname(absPath);
         const thumbPath = absPath.replace(ext, `_thumb${ext}`);
-
-        // 1. Удаляем старую миниатюру (если есть)
         if (fs.existsSync(thumbPath)) fs.unlinkSync(thumbPath);
-
-        // 2. Генерируем новую миниатюру (например, 150x150)
-        await sharp(absPath).resize(150, 150).toFile(thumbPath);
+        await generateThumbnail(absPath);
       }
 
       return res.status(200).json({ message: 'Главное изображение успешно обновлено.' });
@@ -231,9 +227,7 @@ exports.uploadModelImage = async (req, res) => {
     if (existing.length === 0) {
       await updateModelFeaturedImage(brand, model, newImage.id);
       const absPath = path.join('.', imagePath);
-      const ext = path.extname(absPath);
-      const thumbPath = absPath.replace(ext, `_thumb${ext}`);
-      await sharp(absPath).resize(150, 150).toFile(thumbPath);
+      await generateThumbnail(absPath);
     }
 
     res.status(201).json(newImage);
@@ -266,10 +260,7 @@ exports.setModelFeaturedImage = async (req, res) => {
       const mainImg = images.find(img => img.id == imageId);
       if (mainImg) {
         const absPath = path.join('.', mainImg.image_path);
-        const ext = path.extname(absPath);
-        const thumbPath = absPath.replace(ext, `_thumb${ext}`);
-        if (fs.existsSync(thumbPath)) fs.unlinkSync(thumbPath);
-        await sharp(absPath).resize(150, 150).toFile(thumbPath);
+        await generateThumbnail(absPath);
       }
       res.json({ message: 'Главное эталонное изображение обновлено' });
     } else {

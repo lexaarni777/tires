@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
 import styles from './Orders.module.scss';
 import { useNavigate } from 'react-router-dom';
+import { getThumbnailPath } from '../../utils/thumb';
 
 const Orders = () => {
   const dispatch = useDispatch();
@@ -84,7 +85,7 @@ const Orders = () => {
             {order.items.map((item) => (
               <li key={item.product_id} className={styles.orders__item}>
                 <img
-                  src={`http://localhost:5000${item.image}`}
+                  src={`http://localhost:5000${getThumbnailPath(item.image)}`}
                   alt={item.name}
                   className={styles.orders__itemImage}
                 />

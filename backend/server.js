@@ -65,7 +65,10 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // Middleware
-app.use(cors()); // Разрешаем запросы из других источников
+app.use(cors({
+  origin: 'http://localhost:3000', // разрешаем запросы с фронта
+  credentials: true                // разрешаем отправку куки
+})); // Разрешаем запросы из других источников
 app.use(express.json()); // Для обработки JSON в теле запросов
 app.use(cookieParser()); // Для обработки cookies
 app.use('/uploads', express.static('uploads')); // Статические файлы для изображений

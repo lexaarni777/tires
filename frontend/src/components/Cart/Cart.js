@@ -4,6 +4,7 @@ import { fetchCart, removeFromCart, clearCartServerSide, placeOrder, addToCart, 
 import { fetchProfile, fetchAddresses} from '../../slices/profileSlice';
 import { useNavigate } from 'react-router-dom';
 import styles from './Cart.module.scss';
+import { getThumbnailPath } from '../../utils/thumb';
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -181,7 +182,7 @@ const Cart = () => {
                   onChange={() => handleSelect(item.cart_id)}
                 />
                 <img
-                  src={`http://localhost:5000${item.product_image}`}
+                  src={`http://localhost:5000${getThumbnailPath(item.product_image)}`}
                   alt={item.name}
                   className={styles.productImage}
                   onClick={() => navigate(`/productdetailed/${item.product_id}`)}
