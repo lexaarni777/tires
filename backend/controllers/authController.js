@@ -58,7 +58,7 @@ exports.registerUser = async (req, res) => {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: false,
-        sameSite: 'Strict',
+        sameSite: 'Lax',
         maxAge: 30 * 24 * 60 * 60 * 1000,
       });
 
@@ -107,7 +107,7 @@ exports.registerUser = async (req, res) => {
       res.cookie('refreshToken', refreshToken, {
         httpOnly: true,
         secure: false,
-        sameSite: 'Strict',
+        sameSite: 'Lax',
         maxAge: 30 * 24 * 60 * 60 * 1000,
       });
 
@@ -174,7 +174,7 @@ exports.loginUser = async (req, res) => {
   res.cookie('refreshToken', refreshToken, {
     httpOnly: true,
     secure: false,
-    sameSite: 'Strict',
+    sameSite: 'Lax',
     maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
   });
 
@@ -407,6 +407,7 @@ exports.verifyEmail = async (req, res) => {
 };
 
 exports.refreshAccessToken = async (req, res) => {
+  console.log('req.cookies:', req.cookies);
   const token = req.cookies.refreshToken;
   if (!token) return res.status(401).json({ message: 'Нет refresh токена' });
 
