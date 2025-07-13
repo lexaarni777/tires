@@ -1,20 +1,21 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addToCart } from '../../slices/cartSlice';
+import { addToCart, decrementToCart } from '../../slices/cartSlice';
 import styles from './TyreResultCard.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
+import { useNavigate } from 'react-router-dom';
 
 const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
   const dispatch = useDispatch();
-  const selectedCity = useSelector(state => state.stock.selectedCity);
+  const navigate = useNavigate();
+
+  const auth = useSelector((state) => state.auth);
+  const selectedCity = useSelector((state) => state.city.selectedCity);
+  const cartItems = useSelector((state) => state.cart.items);
 
   const cityWarehouses = warehouseList
     .filter(w => w.city === selectedCity)
     .map(w => w.location);
-
-  const handleAddToCart = (tyre) => {
-    dispatch(addToCart({ product: tyre }));
-  };
 
   return (
     <div className={styles.cardGroup}>
@@ -34,7 +35,7 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
             <th>Сезон</th>
             <th>Индекс</th>
             <th>Код товара</th>
-            <th>Наличие в {selectedCity}</th>
+            <th>Наличие ({selectedCity})</th>
             <th>Цена</th>
             <th></th>
           </tr>
@@ -48,6 +49,65 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
               ? `${cityStock.price_retail.toLocaleString()} ₽`
               : '—';
 
+            const cartItem = cartItems.find(
+              item =>
+                item.product_id === tyre.id &&
+                item.stock_id === cityStock?.id
+            );
+
+            const getImage = () => {
+              return tyre.images?.[0]?.image_path
+                ? `http://localhost:5000${tyre.images[0].image_path}`
+                : 'https://via.placeholder.com/150';
+            };
+
+            const handleAdd = () => {
+              if (!cityStock) return;
+              dispatch(addToCart({
+                userId: auth.id || 0,
+                productId: tyre.id,
+                productName: tyre.name,
+                article: tyre.article,
+                image: getImage(),
+                stockId: cityStock.id,
+                location: cityStock.location,
+                price: cityStock.price_retail,
+                quantity: 1,
+                maxAvailable: cityStock.stock
+              }));
+            };
+
+            const handleIncrement = () => {
+              if (!cityStock) return;
+              if ((cartItem?.quantity || 0) < cityStock.stock) {
+                dispatch(addToCart({
+                  userId: auth.id || 0,
+                  productId: tyre.id,
+                  productName: tyre.name,
+                  article: tyre.article,
+                  image: getImage(),
+                  stockId: cityStock.id,
+                  location: cityStock.location,
+                  price: cityStock.price_retail,
+                  quantity: 1,
+                  maxAvailable: cityStock.stock
+                }));
+              }
+            };
+
+            const handleDecrement = () => {
+              if (cartItem && cartItem.quantity > 0) {
+                dispatch(decrementToCart({
+                  userId: auth.id || 0,
+                  productId: tyre.id,
+                  stockId: cityStock.id,
+                  quantity: 1
+                }));
+              }
+            };
+
+            const handleGoToCart = () => navigate('/cart');
+
             return (
               <tr key={tyre.id}>
                 <td>{tyre.name}</td>
@@ -57,13 +117,30 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
                 <td>{stock}</td>
                 <td>{price}</td>
                 <td>
-                  <button
-                    className={styles.cartButton}
-                    onClick={() => handleAddToCart(tyre)}
-                    disabled={!cityStock || cityStock.stock < 1}
-                  >
-                    🛒
-                  </button>
+                  {cityStock && cityStock.stock > 0 ? (
+                    cartItem ? (
+                      <div className={styles.cartInline}>
+                        <button onClick={handleGoToCart}>🛒</button>
+                        <button onClick={handleDecrement}>−</button>
+                        <input
+                          type="number"
+                          value={cartItem.quantity}
+                          readOnly
+                          className={styles.qtyInput}
+                        />
+                        <button
+                          onClick={handleIncrement}
+                          disabled={cartItem.quantity >= cityStock.stock}
+                        >+</button>
+                      </div>
+                    ) : (
+                      <button className={styles.cartButton} onClick={handleAdd}>
+                        В корзину
+                      </button>
+                    )
+                  ) : (
+                    <span>—</span>
+                  )}
                 </td>
               </tr>
             );

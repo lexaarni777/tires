@@ -11,11 +11,14 @@ const TyreSelector = () => {
   const [sectionWidth, setSectionWidth] = useState('');
   const [profile, setProfile] = useState('');
   const [diameter, setDiameter] = useState('');
+  const [sectionWidthRear, setSectionWidthRear] = useState('');
+  const [profileRear, setProfileRear] = useState('');
+  const [diameterRear, setDiameterRear] = useState('');
   const [season, setSeason] = useState({
     summer: false,
     winter: false,
     allseason: false,
-    studs: false,
+    studs: false
   });
   const [isWidePair, setIsWidePair] = useState(false);
   const [inStockOnly, setInStockOnly] = useState(true);
@@ -24,7 +27,7 @@ const TyreSelector = () => {
   const [rawFilteredProducts, setRawFilteredProducts] = useState([]);
 
   const stock = useSelector(state => state.stock.items);
-  const selectedCity = useSelector(state => state.stock.selectedCity);
+  const selectedCity = useSelector(state => state.city.selectedCity);
 
   const stockByTyreId = useMemo(() => {
     const map = {};
@@ -59,37 +62,54 @@ const TyreSelector = () => {
   };
 
   const handleSubmit = async () => {
-    const filters = {};
-    if (sectionWidth) filters.section_width = sectionWidth;
-    if (profile) filters.profile = profile;
-    if (diameter) filters.diameter = diameter;
-
+    const filters = [];
     const selectedSeasons = [];
     if (season.summer) selectedSeasons.push('Летняя');
     if (season.winter) selectedSeasons.push('Зимняя');
     if (season.allseason) selectedSeasons.push('Всесезонная');
-    if (season.studs) filters.studs = true;
 
-    if (selectedSeasons.length === 1) {
-      filters.season = selectedSeasons[0];
+    // Передняя ось
+    const frontFilter = {};
+    if (sectionWidth) frontFilter.section_width = sectionWidth;
+    if (profile) frontFilter.profile = profile;
+    if (diameter) frontFilter.diameter = diameter;
+    if (selectedSeasons.length === 1) frontFilter.season = selectedSeasons[0];
+    if (season.studs) frontFilter.studs = true;
+
+    // Задняя ось, если чекбокс включен
+    const rearFilter = {};
+    if (isWidePair) {
+      if (sectionWidthRear) rearFilter.section_width = sectionWidthRear;
+      if (profileRear) rearFilter.profile = profileRear;
+      if (diameterRear) rearFilter.diameter = diameterRear;
+      if (selectedSeasons.length === 1) rearFilter.season = selectedSeasons[0];
+      if (season.studs) rearFilter.studs = true;
     }
 
-    const result = await dispatch(fetchProducts(filters));
-    if (result.payload) {
-      setRawFilteredProducts(result.payload);
+    const results = [];
+
+    if (Object.keys(frontFilter).length > 0) {
+      const res = await dispatch(fetchProducts(frontFilter));
+      if (res.payload) results.push(...res.payload);
     }
+
+    if (isWidePair && Object.keys(rearFilter).length > 0) {
+      const res = await dispatch(fetchProducts(rearFilter));
+      if (res.payload) results.push(...res.payload);
+    }
+
+    // Объединение по модели/бренду
+    setRawFilteredProducts(results);
   };
 
   useEffect(() => {
     let result = rawFilteredProducts;
-
     if (inStockOnly && selectedCity) {
       result = result.filter(p => {
         const items = stockByTyreId[p.id] || [];
-        return items.some(i => i.city === selectedCity && i.stock > 0);
+        return items.some(i => i.location === selectedCity && i.stock > 0);
       });
     }
-
     setFilteredProducts(result);
   }, [inStockOnly, selectedCity, rawFilteredProducts, stockByTyreId]);
 
@@ -131,6 +151,31 @@ const TyreSelector = () => {
           </select>
         </div>
 
+        {isWidePair && (
+          <div className={styles.selects}>
+            <select value={sectionWidthRear} onChange={e => setSectionWidthRear(e.target.value)}>
+              <option value=''>Ширина (задние)</option>
+              {getOptionStates('section_width').map(opt => (
+                <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
+              ))}
+            </select>
+
+            <select value={profileRear} onChange={e => setProfileRear(e.target.value)}>
+              <option value=''>Профиль (задние)</option>
+              {getOptionStates('profile').map(opt => (
+                <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
+              ))}
+            </select>
+
+            <select value={diameterRear} onChange={e => setDiameterRear(e.target.value)}>
+              <option value=''>Диаметр (задние)</option>
+              {getOptionStates('diameter').map(opt => (
+                <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
         <div className={styles.checkboxGroup}>
           <label><input type="checkbox" checked={season.summer} onChange={e => setSeason({ ...season, summer: e.target.checked })}/> Летние ☀️</label>
           <label><input type="checkbox" checked={season.winter} onChange={e => setSeason({ ...season, winter: e.target.checked })}/> Зимние ❄️</label>
@@ -145,7 +190,7 @@ const TyreSelector = () => {
         <button className={styles.submit} onClick={handleSubmit}>Подобрать</button>
       </div>
 
-      {rawFilteredProducts.length > 0 && (
+      {filteredProducts.length > 0 && (
         <div className={styles.stockToggle}>
           <label>
             <input
