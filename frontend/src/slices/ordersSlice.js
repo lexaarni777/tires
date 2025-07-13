@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addToCart } from './cartSlice';
+import { logout } from './authSlice';
 // Thunk для получения заказов
 export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { getState, dispatch, rejectWithValue }) => {
   const { auth } = getState();
@@ -114,6 +115,11 @@ const ordersSlice = createSlice({
       .addCase(cancelOrder.fulfilled, (state, action) => {
         const order = state.items.find(o => o.order_id === action.payload.orderId);
         if (order) order.status = 'Отменён';
+      })
+      .addCase(logout, (state) => {     // <- добавить этот обработчик
+        state.items = [];
+        state.loading = false;
+        state.error = null;
       });
   },
 });

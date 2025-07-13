@@ -50,7 +50,7 @@ exports.getCart = async (userId) => {
     SELECT 
       c.id AS cart_id,
       c.quantity,
-      c.price,         -- цена, зафиксированная на момент добавления
+      c.price,         
       c.stock_id,
       t.id AS product_id,
       t.name AS product_name,
@@ -60,14 +60,16 @@ exports.getCart = async (userId) => {
       t.season,
       t.load_index,
       t.speed_index,
-      pi.image_path AS product_image,
-      ts.location,         -- склад
-      ts.stock,            -- остаток
-      ts.price_retail,     -- текущая розничная цена на складе
-      ts.price_wholesale   -- текущая оптовая цена на складе
+      COALESCE(pi.image_path, mi.image_path) AS product_image,  -- 🔁 ключевая строка
+      ts.location,         
+      ts.stock,            
+      ts.price_retail,     
+      ts.price_wholesale   
     FROM cart c
     JOIN tyre_catalog t ON c.product_id = t.id
     LEFT JOIN productsimages pi ON t.id = pi.product_id AND pi.is_featured_image = true
+    LEFT JOIN model_images mi 
+      ON mi.brand = t.brand AND mi.model = t.model AND mi.is_featured_image = true  -- 🔁 добавлено
     LEFT JOIN tyre_stock ts ON c.stock_id = ts.id
     WHERE c.user_id = $1
     `,

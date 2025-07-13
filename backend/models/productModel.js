@@ -75,6 +75,7 @@ exports.getProductsFromDB = async (filters = {}) => {
   if (where.length > 0) {
     query += " WHERE " + where.join(" AND ");
   }
+  
 
   query += `
     GROUP BY 

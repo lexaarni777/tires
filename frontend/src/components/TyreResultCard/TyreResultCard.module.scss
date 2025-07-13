@@ -1,0 +1,22 @@
+@import '../../styles/variables';
+
+.cardGroup {
+  margin-top: $space-xl;
+  padding: $space-md;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background-color: #fff;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: $space-md;
+}
+
+.cardList {
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+}
+

@@ -71,15 +71,25 @@ const ProductDetailed = () => {
 
 
   // Главное изображение
-  const getFeaturedImage = () => {
-    if (product?.images && product.images.length > 0) {
-      const featured = product.images.find((img) => img.is_featured_image);
-      return featured
-        ? `http://localhost:5000${featured.image_path}`
-        : `http://localhost:5000${product.images[0].image_path}`;
-    }
-    return "https://via.placeholder.com/220x220";
-  };
+const getFeaturedImage = () => {
+  if (product?.images && product.images.length > 0) {
+    const featured = product.images.find((img) => img.is_featured_image);
+    return featured
+      ? `http://localhost:5000${featured.image_path}`
+      : `http://localhost:5000${product.images[0].image_path}`;
+  }
+
+  // 🔁 ДОБАВЛЕНО: если нет индивидуальных — использовать model_images
+  if (product?.model_images && product.model_images.length > 0) {
+    const featured = product.model_images.find((img) => img.is_featured_image);
+    return featured
+      ? `http://localhost:5000${featured.image_path}`
+      : `http://localhost:5000${product.model_images[0].image_path}`;
+  }
+
+  return "https://via.placeholder.com/220x220";
+};
+
 
   // Инкремент
   const handleIncrement = (e) => {

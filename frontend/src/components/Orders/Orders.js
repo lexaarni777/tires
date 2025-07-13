@@ -84,11 +84,15 @@ const Orders = () => {
           <ul className={styles.orders__items}>
             {order.items.map((item) => (
               <li key={item.product_id} className={styles.orders__item}>
+              {item.image && (
                 <img
                   src={`http://localhost:5000${getThumbnailPath(item.image)}`}
                   alt={item.name}
                   className={styles.orders__itemImage}
+                  onClick={() => navigate(`/productdetailed/${item.product_id}`)}  
                 />
+              )}
+
                 <div className={styles.orders__itemDetails}>
                   <p className={styles.orders__itemName}>{item.name}</p>
                   <p className={styles.orders__itemBrand}>

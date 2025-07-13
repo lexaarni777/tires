@@ -60,39 +60,51 @@ exports.addOrderItemsInDB = async (orderId, cartItems) => {
 
 // Получаем заказы пользователя (с деталями по товарам из tyre_catalog)
 exports.getUserOrders = async (userId) => {
-const query = `
-SELECT 
-  o.id AS order_id,
-  o.status,
-  o.created_at,
-  o.delivery_method,
-  o.pickup_warehouse,
-  o.address,
-  o.phone,
-  SUM(oi.quantity * oi.price) AS total_amount,
-  json_agg(
-    json_build_object(
-      'product_id', oi.product_id,
-      'name', t.name,
-      'quantity', oi.quantity,
-      'price', oi.price,
-      'article', t.article,
-      'stock_id', oi.stock_id,
-      'location', s.location,
-      'image', i.image_path
-    )
-  ) AS items
-FROM orders o
-LEFT JOIN order_items oi ON o.id = oi.order_id
-LEFT JOIN tyre_catalog t ON oi.product_id = t.id
-LEFT JOIN tyre_stock s ON oi.stock_id = s.id
-LEFT JOIN productsimages i ON i.product_id = t.id AND i.is_featured_image = true  -- 👈 ключевая строка
-WHERE o.user_id = $1
-GROUP BY 
-  o.id, o.status, o.created_at, 
-  o.delivery_method, o.pickup_warehouse, o.address, o.phone
-ORDER BY o.created_at DESC;
-`;
+  const query = `
+    SELECT 
+      o.id AS order_id,
+      o.status,
+      o.created_at,
+      o.delivery_method,
+      o.pickup_warehouse,
+      o.address,
+      o.phone,
+      SUM(oi.quantity * oi.price) AS total_amount,
+      json_agg(
+        json_build_object(
+          'product_id', oi.product_id,
+          'name', t.name,
+          'quantity', oi.quantity,
+          'price', oi.price,
+          'article', t.article,
+          'stock_id', oi.stock_id,
+          'location', s.location,
+          'brand', t.brand,
+          'model', t.model,
+          'season', t.season,
+          'studs', t.studs,
+          'image', COALESCE(i.image_path, mi.image_path)
+        )
+      ) AS items
+    FROM orders o
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN tyre_catalog t ON oi.product_id = t.id
+    LEFT JOIN tyre_stock s ON oi.stock_id = s.id
+    LEFT JOIN productsimages i ON i.product_id = t.id AND i.is_featured_image = true
+    LEFT JOIN LATERAL (
+      SELECT image_path
+      FROM model_images
+      WHERE brand = t.brand AND model = t.model AND is_featured_image = true
+      LIMIT 1
+    ) mi ON true  -- ✅ добавлено
+    WHERE o.user_id = $1
+    GROUP BY 
+      o.id, o.status, o.created_at, 
+      o.delivery_method, o.pickup_warehouse, o.address, o.phone
+    ORDER BY o.created_at DESC;
+  `;
+
   const result = await pool.query(query, [userId]);
   return result.rows;
 };
+

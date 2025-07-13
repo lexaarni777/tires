@@ -13,10 +13,12 @@ import Cart from './components/Cart/Cart';
 import ProductDetailed from './components/ProductDetailed/ProductDetailed'; // Импортируем компонент для управления пользователями (новый)
 import Delivery from './components/Delivery/Delivery';
 import EditProfile from './components/EditProfile/EditProfile';
+import TyreSelector from './components/TyreSelector/TyreSelector';
 function App() {
 
   let routes = (
     <Routes>
+      <Route path='/' element={<TyreSelector />} />
       {/* Маршрут для добавления продукта - доступен только администраторам */}
       <Route path='/addproduct' element={
         <PrivateRoute rolesRequired={['admin']}>

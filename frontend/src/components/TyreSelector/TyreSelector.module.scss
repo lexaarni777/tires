@@ -1,0 +1,94 @@
+@import '../../styles/variables';
+@import '../../styles/mixins';
+@import '../../styles/typography';
+
+.wrapper {
+  padding: $space-xl;
+  background-color: #f7f7f7;
+  display: flex;
+  flex-direction: column;
+  gap: $space-lg;
+}
+
+.tabs {
+  display: flex;
+  gap: $space-sm;
+}
+
+.tab {
+  padding: $space-sm $space-md;
+  border: 1px solid #ccc;
+  background-color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  &.active {
+    background-color: #007bff;
+    color: #fff;
+    border-color: #007bff;
+  }
+  &.disabled {
+    background-color: #e0e0e0;
+    color: #888;
+    cursor: not-allowed;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+  max-width: 600px;
+}
+
+.toggleGroup {
+  display: flex;
+  gap: $space-md;
+}
+
+.selects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-md;
+
+  select {
+    padding: $space-xs;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    min-width: 120px;
+  }
+}
+
+.checkboxGroup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: $space-md;
+
+  label {
+    display: flex;
+    align-items: center;
+    gap: $space-xs;
+    font-size: 0.95rem;
+  }
+}
+
+.widePair {
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: $space-xs;
+}
+
+.submit {
+  width: fit-content;
+  padding: $space-sm $space-lg;
+  background-color: #007bff;
+  color: #fff;
+  font-weight: bold;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  &:hover {
+    background-color: #0069d9;
+  }
+}

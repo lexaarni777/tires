@@ -181,12 +181,14 @@ const Cart = () => {
                   checked={selectedIds.includes(item.cart_id)}
                   onChange={() => handleSelect(item.cart_id)}
                 />
-                <img
-                  src={`http://localhost:5000${getThumbnailPath(item.product_image)}`}
-                  alt={item.name}
-                  className={styles.productImage}
-                  onClick={() => navigate(`/productdetailed/${item.product_id}`)}
-                />
+                {item.product_image && (
+                  <img
+                    src={`http://localhost:5000${getThumbnailPath(item.product_image)}`}
+                    alt={item.name}
+                    className={styles.productImage}
+                    onClick={() => navigate(`/productdetailed/${item.product_id}`)}  
+                  />
+                )}
                 <div className={styles.productDetails}>
                   <h3>{item.name}</h3>
                   <p>Склад: {item.location}</p>
