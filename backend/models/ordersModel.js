@@ -108,3 +108,31 @@ exports.getUserOrders = async (userId) => {
   return result.rows;
 };
 
+// Получить все заказы (для админа)
+exports.getAllOrders = async (sortField = 'created_at', sortOrder = 'DESC') => {
+  const query = `
+    SELECT 
+      o.id AS order_id,
+      o.status,
+      o.created_at,
+      o.delivery_method,
+      o.pickup_warehouse,
+      o.address,
+      o.phone,
+      u.name AS user_name,
+      u.email AS user_email,
+      SUM(oi.quantity * oi.price) AS total_amount
+    FROM orders o
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN users u ON o.user_id = u.id
+    GROUP BY o.id, u.name, u.email
+    ORDER BY ${sortField} ${sortOrder}
+  `;
+  const { rows } = await pool.query(query);
+  return rows;
+};
+
+// Обновить статус заказа
+exports.updateOrderStatus = async (orderId, status) => {
+  await pool.query(`UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`, [status, orderId]);
+};

@@ -97,3 +97,21 @@ exports.cancelOrder = async (req, res) => {
     res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
+
+
+const { getAllOrders, updateOrderStatus } = require('../models/ordersModel');
+
+// Получить все заказы (админ)
+exports.getAllOrdersAdmin = async (req, res) => {
+  const { sortField = 'created_at', sortOrder = 'DESC' } = req.query;
+  const orders = await getAllOrders(sortField, sortOrder);
+  res.json(orders);
+};
+
+// Обновить статус (админ)
+exports.changeOrderStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  await updateOrderStatus(id, status);
+  res.json({ message: 'Статус обновлён' });
+};

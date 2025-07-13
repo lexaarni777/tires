@@ -14,6 +14,8 @@ import ProductDetailed from './components/ProductDetailed/ProductDetailed'; // �
 import Delivery from './components/Delivery/Delivery';
 import EditProfile from './components/EditProfile/EditProfile';
 import TyreSelector from './components/TyreSelector/TyreSelector';
+import AdminOrders from './components/AdminOrders/AdminOrders';
+
 function App() {
 
   let routes = (
@@ -25,6 +27,12 @@ function App() {
           <AddProduct />
         </PrivateRoute>
       }/>
+
+    <Route path='/admin/orders' element={
+      <PrivateRoute rolesRequired={['admin']}>
+        <AdminOrders />
+      </PrivateRoute>
+    }/>
 
       {/* Маршрут для списка заказов */}
       <Route path='/orders' element={

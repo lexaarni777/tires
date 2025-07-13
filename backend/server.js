@@ -58,6 +58,7 @@ const roleRoutes = require('./routes/roleRoutes');
 const cartRoutes = require('./routes/cartRoutes');
 const ordersRoutes = require('./routes/ordersRoutes');
 const userRoutes = require('./routes/userRoutes');
+const adminOrdersRoutes = require('./routes/adminOrdersRoutes');
 
 // Настройка приложения
 dotenv.config();
@@ -87,6 +88,8 @@ app.use('/api/roles', roleRoutes); // Маршруты для управлени
 app.use('/api/cart', cartRoutes); // Маршруты для работы с корзиной
 app.use('/api/orders', ordersRoutes); // Маршруты для работы с заказами
 app.use('/api/user', userRoutes);
+app.use('/api/admin/orders', adminOrdersRoutes);
+
 
 // Запуск сервера
 app.listen(PORT, () => {
