@@ -132,6 +132,47 @@ exports.getAllOrders = async (sortField = 'created_at', sortOrder = 'DESC') => {
   return rows;
 };
 
+exports.getOrderByIdAdmin = async (orderId) => {
+  const query = `
+    SELECT 
+      o.id AS order_id,
+      o.status,
+      o.created_at,
+      o.updated_at,
+      o.delivery_method,
+      o.pickup_warehouse,
+      o.address,
+      o.phone,
+      o.payment_method,
+      o.comment,
+      u.name AS user_name,
+      u.email AS user_email,
+      SUM(oi.quantity * oi.price) AS total_amount,
+      json_agg(
+        json_build_object(
+          'product_id', oi.product_id,
+          'quantity', oi.quantity,
+          'price', oi.price,
+          'name', t.name,
+          'brand', t.brand,
+          'article', t.article,
+          'stock_id', oi.stock_id,
+          'location', s.location
+        )
+      ) AS items
+    FROM orders o
+    LEFT JOIN users u ON o.user_id = u.id
+    LEFT JOIN order_items oi ON o.id = oi.order_id
+    LEFT JOIN tyre_catalog t ON oi.product_id = t.id
+    LEFT JOIN tyre_stock s ON oi.stock_id = s.id
+    WHERE o.id = $1
+    GROUP BY o.id, u.name, u.email
+  `;
+  const { rows } = await pool.query(query, [orderId]);
+  return rows[0];
+};
+
+
 // Обновить статус заказа
 exports.updateOrderStatus = async (orderId, status) => {
   await pool.query(`UPDATE orders SET status = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2`, [status, orderId]);

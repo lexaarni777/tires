@@ -5,7 +5,7 @@
  * - Получение всех заказов пользователя
  */
 
-const { createOrderInDB, addOrderItemsInDB, getUserOrders  } = require('../models/ordersModel');
+const { createOrderInDB, addOrderItemsInDB, getUserOrders, getOrderByIdAdmin, getAllOrders, updateOrderStatus  } = require('../models/ordersModel');
 const pool = require('../config/db');
 
 // Создание нового заказа
@@ -98,9 +98,6 @@ exports.cancelOrder = async (req, res) => {
   }
 };
 
-
-const { getAllOrders, updateOrderStatus } = require('../models/ordersModel');
-
 // Получить все заказы (админ)
 exports.getAllOrdersAdmin = async (req, res) => {
   const { sortField = 'created_at', sortOrder = 'DESC' } = req.query;
@@ -114,4 +111,18 @@ exports.changeOrderStatus = async (req, res) => {
   const { status } = req.body;
   await updateOrderStatus(id, status);
   res.json({ message: 'Статус обновлён' });
+};
+
+exports.getOrderByIdAdmin = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const order = await getOrderByIdAdmin(id);
+    if (!order) {
+      return res.status(404).json({ message: 'Заказ не найден' });
+    }
+    res.json(order);
+  } catch (err) {
+    console.error('Ошибка получения заказа:', err);
+    res.status(500).json({ message: 'Ошибка сервера' });
+  }
 };

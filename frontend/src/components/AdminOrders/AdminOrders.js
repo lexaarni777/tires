@@ -1,83 +1,151 @@
-// AdminOrders.js
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
+  const [orderDetails, setOrderDetails] = useState({});
+  const [expandedOrderId, setExpandedOrderId] = useState(null);
   const [sortField, setSortField] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [error, setError] = useState(null);
   const token = useSelector((state) => state.auth.token);
 
+  // Загрузка списка заказов
   useEffect(() => {
-   const fetchAdminOrders = async () => {
-  try {
-    let accessToken = token;
+    const fetchAdminOrders = async () => {
+      try {
+        let accessToken = token;
 
-    // 1. Основной запрос
-    let response = await fetch(
-      `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      }
-    );
+        let response = await fetch(
+          `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+          { headers: { Authorization: `Bearer ${accessToken}` } }
+        );
 
-    // 2. Если accessToken истёк — пробуем обновить через refresh
-    if (response.status === 401) {
-      const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
-        method: 'POST',
-        credentials: 'include',
-      });
+        if (response.status === 401) {
+          const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+            method: 'POST',
+            credentials: 'include',
+          });
+          if (!refreshResp.ok) throw new Error('Refresh токен недействителен');
 
-      if (!refreshResp.ok) throw new Error('Не удалось обновить токен');
+          const data = await refreshResp.json();
+          accessToken = data.accessToken;
+          localStorage.setItem('token', accessToken);
 
-      const data = await refreshResp.json();
-      accessToken = data.accessToken;
-
-      // Обновим токен в localStorage
-      localStorage.setItem('token', accessToken);
-
-      // Повторный запрос
-      response = await fetch(
-        `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`,
-          },
+          response = await fetch(
+            `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+            { headers: { Authorization: `Bearer ${accessToken}` } }
+          );
         }
-      );
-    }
 
-    // 3. Обработка результата
-    const result = await response.json();
-    if (!Array.isArray(result)) throw new Error('Ответ сервера не массив');
-    setOrders(result);
-  } catch (err) {
-    console.error('Ошибка загрузки заказов:', err);
-    setError(err.message || 'Ошибка запроса');
-  }
-};
-
+        const result = await response.json();
+        if (!Array.isArray(result)) throw new Error('Ответ сервера не массив');
+        setOrders(result);
+      } catch (err) {
+        console.error('Ошибка загрузки заказов:', err);
+        setError(err.message || 'Ошибка запроса');
+      }
+    };
 
     if (token) fetchAdminOrders();
   }, [token, sortField, sortOrder]);
 
-  const handleStatusChange = async (id, newStatus) => {
+  // Загрузка подробностей по конкретному заказу
+  const fetchOrderDetails = async (id) => {
     try {
-      await fetch(`http://localhost:5000/api/admin/orders/${id}/status`, {
+      let accessToken = token;
+
+      let response = await fetch(`http://localhost:5000/api/admin/orders/${id}`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+
+      if (response.status === 401) {
+        const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        if (!refreshResp.ok) return;
+
+        const data = await refreshResp.json();
+        accessToken = data.accessToken;
+        localStorage.setItem('token', accessToken);
+
+        response = await fetch(`http://localhost:5000/api/admin/orders/${id}`, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+      }
+
+      if (response.ok) {
+        const details = await response.json();
+        setOrderDetails((prev) => ({ ...prev, [id]: details }));
+      }
+    } catch (err) {
+      console.error('Ошибка загрузки деталей заказа:', err);
+    }
+  };
+
+  const toggleOrder = async (id) => {
+    if (expandedOrderId === id) {
+      setExpandedOrderId(null);
+    } else {
+      if (!orderDetails[id]) {
+        await fetchOrderDetails(id);
+      }
+      setExpandedOrderId(id);
+    }
+  };
+
+  const handleStatusChange = async (id, newStatus, e) => {
+    e.stopPropagation(); // не раскрывать строку по клику на select
+
+    try {
+      let accessToken = token;
+
+      let response = await fetch(`http://localhost:5000/api/admin/orders/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: JSON.stringify({ status: newStatus }),
       });
-      const updated = orders.map((order) =>
-        order.order_id === id ? { ...order, status: newStatus } : order
+
+      if (response.status === 401) {
+        const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+          method: 'POST',
+          credentials: 'include',
+        });
+        if (!refreshResp.ok) throw new Error('Не удалось обновить токен');
+
+        const data = await refreshResp.json();
+        accessToken = data.accessToken;
+        localStorage.setItem('token', accessToken);
+
+        response = await fetch(`http://localhost:5000/api/admin/orders/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ status: newStatus }),
+        });
+      }
+
+      if (!response.ok) throw new Error('Не удалось обновить статус');
+
+      // Обновим статус в таблице
+      setOrders((prev) =>
+        prev.map((order) =>
+          order.order_id === id ? { ...order, status: newStatus } : order
+        )
       );
-      setOrders(updated);
+
+      if (orderDetails[id]) {
+        setOrderDetails((prev) => ({
+          ...prev,
+          [id]: { ...prev[id], status: newStatus },
+        }));
+      }
     } catch (err) {
       console.error('Ошибка обновления статуса:', err);
       alert('Не удалось обновить статус');
@@ -119,25 +187,47 @@ const AdminOrders = () => {
         <tbody>
           {Array.isArray(orders) && orders.length > 0 ? (
             orders.map((o) => (
-              <tr key={o.order_id}>
-                <td>{o.order_id}</td>
-                <td>{new Date(o.created_at).toLocaleString()}</td>
-                <td>{o.total_amount} ₽</td>
-                <td>{o.status}</td>
-                <td>{o.user_name} ({o.user_email})</td>
-                <td>
-                  <select
-                    value={o.status}
-                    onChange={(e) => handleStatusChange(o.order_id, e.target.value)}
-                  >
-                    <option>В обработке</option>
-                    <option>Ожидает приёма</option>
-                    <option>В доставке</option>
-                    <option>Завершён</option>
-                    <option>Отменён</option>
-                  </select>
-                </td>
-              </tr>
+              <React.Fragment key={o.order_id}>
+                <tr onClick={() => toggleOrder(o.order_id)} style={{ cursor: 'pointer' }}>
+                  <td>{o.order_id}</td>
+                  <td>{new Date(o.created_at).toLocaleString()}</td>
+                  <td>{o.total_amount} ₽</td>
+                  <td>{o.status}</td>
+                  <td>{o.user_name} ({o.user_email})</td>
+                  <td>
+                    <select
+                      value={o.status}
+                      onChange={(e) => handleStatusChange(o.order_id, e.target.value, e)}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <option>В обработке</option>
+                      <option>Готов к выдаче</option>
+                      <option>Ожидается оплата</option>
+                      <option>В доставке</option>
+                      <option>Завершён</option>
+                      <option>Отменён</option>
+                      <option>Выдан</option>
+                    </select>
+                  </td>
+                </tr>
+                {expandedOrderId === o.order_id && orderDetails[o.order_id] && (
+                  <tr>
+                    <td colSpan="6">
+                      <p><strong>Телефон:</strong> {orderDetails[o.order_id].phone}</p>
+                      <p><strong>Адрес:</strong> {orderDetails[o.order_id].address || '—'}</p>
+                      <p><strong>Оплата:</strong> {orderDetails[o.order_id].payment_method || '—'}</p>
+                      <p><strong>Комментарий:</strong> {orderDetails[o.order_id].comment || '—'}</p>
+                      <ul>
+                        {orderDetails[o.order_id].items?.map((item, i) => (
+                          <li key={i}>
+                            {item.name} ({item.brand}) — {item.quantity} × {item.price} ₽
+                          </li>
+                        ))}
+                      </ul>
+                    </td>
+                  </tr>
+                )}
+              </React.Fragment>
             ))
           ) : (
             <tr>

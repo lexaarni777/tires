@@ -19,7 +19,7 @@ const Orders = () => {
     }
   }, [auth.token, dispatch]);
 
-
+console.log('items', orders)
 
 
   if (loading) return <p className={styles.orders__loading}>Загрузка заказов...</p>;
@@ -32,6 +32,7 @@ const Orders = () => {
 
       {orders.map((order) => (
         <div key={order.order_id} className={styles.orders__card}>
+          {console.log(order)}
           <div className={styles.orders__top}>
           <button
             className={styles.orders__toggle}
@@ -65,7 +66,7 @@ const Orders = () => {
           </div>
 
           <div className={styles.orders__statusRow}>
-            <span className={`${styles.badge} ${styles[`status__${order.status}`]}`}>
+            <span className={styles.badge}>
               {order.status}
             </span>
             <span className={styles.orders__total}>Итого: {order.total_amount} ₽</span>
@@ -82,6 +83,7 @@ const Orders = () => {
 
 
           <ul className={styles.orders__items}>
+            {console.log('items', order.items)}
             {order.items.map((item) => (
               <li key={item.product_id} className={styles.orders__item}>
               {item.image && (
