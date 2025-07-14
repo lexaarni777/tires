@@ -10,27 +10,56 @@ const AdminOrders = () => {
   const token = useSelector((state) => state.auth.token);
 
   useEffect(() => {
-    const fetchAdminOrders = async () => {
-      try {
-        const response = await fetch(
-          `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-        const data = await response.json();
-        console.log('Загруженные заказы:', data);
-        if (!Array.isArray(data)) {
-          throw new Error('Ответ сервера не является массивом заказов');
-        }
-        setOrders(data);
-      } catch (err) {
-        console.error('Ошибка загрузки заказов:', err);
-        setError(err.message || 'Не удалось загрузить заказы');
+   const fetchAdminOrders = async () => {
+  try {
+    let accessToken = token;
+
+    // 1. Основной запрос
+    let response = await fetch(
+      `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       }
-    };
+    );
+
+    // 2. Если accessToken истёк — пробуем обновить через refresh
+    if (response.status === 401) {
+      const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!refreshResp.ok) throw new Error('Не удалось обновить токен');
+
+      const data = await refreshResp.json();
+      accessToken = data.accessToken;
+
+      // Обновим токен в localStorage
+      localStorage.setItem('token', accessToken);
+
+      // Повторный запрос
+      response = await fetch(
+        `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        }
+      );
+    }
+
+    // 3. Обработка результата
+    const result = await response.json();
+    if (!Array.isArray(result)) throw new Error('Ответ сервера не массив');
+    setOrders(result);
+  } catch (err) {
+    console.error('Ошибка загрузки заказов:', err);
+    setError(err.message || 'Ошибка запроса');
+  }
+};
+
 
     if (token) fetchAdminOrders();
   }, [token, sortField, sortOrder]);
