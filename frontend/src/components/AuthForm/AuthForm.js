@@ -5,6 +5,8 @@ import styles from './AuthForm.module.scss';
 import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { mergeLocalCartWithServer, clearGuestCart } from '../../slices/cartSlice';
+import { validatePhone, validateEmail } from '../../utils/validators';
+
 
 
 const AuthForm = () => {
@@ -20,6 +22,12 @@ const AuthForm = () => {
     const [isCodeSent, setIsCodeSent] = useState(false);
     const [useEmail, setUseEmail] = useState(false);
     const [showMergeModal, setShowMergeModal] = useState(false);
+    const [phoneError, setPhoneError] = useState('');
+    const [emailError, setEmailError] = useState('');
+    const [resetPhoneError, setResetPhoneError] = useState('');
+    const [resetEmailError, setResetEmailError] = useState('');
+
+
 
     const [isResetting, setIsResetting] = useState(false);
     const [resetStep, setResetStep] = useState('request'); // request, verify, change
@@ -79,6 +87,8 @@ const AuthForm = () => {
         e.preventDefault();
         // Только регистрация по телефону (старый flow)
         if (!phone && !email) return alert('Укажите телефон или email');
+        if (phone && !validatePhone(phone)) return setPhoneError('Некорректный номер');
+        if (email && !validateEmail(email)) return setEmailError('Некорректный email');
         if (phone && isCodeSent) {
             dispatch(registerUser({ phone, email, password, code }));
         }
@@ -89,6 +99,8 @@ const AuthForm = () => {
     const handleLogin = (e) => {
         e.preventDefault();
         if (!phone && !email) return alert('Укажите телефон или email');
+        if (phone && !validatePhone(phone)) return setPhoneError('Некорректный номер');
+        if (email && !validateEmail(email)) return setEmailError('Некорректный email');
         dispatch(loginUser({ phone, email, password }));
     };
 
@@ -147,12 +159,16 @@ const handleVerifyEmail = async (e) => {
         <input
           type="tel"
           value={phone}
-          onChange={e => setPhone(e.target.value)}
+          onChange={e => {
+            setPhone(e.target.value);
+            setPhoneError(validatePhone(e.target.value) ? '' : 'Некорректный номер');
+          }}
           className={styles.input}
           placeholder="+7..."
           disabled={isCodeSent && isRegistering}
           autoFocus={!useEmail}
         />
+        {phoneError && <div className={styles.error}>{phoneError}</div>}
       </div>
     )}
     {/* Email */}
@@ -162,11 +178,15 @@ const handleVerifyEmail = async (e) => {
         <input
           type="email"
           value={email}
-          onChange={e => setEmail(e.target.value)}
+          onChange={e => {
+            setEmail(e.target.value);
+            setEmailError(validateEmail(e.target.value) ? '' : 'Некорректный email');
+          }}
           className={styles.input}
           placeholder="you@example.com"
           autoFocus={useEmail}
         />
+      {emailError && <div className={styles.error}>{emailError}</div>}
       </div>
     )}
 
@@ -207,7 +227,10 @@ const handleVerifyEmail = async (e) => {
           <input
             type="email"
             value={email}
-            onChange={e => setEmail(e.target.value)}
+            onChange={e => {
+              setEmail(e.target.value);
+              setEmailError(validateEmail(e.target.value) ? '' : 'Некорректный email');
+            }}
             className={styles.input}
             placeholder="you@example.com"
             autoFocus
@@ -326,23 +349,36 @@ const handleVerifyEmail = async (e) => {
         <input
           type="tel"
           value={resetPhone}
-          onChange={e => setResetPhone(e.target.value)}
+          onChange={e => {
+            setResetPhone(e.target.value);
+            setResetPhoneError(e.target.value === '' ? '' : (validatePhone(e.target.value) ? '' : 'Некорректный номер'));
+          }}
           placeholder="Телефон (+7...)"
           className={styles.input}
           disabled={!!resetEmail}
         />
+        {resetPhoneError && <div className={styles.error}>{resetPhoneError}</div>}
+
         <input
           type="email"
           value={resetEmail}
-          onChange={e => setResetEmail(e.target.value)}
+          onChange={e => {
+            setResetEmail(e.target.value);
+            setResetEmailError(e.target.value === '' ? '' : (validateEmail(e.target.value) ? '' : 'Некорректный email'));
+          }}
           placeholder="Email"
           className={styles.input}
           disabled={!!resetPhone}
         />
+        {resetEmailError && <div className={styles.error}>{resetEmailError}</div>}
+
         <button
           onClick={async () => {
             setResetError('');
             if (!resetPhone && !resetEmail) return setResetError('Введите телефон или email');
+            if (resetPhone && !validatePhone(resetPhone)) return setResetPhoneError('Некорректный номер');
+            if (resetEmail && !validateEmail(resetEmail)) return setResetEmailError('Некорректный email');
+            if (resetPhoneError || resetEmailError) return; // Блокируем отправку при ошибке
             const res = await dispatch(sendResetCode({ phone: resetPhone, email: resetEmail }));
             if (res.meta.requestStatus === 'fulfilled') setResetStep('verify');
             else setResetError(res.payload || 'Ошибка отправки кода');

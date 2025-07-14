@@ -23,11 +23,21 @@ const SMTP_PORT = process.env.SMTP_PORT;
 const SMTP_USER = process.env.SMTP_USER;
 const SMTP_PASS = process.env.SMTP_PASS;
 
+const phoneRegex = /^\+?\d{10,15}$/;
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 
 // Регистрация пользователя по номеру телефона с подтверждением через SMS
 exports.registerUser = async (req, res) => {
   console.log('req.body', req.body);
   const { email, password, phone, code } = req.body;
+  if (phone && !phoneRegex.test(phone)) {
+    return res.status(400).json({ error: 'Неверный формат телефона' });
+  }
+  if (email && !emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Неверный формат email' });
+  }
+
 
   try {
     // 1. Если есть email (и нет телефона) — регистрация по email (простая)
@@ -132,6 +142,13 @@ exports.registerUser = async (req, res) => {
 // Авторизация пользователя
 exports.loginUser = async (req, res) => {
   const { email, phone, password } = req.body;
+  if (phone && !phoneRegex.test(phone)) {
+    return res.status(400).json({ error: 'Неверный формат телефона' });
+  }
+  if (email && !emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Неверный формат email' });
+  }
+
   console.log('req.body:', req.body);
 
   try {
@@ -202,6 +219,10 @@ res.json({
 
 exports.sendSmsCode = async (req, res) => {
   const { phone } = req.body; // убираем userId!
+  if (phone && !phoneRegex.test(phone)) {
+    return res.status(400).json({ error: 'Неверный формат телефона' });
+  }
+
   const code = Math.floor(100000 + Math.random() * 9000).toString();
 
   try {
@@ -255,7 +276,15 @@ exports.verifyPhone = async (req, res) => {
 
 exports.sendResetCode = async (req, res) => {
   const { phone, email } = req.body;
+  if (phone && !phoneRegex.test(phone)) {
+    return res.status(400).json({ error: 'Неверный формат телефона' });
+  }
+  if (email && !emailRegex.test(email)) {
+    return res.status(400).json({ error: 'Неверный формат email' });
+  }
+
   const code = Math.floor(100000 + Math.random() * 9000).toString();
+
 
   try {
     let user;

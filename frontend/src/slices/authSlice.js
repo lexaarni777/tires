@@ -2,42 +2,52 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 // Асинхронное действие для регистрации
 export const registerUser = createAsyncThunk('auth/registerUser', async (userData, { rejectWithValue }) => {
-    try {
-        const response = await fetch('http://localhost:5000/api/auth/register', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(userData),
-        });
-
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Ошибка при регистрации');
-        }
-
-        return response.json();
-    } catch (error) {
-        return rejectWithValue(error.message);
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(userData),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      if (response.status === 429) {
+        return rejectWithValue(
+          error.error || 'Вы превысили лимит регистраций. Повторите через 15 минут.'
+        );
+      }
+      return rejectWithValue(error.message || 'Ошибка при регистрации');
     }
+    return response.json();
+  } catch (error) {
+    return rejectWithValue(error.message || 'Ошибка при регистрации');
+  }
 });
+
 
 export const sendSmsCode = createAsyncThunk('auth/sendSmsCode', async ({ phone }, { rejectWithValue }) => {
-    try {
-        const response = await fetch('http://localhost:5000/api/auth/send-sms', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ phone }),
-        });
-        if (!response.ok) {
-            const error = await response.json();
-            throw new Error(error.message || 'Ошибка при отправке кода');
-        }
-        return response.json();
-    } catch (error) {
-        return rejectWithValue(error.message);
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/send-sms', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ phone }),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      if (response.status === 429) {
+        return rejectWithValue(
+          error.error || 'Вы превысили лимит отправки SMS. Повторите через 15 минут.'
+        );
+      }
+      return rejectWithValue(error.message || 'Ошибка при отправке кода');
     }
+    return response.json();
+  } catch (error) {
+    return rejectWithValue(error.message || 'Ошибка при отправке кода');
+  }
 });
+
 export const refreshAccessToken = createAsyncThunk('auth/refreshToken', async (_, { rejectWithValue }) => {
   try {
     const response = await fetch('http://localhost:5000/api/auth/refresh', {
@@ -66,60 +76,70 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { r
             credentials: 'include',
         });
 
-        console.log(response.ok)
-
         if (!response.ok) {
             const error = await response.json();
-            throw new Error(error.message || 'Ошибка при авторизации');
+            if (response.status === 429) {
+                return rejectWithValue(error.error || 'Вы превысили максимальное количество неудачных попыток входа. Повторите через 15 минут.');
+            }
+            return rejectWithValue(error.message || 'Ошибка при авторизации');
         }
 
         return response.json();
     } catch (error) {
-        return rejectWithValue(error.message);
+        return rejectWithValue(error.message || 'Ошибка при авторизации');
     }
 });
 
+
 // Отправка кода для сброса (универсально)
-export const sendResetCode = createAsyncThunk(
-  'auth/sendResetCode',
-  async ({ phone, email }, { rejectWithValue }) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/send-reset-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(phone ? { phone } : { email }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка при отправке кода');
+export const sendResetCode = createAsyncThunk('auth/sendResetCode', async ({ phone, email }, { rejectWithValue }) => {
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/send-reset-code', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(phone ? { phone } : { email }),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      if (response.status === 429) {
+        return rejectWithValue(
+          error.error || 'Вы превысили лимит попыток сброса. Повторите через 15 минут.'
+        );
       }
-      return response.json();
-    } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.message || 'Ошибка при отправке кода');
     }
+    return response.json();
+  } catch (error) {
+    return rejectWithValue(error.message || 'Ошибка при отправке кода');
   }
-);
+});
+
 
 // Сброс пароля (универсально)
-export const resetPassword = createAsyncThunk(
-  'auth/resetPassword',
-  async ({ phone, email, code, newPassword }, { rejectWithValue }) => {
-    try {
-      const response = await fetch('http://localhost:5000/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(phone ? { phone, code, newPassword } : { email, code, newPassword }),
-      });
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || 'Ошибка при сбросе пароля');
+export const resetPassword = createAsyncThunk('auth/resetPassword', async ({ phone, email, code, newPassword }, { rejectWithValue }) => {
+  try {
+    const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(phone ? { phone, code, newPassword } : { email, code, newPassword }),
+      credentials: 'include',
+    });
+    if (!response.ok) {
+      const error = await response.json();
+      if (response.status === 429) {
+        return rejectWithValue(
+          error.error || 'Вы превысили лимит попыток сброса пароля. Повторите через 15 минут.'
+        );
       }
-      return response.json();
-    } catch (error) {
-      return rejectWithValue(error.message);
+      return rejectWithValue(error.message || 'Ошибка при сбросе пароля');
     }
+    return response.json();
+  } catch (error) {
+    return rejectWithValue(error.message || 'Ошибка при сбросе пароля');
   }
-);
+});
+
 
 // Отправить email-код
 export const sendEmailCode = createAsyncThunk('auth/sendEmailCode', async ({ email }, { rejectWithValue }) => {
@@ -128,16 +148,23 @@ export const sendEmailCode = createAsyncThunk('auth/sendEmailCode', async ({ ema
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
+      credentials: 'include',
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Ошибка отправки кода');
+      if (response.status === 429) {
+        return rejectWithValue(
+          error.error || 'Вы превысили лимит отправки кода на email. Повторите через 15 минут.'
+        );
+      }
+      return rejectWithValue(error.message || 'Ошибка отправки кода');
     }
     return response.json();
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue(error.message || 'Ошибка отправки кода');
   }
 });
+
 
 // Подтверждение email и завершение регистрации
 export const verifyEmail = createAsyncThunk('auth/verifyEmail', async ({ email, code, password }, { rejectWithValue }) => {
@@ -146,16 +173,23 @@ export const verifyEmail = createAsyncThunk('auth/verifyEmail', async ({ email, 
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, code, password }),
+      credentials: 'include',
     });
     if (!response.ok) {
       const error = await response.json();
-      throw new Error(error.message || 'Ошибка подтверждения');
+      if (response.status === 429) {
+        return rejectWithValue(
+          error.error || 'Вы превысили лимит попыток. Повторите через 15 минут.'
+        );
+      }
+      return rejectWithValue(error.message || 'Ошибка подтверждения email');
     }
     return response.json();
   } catch (error) {
-    return rejectWithValue(error.message);
+    return rejectWithValue(error.message || 'Ошибка подтверждения email');
   }
 });
+
 
 
 
