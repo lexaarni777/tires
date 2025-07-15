@@ -1,154 +1,186 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { fetchWithRefresh } from '../utils/authFetch';
 
 // Получение профиля пользователя
-export const fetchProfile = createAsyncThunk('profile/fetchProfile', async (_, { getState, rejectWithValue }) => {
-  try {
-    const token = getState().auth.token;
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/profile`, {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!response.ok) throw new Error('Ошибка получения профиля 2');
-    return response.json();
-  } catch (error) {
-    return rejectWithValue(error.message);
+export const fetchProfile = createAsyncThunk(
+  'profile/fetchProfile',
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/profile`,
+        { method: 'GET' },
+        { dispatch, getState }
+      );
+      if (!response.ok) throw new Error('Ошибка получения профиля');
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
+
 
 // Обновление профиля (имя, email, телефон)
-export const updateProfile = createAsyncThunk('profile/updateProfile', async (userData, { getState, rejectWithValue }) => {
-  try {
-    const token = getState().auth.token;
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/profile`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(userData)
-    });
-    if (!response.ok) throw new Error('Ошибка обновления профиля');
-    return response.json();
-  } catch (error) {
-    return rejectWithValue(error.message);
+export const updateProfile = createAsyncThunk(
+  'profile/updateProfile',
+  async (userData, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/profile`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(userData)
+        },
+        { dispatch, getState }
+      );
+      if (!response.ok) throw new Error('Ошибка обновления профиля');
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
 // Смена пароля
-export const changePassword = createAsyncThunk('profile/changePassword', async ({ oldPassword, newPassword }, { getState, rejectWithValue }) => {
-  try {
-    const token = getState().auth.token;
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/change-password`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ oldPassword, newPassword })
-    });
-    if (!response.ok) {
-  const errorData = await response.json().catch(() => ({}));
-  throw new Error(errorData.message || 'Ошибка смены пароля');
-}
-;
-    return response.json();
-  } catch (error) {
-    return rejectWithValue(error.message);
+export const changePassword = createAsyncThunk(
+  'profile/changePassword',
+  async ({ oldPassword, newPassword }, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/change-password`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ oldPassword, newPassword })
+        },
+        { dispatch, getState }
+      );
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Ошибка смены пароля');
+      }
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
 // Получение адресов
-export const fetchAddresses = createAsyncThunk('profile/fetchAddresses', async (_, { getState, rejectWithValue }) => {
-  try {
-    const token = getState().auth.token;
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/addresses`, {
-      method: 'GET',
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!response.ok) throw new Error('Ошибка получения адресов 1');
-    return response.json();
-  } catch (error) {
-    return rejectWithValue(error.message);
+export const fetchAddresses = createAsyncThunk(
+  'profile/fetchAddresses',
+  async (_, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/addresses`,
+        { method: 'GET' },
+        { dispatch, getState }
+      );
+      if (!response.ok) throw new Error('Ошибка получения адресов');
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
 // Добавление адреса
-export const addAddress = createAsyncThunk('profile/addAddress', async (addressData, { getState, rejectWithValue }) => {
-  try {
-    const token = getState().auth.token;
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/addresses`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(addressData)
-    });
-    if (!response.ok) throw new Error('Ошибка добавления адреса');
-    return response.json();
-  } catch (error) {
-    return rejectWithValue(error.message);
+export const addAddress = createAsyncThunk(
+  'profile/addAddress',
+  async (addressData, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/addresses`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(addressData)
+        },
+        { dispatch, getState }
+      );
+      if (!response.ok) throw new Error('Ошибка добавления адреса');
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
 // Изменение email (шаг 1 — запросить код)
-export const requestEmailChange = createAsyncThunk('profile/requestEmailChange', async ({ newEmail }, { getState, rejectWithValue }) => {
-  try {
-    const token = getState().auth.token;
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/request-email-change`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ newEmail })
-    });
-    if (!response.ok) throw new Error('Ошибка отправки кода');
-    return response.json();
-  } catch (error) {
-    return rejectWithValue(error.message);
+export const requestEmailChange = createAsyncThunk(
+  'profile/requestEmailChange',
+  async ({ newEmail }, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/request-email-change`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ newEmail })
+        },
+        { dispatch, getState }
+      );
+      if (!response.ok) throw new Error('Ошибка отправки кода');
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
 // Подтверждение email (шаг 2)
-export const confirmEmailChange = createAsyncThunk('profile/confirmEmailChange', async ({ code, newEmail }, { getState, rejectWithValue }) => {
-  try {
-    const token = getState().auth.token;
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/confirm-email-change`, {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ code, newEmail  })
-    });
-    if (!response.ok) throw new Error('Ошибка подтверждения email');
-    return response.json();
-  } catch (error) {
-    return rejectWithValue(error.message);
+export const confirmEmailChange = createAsyncThunk(
+  'profile/confirmEmailChange',
+  async ({ code, newEmail }, { getState, dispatch, rejectWithValue }) => {
+    try {
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/confirm-email-change`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ code, newEmail })
+        },
+        { dispatch, getState }
+      );
+      if (!response.ok) throw new Error('Ошибка подтверждения email');
+      return response.json();
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
   }
-});
+);
 
-// Аналогично для телефона — requestPhoneChange, confirmPhoneChange
 // Запросить код для смены телефона (шаг 1)
 export const requestPhoneChange = createAsyncThunk(
   'profile/requestPhoneChange',
-  async ({ newPhone }, { getState, rejectWithValue }) => {
+  async ({ newPhone }, { getState, dispatch, rejectWithValue }) => {
     try {
-      const token = getState().auth.token;
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/user/request-phone-change`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/request-phone-change`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ newPhone })
         },
-        body: JSON.stringify({ newPhone })
-      });
+        { dispatch, getState }
+      );
       if (!response.ok) {
-  const error = await response.json();
-  throw new Error(error.message || 'Ошибка отправки SMS-кода');
-}
-
+        const error = await response.json();
+        throw new Error(error.message || 'Ошибка отправки SMS-кода');
+      }
       return response.json();
     } catch (error) {
       return rejectWithValue(error.message);
@@ -159,17 +191,19 @@ export const requestPhoneChange = createAsyncThunk(
 // Подтвердить код и завершить смену телефона (шаг 2)
 export const confirmPhoneChange = createAsyncThunk(
   'profile/confirmPhoneChange',
-  async ({ code, newPhone }, { getState, rejectWithValue }) => {
+  async ({ code, newPhone }, { getState, dispatch, rejectWithValue }) => {
     try {
-      const token = getState().auth.token;
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/user/confirm-phone-change`, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json'
+      const response = await fetchWithRefresh(
+        `${process.env.REACT_APP_API_URL}/user/confirm-phone-change`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ code, newPhone })
         },
-        body: JSON.stringify({ code, newPhone }) // для телефона
-      });
+        { dispatch, getState }
+      );
       if (!response.ok) throw new Error('Ошибка подтверждения телефона');
       return response.json();
     } catch (error) {
@@ -177,6 +211,7 @@ export const confirmPhoneChange = createAsyncThunk(
     }
   }
 );
+
 
 // ...по аналогии можешь добавить updateAddress, deleteAddress и т.д.
 
