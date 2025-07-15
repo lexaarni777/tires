@@ -7,7 +7,7 @@ export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { ge
   let token = auth.token;
 
   // 1. Первый запрос — с текущим accessToken
-  let response = await fetch('http://localhost:5000/api/orders', {
+  let response = await fetch(`${process.env.REACT_APP_API_URL}/orders`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -15,7 +15,7 @@ export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { ge
 
   // 2. Если токен истёк — пробуем обновить через refresh
   if (response.status === 401) {
-    const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+    const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
       method: 'POST',
       credentials: 'include', // чтобы отправить httpOnly cookie
     });
@@ -32,7 +32,7 @@ export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { ge
     localStorage.setItem('token', token);
 
     // Повторяем запрос
-    response = await fetch('http://localhost:5000/api/orders', {
+    response = await fetch(`${process.env.REACT_APP_API_URL}/orders`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -74,7 +74,7 @@ export const cancelOrder = createAsyncThunk(
   'orders/cancelOrder',
   async (orderId, { getState }) => {
     const { auth } = getState();
-    const response = await fetch(`http://localhost:5000/api/orders/cancel/${orderId}`, {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/orders/cancel/${orderId}`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${auth.token}`

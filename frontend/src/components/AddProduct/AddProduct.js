@@ -94,8 +94,8 @@ const uploadImages = async (productId, brand, model) => {
     formData.append('image', file);
 
     const url = useAsReference
-      ? `http://localhost:5000/api/images/model/${brand}/${model}`
-      : `http://localhost:5000/api/images/${productId}/upload-image`;
+      ? `${process.env.REACT_APP_API_URL}/images/model/${brand}/${model}`
+      : `${process.env.REACT_APP_API_URL}/images/${productId}/upload-image`;
 
     await fetch(url, {
       method: 'POST',

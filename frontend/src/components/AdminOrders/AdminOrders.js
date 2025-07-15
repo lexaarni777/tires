@@ -17,12 +17,12 @@ const AdminOrders = () => {
         let accessToken = token;
 
         let response = await fetch(
-          `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+          `${process.env.REACT_APP_API_URL}/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
         if (response.status === 401) {
-          const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+          const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
             method: 'POST',
             credentials: 'include',
           });
@@ -33,7 +33,7 @@ const AdminOrders = () => {
           localStorage.setItem('token', accessToken);
 
           response = await fetch(
-            `http://localhost:5000/api/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+            `${process.env.REACT_APP_API_URL}/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
           );
         }
@@ -55,12 +55,12 @@ const AdminOrders = () => {
     try {
       let accessToken = token;
 
-      let response = await fetch(`http://localhost:5000/api/admin/orders/${id}`, {
+      let response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (response.status === 401) {
-        const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+        const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         });
@@ -70,7 +70,7 @@ const AdminOrders = () => {
         accessToken = data.accessToken;
         localStorage.setItem('token', accessToken);
 
-        response = await fetch(`http://localhost:5000/api/admin/orders/${id}`, {
+        response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
       }
@@ -101,7 +101,7 @@ const AdminOrders = () => {
     try {
       let accessToken = token;
 
-      let response = await fetch(`http://localhost:5000/api/admin/orders/${id}/status`, {
+      let response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +111,7 @@ const AdminOrders = () => {
       });
 
       if (response.status === 401) {
-        const refreshResp = await fetch('http://localhost:5000/api/auth/refresh', {
+        const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         });
@@ -121,7 +121,7 @@ const AdminOrders = () => {
         accessToken = data.accessToken;
         localStorage.setItem('token', accessToken);
 
-        response = await fetch(`http://localhost:5000/api/admin/orders/${id}/status`, {
+        response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}/status`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

@@ -4,7 +4,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 export const fetchProfile = createAsyncThunk('profile/fetchProfile', async (_, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
-    const response = await fetch('http://localhost:5000/api/user/profile', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/profile`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -19,7 +19,7 @@ export const fetchProfile = createAsyncThunk('profile/fetchProfile', async (_, {
 export const updateProfile = createAsyncThunk('profile/updateProfile', async (userData, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
-    const response = await fetch('http://localhost:5000/api/user/profile', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/profile`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -38,7 +38,7 @@ export const updateProfile = createAsyncThunk('profile/updateProfile', async (us
 export const changePassword = createAsyncThunk('profile/changePassword', async ({ oldPassword, newPassword }, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
-    const response = await fetch('http://localhost:5000/api/user/change-password', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/change-password`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -61,7 +61,7 @@ export const changePassword = createAsyncThunk('profile/changePassword', async (
 export const fetchAddresses = createAsyncThunk('profile/fetchAddresses', async (_, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
-    const response = await fetch('http://localhost:5000/api/user/addresses', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/addresses`, {
       method: 'GET',
       headers: { Authorization: `Bearer ${token}` }
     });
@@ -76,7 +76,7 @@ export const fetchAddresses = createAsyncThunk('profile/fetchAddresses', async (
 export const addAddress = createAsyncThunk('profile/addAddress', async (addressData, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
-    const response = await fetch('http://localhost:5000/api/user/addresses', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/addresses`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -95,7 +95,7 @@ export const addAddress = createAsyncThunk('profile/addAddress', async (addressD
 export const requestEmailChange = createAsyncThunk('profile/requestEmailChange', async ({ newEmail }, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
-    const response = await fetch('http://localhost:5000/api/user/request-email-change', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/request-email-change`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -114,7 +114,7 @@ export const requestEmailChange = createAsyncThunk('profile/requestEmailChange',
 export const confirmEmailChange = createAsyncThunk('profile/confirmEmailChange', async ({ code, newEmail }, { getState, rejectWithValue }) => {
   try {
     const token = getState().auth.token;
-    const response = await fetch('http://localhost:5000/api/user/confirm-email-change', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/user/confirm-email-change`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
@@ -136,7 +136,7 @@ export const requestPhoneChange = createAsyncThunk(
   async ({ newPhone }, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
-      const response = await fetch('http://localhost:5000/api/user/request-phone-change', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/user/request-phone-change`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -162,7 +162,7 @@ export const confirmPhoneChange = createAsyncThunk(
   async ({ code, newPhone }, { getState, rejectWithValue }) => {
     try {
       const token = getState().auth.token;
-      const response = await fetch('http://localhost:5000/api/user/confirm-phone-change', {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/user/confirm-phone-change`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -228,8 +228,13 @@ const profileSlice = createSlice({
         state.error = action.payload;
       })
       // адреса
+      .addCase(fetchAddresses.pending, (state) => {
+        state.status = 'loading';
+        state.error = null;
+      })
       .addCase(fetchAddresses.fulfilled, (state, action) => {
         state.addresses = action.payload.addresses;
+        state.error = null;
       })
       .addCase(addAddress.fulfilled, (state, action) => {
         state.addresses.push(action.payload.address);

@@ -3,7 +3,7 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 // Асинхронное действие для регистрации
 export const registerUser = createAsyncThunk('auth/registerUser', async (userData, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/register', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(userData),
@@ -27,7 +27,7 @@ export const registerUser = createAsyncThunk('auth/registerUser', async (userDat
 
 export const sendSmsCode = createAsyncThunk('auth/sendSmsCode', async ({ phone }, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/send-sms', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/send-sms`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ phone }),
@@ -50,7 +50,7 @@ export const sendSmsCode = createAsyncThunk('auth/sendSmsCode', async ({ phone }
 
 export const refreshAccessToken = createAsyncThunk('auth/refreshToken', async (_, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/refresh', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
       method: 'POST',
       credentials: 'include', // чтобы отправить httpOnly cookie
     });
@@ -67,7 +67,7 @@ export const refreshAccessToken = createAsyncThunk('auth/refreshToken', async (_
 // Асинхронное действие для авторизации
 export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { rejectWithValue }) => {
     try {
-        const response = await fetch('http://localhost:5000/api/auth/login', {
+        const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -94,7 +94,7 @@ export const loginUser = createAsyncThunk('auth/loginUser', async (userData, { r
 // Отправка кода для сброса (универсально)
 export const sendResetCode = createAsyncThunk('auth/sendResetCode', async ({ phone, email }, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/send-reset-code', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/send-reset-code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(phone ? { phone } : { email }),
@@ -119,7 +119,7 @@ export const sendResetCode = createAsyncThunk('auth/sendResetCode', async ({ pho
 // Сброс пароля (универсально)
 export const resetPassword = createAsyncThunk('auth/resetPassword', async ({ phone, email, code, newPassword }, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/reset-password', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/reset-password`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(phone ? { phone, code, newPassword } : { email, code, newPassword }),
@@ -144,7 +144,7 @@ export const resetPassword = createAsyncThunk('auth/resetPassword', async ({ pho
 // Отправить email-код
 export const sendEmailCode = createAsyncThunk('auth/sendEmailCode', async ({ email }, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/send-email-code', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/send-email-code`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -169,7 +169,7 @@ export const sendEmailCode = createAsyncThunk('auth/sendEmailCode', async ({ ema
 // Подтверждение email и завершение регистрации
 export const verifyEmail = createAsyncThunk('auth/verifyEmail', async ({ email, code, password }, { rejectWithValue }) => {
   try {
-    const response = await fetch('http://localhost:5000/api/auth/verify-email', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/auth/verify-email`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, code, password }),

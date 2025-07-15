@@ -11,7 +11,7 @@ export const fetchStock = createAsyncThunk(
     // Формируем query string из объекта фильтров (пример: ?tyre_id=5&location=Москва-1)
     const query = new URLSearchParams(params).toString();
     const response = await fetch(
-      `http://localhost:5000/api/products/stock${query ? `?${query}` : ""}`
+      `${process.env.REACT_APP_API_URL}/products/stock${query ? `?${query}` : ""}`
     );
     if (!response.ok) {
       throw new Error("Ошибка при загрузке остатков шин");
@@ -27,7 +27,7 @@ export const addStock = createAsyncThunk(
   "stock/addStock",
   async (stockData, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
-    const response = await fetch("http://localhost:5000/api/products/stock", {
+    const response = await fetch("${process.env.REACT_APP_API_URL}/products/stock", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -54,7 +54,7 @@ export const uploadStockFromExcel = createAsyncThunk(
     formData.append("file", file);
     const token = localStorage.getItem("token");
     const response = await fetch(
-      "http://localhost:5000/api/products/stock/upload",
+      `${process.env.REACT_APP_API_URL}/products/stock/upload`,
       {
         method: "POST",
         headers: {
@@ -79,7 +79,7 @@ export const updateStock = createAsyncThunk(
   async ({ id, stockData }, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
     const response = await fetch(
-      `http://localhost:5000/api/products/stock/${id}`,
+      `${process.env.REACT_APP_API_URL}/products/stock/${id}`,
       {
         method: "PUT",
         headers: {
@@ -105,7 +105,7 @@ export const deleteStock = createAsyncThunk(
   async (id, { rejectWithValue }) => {
     const token = localStorage.getItem("token");
     const response = await fetch(
-      `http://localhost:5000/api/products/stock/${id}`,
+      `${process.env.REACT_APP_API_URL}/products/stock/${id}`,
       {
         method: "DELETE",
         headers: {

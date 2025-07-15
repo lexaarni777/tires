@@ -11,7 +11,7 @@ export const fetchProducts = createAsyncThunk(
     // Формируем query-string для фильтрации: ?brand=Triangle&size=205/55R16
     const query = new URLSearchParams(params).toString();
     const response = await fetch(
-      `http://localhost:5000/api/products/catalog${query ? `?${query}` : ''}`
+      `${process.env.REACT_APP_API_URL}/products/catalog${query ? `?${query}` : ''}`
     );
     if (!response.ok) {
       throw new Error('Ошибка при загрузке каталога');
@@ -29,7 +29,7 @@ export const deleteProduct = createAsyncThunk(
   async (id) => {
     const token = localStorage.getItem('token');
     const response = await fetch(
-      `http://localhost:5000/api/products/catalog/${id}`,
+      `${process.env.REACT_APP_API_URL}/products/catalog/${id}`,
       {
         method: 'DELETE',
         headers: {
@@ -53,7 +53,7 @@ export const addProduct = createAsyncThunk(
   'products/addProduct',
   async (productData) => {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:5000/api/products/catalog', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/products/catalog`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export const addStock = createAsyncThunk(
   'products/addStock',
   async (stockData) => {
     const token = localStorage.getItem('token');
-    const response = await fetch('http://localhost:5000/api/products/stock', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/products/stock`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -102,7 +102,7 @@ export const uploadProductsFromExcel = createAsyncThunk(
     formData.append('file', file);
     const token = localStorage.getItem('token');
     const response = await fetch(
-      'http://localhost:5000/api/products/catalog/upload',
+      `${process.env.REACT_APP_API_URL}/products/catalog/upload`,
       {
         method: 'POST',
         headers: {

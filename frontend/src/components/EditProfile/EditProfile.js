@@ -72,6 +72,13 @@ useEffect(() => {
   }
 }, [user]);
 
+useEffect(() => {
+  return () => {
+    dispatch(resetProfileState());
+  };
+}, [dispatch]);
+
+
 
   const handleFormChange = (e) => {
     setForm((prev) => ({ ...prev, [e.target.name]: e.target.value }));
@@ -101,11 +108,6 @@ useEffect(() => {
     });
   };
 
-const handleAddressChange = (e) => {
-  setNewAddress({ address: e.target.value });
-  if (error) dispatch(resetProfileState());
-};
-
   const handleAddAddress = (e) => {
     e.preventDefault();
     dispatch(addAddress(newAddress)).then((res) => {
@@ -118,7 +120,7 @@ const handleAddressChange = (e) => {
 
   const handleRequestPhoneCode = (e) => {
     e.preventDefault();
-    if (!newPhone.match(/^[0-9\-\+\s\(\)]{10,}$/)) {
+    if (!newPhone.match(/^[0-9\-+\s()]{10,}$/)) {
       setSuccessMsg('Некорректный номер');
       return;
     }
