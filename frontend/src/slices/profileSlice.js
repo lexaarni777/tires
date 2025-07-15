@@ -65,7 +65,7 @@ export const fetchAddresses = createAsyncThunk('profile/fetchAddresses', async (
       method: 'GET',
       headers: { Authorization: `Bearer ${token}` }
     });
-    if (!response.ok) throw new Error('Ошибка получения адресов');
+    if (!response.ok) throw new Error('Ошибка получения адресов 1');
     return response.json();
   } catch (error) {
     return rejectWithValue(error.message);

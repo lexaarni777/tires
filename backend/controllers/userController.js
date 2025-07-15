@@ -108,7 +108,7 @@ const result = await pool.query(
 exports.updateAddress = async (req, res) => {
   try {
     const userId = req.user.id;
-    const { addressId } = req.params.id;
+    const addressId = req.params.id;
     const { address } = req.body;
     await pool.query(
     'UPDATE addresses SET address = $1 WHERE id = $2 AND user_id = $3',

@@ -151,10 +151,10 @@ exports.updateProductInDB = async (productId, productData) => {
       recommended_rim_width = $12,
       diameter = $13,
       country = $14,
-      description = $15
+      description = $15,
       studs = $16,
       profile = $17
-    WHERE id = $16
+    WHERE id = $18
     RETURNING *;
   `;
 
