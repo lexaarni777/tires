@@ -88,7 +88,7 @@ console.log('items', orders)
               <li key={item.product_id} className={styles.orders__item}>
               {item.image && (
                 <img
-                  src={`http://localhost:5000${getThumbnailPath(item.image)}`}
+                  src={`${API_URL}${getThumbnailPath(item.image)}`}
                   alt={item.name}
                   className={styles.orders__itemImage}
                   onClick={() => navigate(`/productdetailed/${item.product_id}`)}  

@@ -22,7 +22,7 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
       <div className={styles.header}>
         <img
           className={styles.image}
-          src={tyres[0]?.images?.[0]?.image_path ? `http://localhost:5000${tyres[0].images[0].image_path}` : 'https://via.placeholder.com/100'}
+          src={tyres[0]?.images?.[0]?.image_path ? `${API_URL}${tyres[0].images[0].image_path}` : 'https://via.placeholder.com/100'}
           alt={tyres[0].name}
         />
         <div className={styles.title}>{brand} {model}</div>
@@ -57,7 +57,7 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
 
             const getImage = () => {
               return tyre.images?.[0]?.image_path
-                ? `http://localhost:5000${tyre.images[0].image_path}`
+                ? `${API_URL}${tyre.images[0].image_path}`
                 : 'https://via.placeholder.com/150';
             };
 

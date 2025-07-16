@@ -4,6 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementToCart } from "../../slices/cartSlice";
 import styles from "./ProductCard.module.scss";
 import { warehouseList } from "../../constants/warehouseList"; // Список складов
+const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+// убираем /api, если он в переменной
+
 
 /**
  * ProductCard — карточка товара.
@@ -88,14 +91,14 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   if (product.images && product.images.length > 0) {
     const featured = product.images.find((img) => img.is_featured_image);
     return featured
-      ? `http://localhost:5000${featured.image_path}`
-      : `http://localhost:5000${product.images[0].image_path}`;
+      ? `${API_URL}${featured.image_path}`
+      : `${API_URL}${product.images[0].image_path}`;
   }
   if (product.model_images && product.model_images.length > 0) {
     const featured = product.model_images.find((img) => img.is_featured_image);
     return featured
-      ? `http://localhost:5000${featured.image_path}`
-      : `http://localhost:5000${product.model_images[0].image_path}`;
+      ? `${API_URL}${featured.image_path}`
+      : `${API_URL}${product.model_images[0].image_path}`;
   }
   return 'https://via.placeholder.com/150';
 };

@@ -74,7 +74,7 @@ app.use(express.json()); // Для обработки JSON в теле запр�
 app.use(cookieParser()); // Для обработки cookies
 app.use('/uploads', express.static('uploads')); // Статические файлы для изображений
 app.use(session({
-  secret: 'ваш_секретный_ключ', // Используйте секретный ключ для шифрования сессий
+  secret: process.env.SESSION_SECRET, // Используйте секретный ключ для шифрования сессий
   resave: false,
   saveUninitialized: true,
   cookie: { maxAge: 600000 } // Сессия будет активна в течение 10 минут

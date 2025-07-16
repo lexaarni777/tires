@@ -387,13 +387,13 @@ const handleDeleteModelImage = async (imageId) => {
       {/* Показывать миниатюру для главного изображения */}
       {image.is_featured_image ? (
         <img
-          src={`http://localhost:5000${getThumbPath(image) || image.image_path}`}
+          src={`${API_URL}${getThumbPath(image) || image.image_path}`}
           alt={`Главная миниатюра`}
           className={styles.image}
         />
       ) : (
         <img
-          src={`http://localhost:5000${image.image_path}`}
+          src={`${API_URL}${image.image_path}`}
           alt={`Uploaded ${image.id}`}
           className={styles.image}
         />
@@ -448,7 +448,7 @@ const handleDeleteModelImage = async (imageId) => {
   {modelImages.map((image) => (
     <div key={image.id} className={styles.imageItem}>
       <img
-        src={`http://localhost:5000${image.image_path}`}
+        src={`${API_URL}${image.image_path}`}
         alt={`Model ${image.id}`}
         className={styles.image}
       />
