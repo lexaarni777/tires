@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import styles from './EditProduct.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
+const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
 const EditProduct = () => {
   const { id } = useParams();

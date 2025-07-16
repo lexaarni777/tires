@@ -7,6 +7,7 @@ import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSli
 import styles from "./ProductDetailed.module.scss";
 import { deleteProduct } from "../../slices/productSlice";
 import { warehouseList } from "../../constants/warehouseList";
+const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
 
 

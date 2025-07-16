@@ -4,6 +4,7 @@ import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
 import styles from './Orders.module.scss';
 import { useNavigate } from 'react-router-dom';
 import { getThumbnailPath } from '../../utils/thumb';
+const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
 const Orders = () => {
   const dispatch = useDispatch();

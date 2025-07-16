@@ -1,0 +1,17 @@
+   DATABASE_URL=postgres://postgres:123456@localhost:5432/tires
+   JWT_SECRET=s3Cr3t!k3y$%^12345very$trong
+   SMS_GATEWAY_URL = http://192.168.1.54:8080
+   SMS_GATEWAY_USER = sms
+   SMS_GATEWAY_PASS = THd9FapE
+   SMTP_HOST=smtp.yandex.ru
+   SMTP_PORT=465
+   SMTP_USER=Lexaarni777@yandex.ru
+   SMTP_PASS=zckxfnvcibrkuvji
+   JWT_REFRESH_SECRET=fg9#Svdn%Y9dF!4^JhQ3x7P$1wZtrN5q2kUi
+   JWT_ACCESS_EXPIRES_IN=1m
+   JWT_REFRESH_EXPIRES_IN=30d
+   CLIENT_URL=http://localhost:3000
+   SESSION_SECRET=7f0b6c23e987r4a2m1o1p95v0bc1aa70
+
+
+

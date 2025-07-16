@@ -5,6 +5,7 @@ import { fetchProfile, fetchAddresses} from '../../slices/profileSlice';
 import { useNavigate } from 'react-router-dom';
 import styles from './Cart.module.scss';
 import { getThumbnailPath } from '../../utils/thumb';
+const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
 const Cart = () => {
   const dispatch = useDispatch();

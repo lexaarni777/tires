@@ -4,6 +4,7 @@ import { addToCart, decrementToCart } from '../../slices/cartSlice';
 import styles from './TyreResultCard.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
 import { useNavigate } from 'react-router-dom';
+const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
 const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
   const dispatch = useDispatch();
