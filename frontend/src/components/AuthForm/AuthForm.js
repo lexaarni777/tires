@@ -13,35 +13,43 @@ const AuthForm = () => {
     const user = useSelector((state) => state.auth.user);
     const navigate = useNavigate();
    
-
+  
     const [isRegistering, setIsRegistering] = useState(false);
-    const [phone, setPhone] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [code, setCode] = useState('');
-    const [isCodeSent, setIsCodeSent] = useState(false);
-    const [useEmail, setUseEmail] = useState(false);
+   
     const [showMergeModal, setShowMergeModal] = useState(false);
-    const [phoneError, setPhoneError] = useState('');
-    const [emailError, setEmailError] = useState('');
-    const [resetPhoneError, setResetPhoneError] = useState('');
-    const [resetEmailError, setResetEmailError] = useState('');
+    const [form, setForm] = useState({
+      phone: '',
+      email: '',
+      password: '',
+      code: '',
+      newPassword: '',
+      repeatPassword: '',
+      emailCode: '',
+      resetPhone: '',
+      resetEmail: '',
+      resetCode: '',
+    });
+    const [errors, setErrors] = useState({});
+    const [authMode, setAuthMode] = useState('phone'); // 'phone' или 'email'
+    const [registerStep, setRegisterStep] = useState('start'); // 'start' | 'code' | 'finish'
+
+
 
 
 
     const [isResetting, setIsResetting] = useState(false);
     const [resetStep, setResetStep] = useState('request'); // request, verify, change
-    const [resetPhone, setResetPhone] = useState('');
-    const [resetEmail, setResetEmail] = useState('');
-    const [resetCode, setResetCode] = useState('');
-    const [newPass1, setNewPass1] = useState('');
-    const [newPass2, setNewPass2] = useState('');
-    const [resetError, setResetError] = useState('');
-
-    const [isEmailCodeSent, setIsEmailCodeSent] = useState(false); // Код уже отправлен?
-    const [emailCode, setEmailCode] = useState('');                // Введённый пользователем код
-
-
+    const handleChange = (e) => {
+    const { name, value } = e.target;
+    setForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+    setErrors(prev => ({
+      ...prev,
+      [name]: ''
+    }));
+    };
 
 
     const dispatch = useDispatch();
@@ -76,51 +84,80 @@ const AuthForm = () => {
 
     // Отправка кода на телефон (регистрация)
     const handleSendCode = async (e) => {
-        e.preventDefault();
-        if (!phone) return;
-        const res = await dispatch(sendSmsCode({ phone }));
-        if (res.meta.requestStatus === 'fulfilled') setIsCodeSent(true);
+      e.preventDefault();
+      if (!form.phone) return;
+      const res = await dispatch(sendSmsCode({ phone: form.phone }));
+      // Если нужен переход шага, делай через setForm или setErrors, а не setIsCodeSent.
     };
+
 
     // Регистрация пользователя (телефон/код/пароль/или email)
     const handleRegister = (e) => {
         e.preventDefault();
-        // Только регистрация по телефону (старый flow)
-        if (!phone && !email) return alert('Укажите телефон или email');
-        if (phone && !validatePhone(phone)) return setPhoneError('Некорректный номер');
-        if (email && !validateEmail(email)) return setEmailError('Некорректный email');
-        if (phone && isCodeSent) {
-            dispatch(registerUser({ phone, email, password, code }));
+        const errors = {};
+        if (!form.phone && !form.email) errors.phone = 'Укажите телефон или email';
+        if (form.phone && !validatePhone(form.phone)) errors.phone = 'Некорректный номер';
+        if (form.email && !validateEmail(form.email)) errors.email = 'Некорректный email';
+        if (!form.code) errors.code = 'Введите код';
+        if (!form.password) errors.password = 'Введите пароль';
+        if (Object.keys(errors).length > 0) {
+          setErrors(errors);
+          return;
         }
-        // else if (email && !phone) — удалить! Это больше не актуально!
-    };
+        dispatch(registerUser({
+          phone: form.phone,
+          email: form.email,
+          password: form.password,
+          code: form.code
+        }));
+      };
 
     // Логин (можно по телефону или email)
     const handleLogin = (e) => {
         e.preventDefault();
-        if (!phone && !email) return alert('Укажите телефон или email');
-        if (phone && !validatePhone(phone)) return setPhoneError('Некорректный номер');
-        if (email && !validateEmail(email)) return setEmailError('Некорректный email');
-        dispatch(loginUser({ phone, email, password }));
+        const errors = {};
+        if (!form.phone && !form.email) errors.email = 'Укажите телефон или email';
+        if (form.phone && !validatePhone(form.phone)) errors.phone = 'Некорректный номер';
+        if (form.email && !validateEmail(form.email)) errors.email = 'Некорректный email';
+        if (!form.password) errors.form = 'Введите пароль';
+        if (Object.keys(errors).length > 0) {
+            setErrors(errors);
+            return;
+        }
+        dispatch(loginUser({ 
+          phone: form.phone, 
+          email: form.email, 
+          password: form.password
+        }));
     };
 
-    const handleSendEmailCode = async (e) => {
-    e.preventDefault();
-        if (!email) return alert('Введите email');
-        const res = await dispatch(sendEmailCode({ email }));
-        if (res.meta.requestStatus === 'fulfilled') setIsEmailCodeSent(true);
-    };
+      const handleSendEmailCode = async (e) => {
+        e.preventDefault();
+        if (!form.email) {
+          setErrors({ email: 'Введите email' });
+          return;
+        }
+        const res = await dispatch(sendEmailCode({ email: form.email }));
+        // Для переключения шага используй дополнительный стейт или form (например, form.emailCodeStep = true)
+      };
+
 
 const handleVerifyEmail = async (e) => {
-    e.preventDefault();
-    if (!email || !emailCode || !password) return alert('Все поля обязательны');
-    const res = await dispatch(verifyEmail({ email, code: emailCode, password }));
-    if (res.meta.requestStatus === 'fulfilled') {
-        // После успешной верификации — логин!
-        await dispatch(loginUser({ email, password }));
-        // navigate('/cart') не нужен, useEffect сам сработает на user
-    }
+  e.preventDefault();
+  const errors = {};
+  if (!form.email) errors.email = 'Введите email';
+  if (!form.emailCode) errors.emailCode = 'Введите код';
+  if (!form.password) errors.password = 'Введите пароль';
+  if (Object.keys(errors).length > 0) {
+    setErrors(errors);
+    return;
+  }
+  const res = await dispatch(verifyEmail({ email: form.email, code: form.emailCode, password: form.password }));
+  if (res.meta.requestStatus === 'fulfilled') {
+    await dispatch(loginUser({ email: form.email, password: form.password }));
+  }
 };
+
 
 
 
@@ -129,200 +166,260 @@ const handleVerifyEmail = async (e) => {
 <div className={styles.authForm}>
   <h2 className={styles.title}>{isRegistering ? 'Регистрация' : 'Авторизация'}</h2>
   
-  {/* Чекбокс выбора email */}
+
+  
+<form className={styles.form}>
+  {/* Чекбокс выбора email/телефон */}
   <div className={styles.toggleEmailRow}>
     <label className={styles.toggleEmailLabel}>
       <input
         type="checkbox"
-        checked={useEmail}
+        checked={authMode === 'email'}
         onChange={() => {
-          setUseEmail((prev) => !prev);
-          setEmail('');
-          setPhone('');
-          setIsCodeSent(false);
+          setAuthMode(authMode === 'email' ? 'phone' : 'email');
+          setRegisterStep('start');
+          setForm({
+            ...form,
+            phone: '',
+            email: '',
+            code: '',
+            password: '',
+            emailCode: ''
+          });
+          setErrors({});
         }}
       />
       Использовать Email вместо телефона
     </label>
   </div>
-  
-  <form
-    onSubmit={isRegistering
-      ? (!useEmail && phone && !isCodeSent ? handleSendCode : handleRegister)
-      : handleLogin}
-    className={styles.form}
-  >
-    {/* Телефон */}
-    {!useEmail && (
+
+  {/* Регистрация — телефон */}
+  {isRegistering && authMode === 'phone' && registerStep === 'start' && (
+    <>
       <div className={styles.fieldGroup}>
         <label className={styles.label}>Телефон:</label>
         <input
           type="tel"
-          value={phone}
-          onChange={e => {
-            setPhone(e.target.value);
-            setPhoneError(validatePhone(e.target.value) ? '' : 'Некорректный номер');
-          }}
+          name="phone"
+          value={form.phone}
+          onChange={handleChange}
           className={styles.input}
           placeholder="+7..."
-          disabled={isCodeSent && isRegistering}
-          autoFocus={!useEmail}
+          autoFocus
         />
-        {phoneError && <div className={styles.error}>{phoneError}</div>}
+        {errors.phone && <div className={styles.error}>{errors.phone}</div>}
       </div>
-    )}
-    {/* Email */}
-    {useEmail && (
+      <button
+        type="button"
+        className={styles.button}
+        onClick={async () => {
+          if (!form.phone) return setErrors({ phone: 'Введите телефон' });
+          if (!validatePhone(form.phone)) return setErrors({ phone: 'Некорректный номер' });
+          const res = await dispatch(sendSmsCode({ phone: form.phone }));
+          if (res.meta.requestStatus === 'fulfilled') setRegisterStep('code');
+        }}
+        disabled={status === 'loading'}
+      >
+        Получить код
+      </button>
+    </>
+  )}
+
+  {isRegistering && authMode === 'phone' && registerStep === 'code' && (
+    <>
       <div className={styles.fieldGroup}>
-        <label className={styles.label}>Email:</label>
+        <label className={styles.label}>Код из SMS:</label>
         <input
-          type="email"
-          value={email}
-          onChange={e => {
-            setEmail(e.target.value);
-            setEmailError(validateEmail(e.target.value) ? '' : 'Некорректный email');
-          }}
+          type="text"
+          name="code"
+          value={form.code}
+          onChange={handleChange}
           className={styles.input}
-          placeholder="you@example.com"
-          autoFocus={useEmail}
         />
-      {emailError && <div className={styles.error}>{emailError}</div>}
+        {errors.code && <div className={styles.error}>{errors.code}</div>}
       </div>
-    )}
-
-    {/* Только для регистрации с телефоном: код и пароль */}
-    {isRegistering && !useEmail && phone && isCodeSent && (
-      <>
-        <div className={styles.fieldGroup}>
-          <label className={styles.label}>Код из SMS:</label>
-          <input
-            type="text"
-            value={code}
-            onChange={e => setCode(e.target.value)}
-            required
-            className={styles.input}
-          />
-        </div>
-        <div className={styles.fieldGroup}>
-          <label className={styles.label}>Пароль:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            required
-            className={styles.input}
-          />
-        </div>
-      </>
-    )}
-
-    {/* Регистрация по email с подтверждением кода */}
-{isRegistering && useEmail && (
-  <>
-    {!isEmailCodeSent ? (
-      // Первый шаг — отправить код
-      <>
-        <div className={styles.fieldGroup}>
-          <label className={styles.label}>Email:</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => {
-              setEmail(e.target.value);
-              setEmailError(validateEmail(e.target.value) ? '' : 'Некорректный email');
-            }}
-            className={styles.input}
-            placeholder="you@example.com"
-            autoFocus
-          />
-        </div>
-        <button
-          type="button"
-          onClick={handleSendEmailCode}
-          className={styles.button}
-          disabled={status === 'loading'}
-        >
-          Получить код на email
-        </button>
-      </>
-    ) : (
-      // Второй шаг — ввод кода и пароля
-      <>
-        <div className={styles.fieldGroup}>
-          <label className={styles.label}>Код из email:</label>
-          <input
-            type="text"
-            value={emailCode}
-            onChange={e => setEmailCode(e.target.value)}
-            className={styles.input}
-            placeholder="4-значный код"
-            autoFocus
-          />
-        </div>
-        <div className={styles.fieldGroup}>
-          <label className={styles.label}>Пароль:</label>
-          <input
-            type="password"
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            className={styles.input}
-            placeholder="Придумайте пароль"
-          />
-        </div>
-        <button
-          type="button"
-          onClick={handleVerifyEmail}
-          className={styles.button}
-          disabled={status === 'loading'}
-        >
-          Завершить регистрацию
-        </button>
-      </>
-    )}
-  </>
-)}
-
-
-    {/* Вход — телефон/email + пароль */}
-    {!isRegistering && (
       <div className={styles.fieldGroup}>
         <label className={styles.label}>Пароль:</label>
         <input
           type="password"
-          value={password}
-          onChange={e => setPassword(e.target.value)}
-          required
+          name="password"
+          value={form.password}
+          onChange={handleChange}
           className={styles.input}
         />
+        {errors.password && <div className={styles.error}>{errors.password}</div>}
       </div>
-    )}
+      <button
+        type="button"
+        className={styles.button}
+        onClick={handleRegister}
+        disabled={status === 'loading'}
+      >
+        Зарегистрироваться
+      </button>
+      <button
+        type="button"
+        onClick={() => setRegisterStep('start')}
+        className={styles.toggleButton}
+      >
+        Назад
+      </button>
+    </>
+  )}
 
-    {status === 'loading' && <p className={styles.loading}>Загрузка...</p>}
-    {error && <p className={styles.error}>{error}</p>}
-    <button
-      type="submit"
-      disabled={status === 'loading'}
-      className={styles.button}
-    >
-      {isRegistering
-        ? (!useEmail && phone && !isCodeSent ? 'Получить код' : 'Зарегистрироваться')
-        : 'Войти'}
-    </button>
-    <button
-      type="button"
-      onClick={() => {
-        setIsRegistering(!isRegistering);
-        setIsCodeSent(false);
-        setPassword('');
-        setCode('');
-        setPhone('');
-        setEmail('');
-      }}
-      className={styles.toggleButton}
-    >
-      {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
-    </button>
-  </form>
+  {/* Регистрация — email */}
+  {isRegistering && authMode === 'email' && registerStep === 'start' && (
+    <>
+      <div className={styles.fieldGroup}>
+        <label className={styles.label}>Email:</label>
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          className={styles.input}
+          autoFocus
+          placeholder="you@example.com"
+        />
+        {errors.email && <div className={styles.error}>{errors.email}</div>}
+      </div>
+      <button
+        type="button"
+        className={styles.button}
+        onClick={async () => {
+          if (!form.email) return setErrors({ email: 'Введите email' });
+          if (!validateEmail(form.email)) return setErrors({ email: 'Некорректный email' });
+          const res = await dispatch(sendEmailCode({ email: form.email }));
+          if (res.meta.requestStatus === 'fulfilled') setRegisterStep('code');
+        }}
+        disabled={status === 'loading'}
+      >
+        Получить код на email
+      </button>
+    </>
+  )}
+
+  {isRegistering && authMode === 'email' && registerStep === 'code' && (
+    <>
+      <div className={styles.fieldGroup}>
+        <label className={styles.label}>Код из email:</label>
+        <input
+          type="text"
+          name="emailCode"
+          value={form.emailCode}
+          onChange={handleChange}
+          className={styles.input}
+          placeholder="4-значный код"
+        />
+        {errors.emailCode && <div className={styles.error}>{errors.emailCode}</div>}
+      </div>
+      <div className={styles.fieldGroup}>
+        <label className={styles.label}>Пароль:</label>
+        <input
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          className={styles.input}
+          placeholder="Придумайте пароль"
+        />
+        {errors.password && <div className={styles.error}>{errors.password}</div>}
+      </div>
+      <button
+        type="button"
+        className={styles.button}
+        onClick={handleVerifyEmail}
+        disabled={status === 'loading'}
+      >
+        Завершить регистрацию
+      </button>
+      <button
+        type="button"
+        onClick={() => setRegisterStep('start')}
+        className={styles.toggleButton}
+      >
+        Назад
+      </button>
+    </>
+  )}
+
+  {/* Вход (логин) */}
+  {!isRegistering && (
+    <>
+      {authMode === 'phone' && (
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>Телефон:</label>
+          <input
+            type="tel"
+            name="phone"
+            value={form.phone}
+            onChange={handleChange}
+            className={styles.input}
+            autoFocus
+          />
+          {errors.phone && <div className={styles.error}>{errors.phone}</div>}
+        </div>
+      )}
+      {authMode === 'email' && (
+        <div className={styles.fieldGroup}>
+          <label className={styles.label}>Email:</label>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className={styles.input}
+            autoFocus
+          />
+          {errors.email && <div className={styles.error}>{errors.email}</div>}
+        </div>
+      )}
+      <div className={styles.fieldGroup}>
+        <label className={styles.label}>Пароль:</label>
+        <input
+          type="password"
+          name="password"
+          value={form.password}
+          onChange={handleChange}
+          className={styles.input}
+        />
+        {errors.password && <div className={styles.error}>{errors.password}</div>}
+      </div>
+      <button
+        type="button"
+        className={styles.button}
+        onClick={handleLogin}
+        disabled={status === 'loading'}
+      >
+        Войти
+      </button>
+    </>
+  )}
+
+  <button
+  type="button"
+  className={styles.toggleButton}
+  onClick={() => {
+    setIsRegistering(!isRegistering); // Переключаем режим формы
+    setRegisterStep('start'); // Всегда возвращаемся на начальный шаг регистрации
+    setForm({
+      ...form,
+      phone: '',
+      email: '',
+      code: '',
+      password: '',
+      emailCode: '',
+    }); // Очищаем значения формы (или нужные поля)
+    setErrors({});
+  }}
+>
+  {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
+</button>
+
+
+
+</form>
+
   {!isResetting && (
   <button
     type="button"
@@ -330,13 +427,17 @@ const handleVerifyEmail = async (e) => {
     onClick={() => {
       setIsResetting(true);
       setResetStep('request');
-      setResetPhone('');
-      setResetEmail('');
-      setResetCode('');
-      setNewPass1('');
-      setNewPass2('');
-      setResetError('');
+      setForm({
+        ...form,
+        resetPhone: '',
+        resetEmail: '',
+        resetCode: '',
+        newPassword: '',
+        repeatPassword: '',
+      });
+      setErrors({});
     }}
+
   >
     Забыли пароль?
   </button>
@@ -348,47 +449,49 @@ const handleVerifyEmail = async (e) => {
         <h3>Восстановление пароля</h3>
         <input
           type="tel"
-          value={resetPhone}
-          onChange={e => {
-            setResetPhone(e.target.value);
-            setResetPhoneError(e.target.value === '' ? '' : (validatePhone(e.target.value) ? '' : 'Некорректный номер'));
-          }}
+          name='resetPhone'
+          value={form.resetPhone}
+          onChange={handleChange}
           placeholder="Телефон (+7...)"
           className={styles.input}
-          disabled={!!resetEmail}
+          disabled={!!form.resetEmail}
         />
-        {resetPhoneError && <div className={styles.error}>{resetPhoneError}</div>}
-
+        {errors.resetPhone && <div className={styles.error}>{errors.resetPhone}</div>}
         <input
           type="email"
-          value={resetEmail}
-          onChange={e => {
-            setResetEmail(e.target.value);
-            setResetEmailError(e.target.value === '' ? '' : (validateEmail(e.target.value) ? '' : 'Некорректный email'));
-          }}
+          name='resetEmail' 
+          value={form.resetEmail}
+          onChange={handleChange}
           placeholder="Email"
           className={styles.input}
-          disabled={!!resetPhone}
+          disabled={!!form.resetPhone}
         />
-        {resetEmailError && <div className={styles.error}>{resetEmailError}</div>}
+        {errors.resetEmail && <div className={styles.error}>{errors.resetEmail}</div>}
 
         <button
           onClick={async () => {
-            setResetError('');
-            if (!resetPhone && !resetEmail) return setResetError('Введите телефон или email');
-            if (resetPhone && !validatePhone(resetPhone)) return setResetPhoneError('Некорректный номер');
-            if (resetEmail && !validateEmail(resetEmail)) return setResetEmailError('Некорректный email');
-            if (resetPhoneError || resetEmailError) return; // Блокируем отправку при ошибке
-            const res = await dispatch(sendResetCode({ phone: resetPhone, email: resetEmail }));
+            const errors = {};
+            if (!form.resetPhone && !form.resetEmail) errors.resetPhone = 'Введите телефон или email';
+            if (form.resetPhone && !validatePhone(form.resetPhone)) errors.resetPhone = 'Некорректный номер';
+            if (form.resetEmail && !validateEmail(form.resetEmail)) errors.resetEmail = 'Некорректный email';
+            if (Object.keys(errors).length > 0) {
+              setErrors(errors);
+              return;
+            }
+            const res = await dispatch(sendResetCode({ phone: form.resetPhone, email: form.resetEmail }));
             if (res.meta.requestStatus === 'fulfilled') setResetStep('verify');
-            else setResetError(res.payload || 'Ошибка отправки кода');
+            else if (form.resetPhone)
+              setErrors({ resetPhone: res.payload || 'Ошибка отправки кода на телефон' });
+            else
+              setErrors({ resetEmail: res.payload || 'Ошибка отправки кода на Email' });
           }}
           className={styles.button}
         >
           Получить код
         </button>
         <button className={styles.toggleButton} onClick={() => setIsResetting(false)}>Назад</button>
-        {resetError && <div className={styles.error}>{resetError}</div>}
+        {errors.resetPhone && <div className={styles.error}>{errors.resetPhone}</div>}
+        {errors.resetEmail && <div className={styles.error}>{errors.resetEmail}</div>}
       </>
     )}
 
@@ -397,11 +500,13 @@ const handleVerifyEmail = async (e) => {
         <h3>Введите код</h3>
         <input
           type="text"
-          value={resetCode}
-          onChange={e => setResetCode(e.target.value)}
+          name='resetCode'
+          value={form.resetCode}
+          onChange={handleChange}
           className={styles.input}
           placeholder="Код из SMS/email"
         />
+        {errors.resetCode && <div className={styles.error}>{errors.resetCode}</div>}
         <button
           onClick={() => setResetStep('change')}
           className={styles.button}
@@ -417,40 +522,57 @@ const handleVerifyEmail = async (e) => {
         <h3>Смена пароля</h3>
         <input
           type="password"
-          value={newPass1}
-          onChange={e => setNewPass1(e.target.value)}
+          name='newPassword'
+          value={form.newPassword}
+          onChange={handleChange}
           className={styles.input}
           placeholder="Новый пароль"
         />
+        {errors.newPassword && <div className={styles.error}>{errors.newPassword}</div>}
         <input
           type="password"
-          value={newPass2}
-          onChange={e => setNewPass2(e.target.value)}
+          name='repeatPassword'
+          value={form.repeatPassword}
+          onChange={handleChange}
           className={styles.input}
           placeholder="Повторите пароль"
         />
+        {errors.repeatPassword && <div className={styles.error}>{errors.repeatPassword}</div>}
         <button
           onClick={async () => {
-            setResetError('');
-            if (newPass1 !== newPass2) return setResetError('Пароли не совпадают');
+            const errors = {};
+            if (!form.newPassword) errors.newPassword = 'Введите новый пароль';
+            if (!form.repeatPassword) errors.repeatPassword = 'Повторите пароль';
+            if (form.newPassword !== form.repeatPassword) errors.repeatPassword = 'Пароли не совпадают';
+            if (Object.keys(errors).length > 0) {
+              setErrors(errors); 
+              return;
+            }
             const res = await dispatch(resetPassword({
-              phone: resetPhone || undefined,
-              email: resetEmail || undefined,
-              code: resetCode,
-              newPassword: newPass1,
+              phone: form.resetPhone || undefined,
+              email: form.resetEmail || undefined,
+              code: form.resetCode,
+              newPassword: form.newPassword,
             }));
             if (res.meta.requestStatus === 'fulfilled') {
               setIsResetting(false);
               setResetStep('request');
-              setResetError('');
-              // Можно сразу вызвать loginUser
+              setErrors({});
+              setForm({
+                ...form,
+                resetPhone: '',
+                resetEmail: '',
+                resetCode: '',
+                newPassword: '',
+                repeatPassword: ''
+              });
               dispatch(loginUser({
-                phone: resetPhone || undefined,
-                email: resetEmail || undefined,
-                password: newPass1
+                phone: form.resetPhone || undefined,
+                email: form.resetEmail || undefined,
+                password: form.newPassword
               }));
             } else {
-              setResetError(res.payload || 'Ошибка сброса пароля');
+              setErrors({ repeatPassword: res.payload || 'Ошибка сброса пароля' });
             }
           }}
           className={styles.button}
@@ -458,7 +580,6 @@ const handleVerifyEmail = async (e) => {
           Сменить пароль и войти
         </button>
         <button className={styles.toggleButton} onClick={() => setResetStep('verify')}>Назад</button>
-        {resetError && <div className={styles.error}>{resetError}</div>}
       </>
     )}
   </div>

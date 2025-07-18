@@ -6,7 +6,7 @@
  * - Авторизация пользователя.
  */
 
-const { registerUserInDB, findUserByEmail, getUserWithRoles, savePhoneAndCode, verifyPhoneCode, saveResetCode, findUserByPhone, resetPasswordWithCode, createUserWithPhone, resetPasswordWithEmail } = require('../models/userModel');
+const { registerUserInDB, findUserByEmail, getUserWithRoles, savePhoneAndCode, verifyPhoneCode, saveResetCode, findUserByPhone, resetPasswordWithCode, createUserWithPhone, resetPasswordWithEmail, saveEmailVerificationCode } = require('../models/userModel');
 const { assignRoleToUser } = require('../models/roleModel');
 
 const bcrypt = require('bcrypt');
@@ -376,7 +376,7 @@ exports.sendEmailCode = async (req, res) => {
       );
       user = rows[0];
     } else {
-      await exports.saveEmailVerificationCode(user.id, code);
+      await saveEmailVerificationCode(user.id, code);
     }
 
     // Отправка кода через nodemailer

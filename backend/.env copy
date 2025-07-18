@@ -1,4 +1,4 @@
-   DATABASE_URL=postgres://postgres:123456@localhost:5432/tires
+   DATABASE_URL=postgres://tires_user:mySuperSecret123@localhost:5432/tires_db
    JWT_SECRET=s3Cr3t!k3y$%^12345very$trong
    SMS_GATEWAY_URL = http://192.168.1.54:8080
    SMS_GATEWAY_USER = sms
@@ -8,9 +8,9 @@
    SMTP_USER=Lexaarni777@yandex.ru
    SMTP_PASS=zckxfnvcibrkuvji
    JWT_REFRESH_SECRET=fg9#Svdn%Y9dF!4^JhQ3x7P$1wZtrN5q2kUi
-   JWT_ACCESS_EXPIRES_IN=1m
+   JWT_ACCESS_EXPIRES_IN=15m
    JWT_REFRESH_EXPIRES_IN=30d
-   CLIENT_URL=http://localhost:3000
+   CLIENT_URL=http://msktires.ru
    SESSION_SECRET=7f0b6c23e987r4a2m1o1p95v0bc1aa70
 
 
