@@ -16,7 +16,7 @@ export const mergeLocalCartWithServer = createAsyncThunk(
 
     if (!items.length) return { items: [] };
 
-    const response = await fetch('${process.env.REACT_APP_API_URL}/cart/merge', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/merge`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -67,7 +67,7 @@ export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getSt
         dispatch(localAdd(item)); // Новый localAdd
         return item;
     }
-    const response = await fetch('${process.env.REACT_APP_API_URL}/cart/add', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/add`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -92,7 +92,7 @@ export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (i
       dispatch(localDecrement({ productId: item.productId, stockId: item.stockId }));
       return item;
     }
-    const response = await fetch('${process.env.REACT_APP_API_URL}/cart/decrement', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/decrement`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -134,7 +134,7 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (car
  */
 export const placeOrder = createAsyncThunk('cart/placeOrder', async (orderDetails, { getState, dispatch }) => {
     const { auth } = getState();
-    const response = await fetch('${process.env.REACT_APP_API_URL}/orders/create', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/orders/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ export const clearCartServerSide = createAsyncThunk(
                 dispatch(clearGuestCart()); // Очищаем только guestCart
                 return;
               }
-        await fetch('${process.env.REACT_APP_API_URL}/cart/delete', {
+        await fetch(`${process.env.REACT_APP_API_URL}/cart/delete`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -184,7 +184,7 @@ export const removeManyFromCart = createAsyncThunk(
       });
       return cartIds;
     }
-    const response = await fetch('${process.env.REACT_APP_API_URL}/cart/delete-many', {
+    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/delete-many`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
