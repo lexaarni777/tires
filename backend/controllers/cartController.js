@@ -46,8 +46,6 @@ exports.addProductToCart = async (req, res) => {
   // userId получаем из body (или из req.user, если есть авторизация)
   const { userId, productId, stockId, price, quantity } = req.body;
 
-  console.log('addProductToCart', req.body);
-
   if (!productId || !stockId || !quantity) {
     return res.status(400).json({ message: 'Не переданы все обязательные параметры (productId, stockId, quantity)' });
   }
@@ -95,7 +93,6 @@ exports.updateCartItem = async (req, res) => {
 // Удалить товар из корзины по cart_id
 exports.removeFromCart = async (req, res) => {
   const cart_id = req.params.cart_id; // <-- берем id из параметра URL
-  console.log('removeFromCart cart_id', cart_id);
   try {
     await removeFromCart(cart_id); // Функция в cartModel удаляет по cart_id
     res.status(200).json({ message: 'Товар удалён из корзины' });

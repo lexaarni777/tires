@@ -20,7 +20,7 @@ const Orders = () => {
     }
   }, [auth.token, dispatch]);
 
-console.log('items', orders)
+
 
 
   if (loading) return <p className={styles.orders__loading}>Загрузка заказов...</p>;
@@ -33,7 +33,7 @@ console.log('items', orders)
 
       {orders.map((order) => (
         <div key={order.order_id} className={styles.orders__card}>
-          {console.log(order)}
+
           <div className={styles.orders__top}>
           <button
             className={styles.orders__toggle}
@@ -84,7 +84,6 @@ console.log('items', orders)
 
 
           <ul className={styles.orders__items}>
-            {console.log('items', order.items)}
             {order.items.map((item) => (
               <li key={item.product_id} className={styles.orders__item}>
               {item.image && (

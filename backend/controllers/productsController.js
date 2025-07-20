@@ -86,9 +86,9 @@ exports.createTyre = async (req, res) => {
 
     res.status(201).json(rows[0]);
   } catch (err) {
-    console.error('Ошибка при создании шины:', err);
-    res.status(500).send('Ошибка сервера');
-  }
+  console.error('❌ Ошибка при создании шины:', err.message, err.code, err.detail);
+  res.status(500).json({ message: 'Ошибка сервера', error: err.message });
+}
 };
 
 
@@ -232,7 +232,6 @@ exports.getStock = async (req, res) => {
 // Добавить остаток (по складу)
 exports.createStock = async (req, res) => {
   try {
-    console.log('Добавление остатков:', req.body);
     const { tyre_id, location, price_wholesale, price_retail, stock } = req.body;
     const { rows } = await pool.query(
       'INSERT INTO tyre_stock (tyre_id, location, price_wholesale, price_retail, stock) VALUES ($1, $2, $3, $4, $5) RETURNING *',

@@ -61,7 +61,7 @@ export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { getState
  * item — объект CartItem с деталями выбранного склада и количества.
  */
 export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getState, dispatch }) => {
-    console.log(item)
+
     const { auth } = getState();
         if (!auth.token) {
         dispatch(localAdd(item)); // Новый localAdd
@@ -87,7 +87,6 @@ export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getSt
  */
 export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (item, { getState, dispatch }) => {
     const { auth } = getState();
-    console.log(item)
     if (!auth.token) {
       dispatch(localDecrement({ productId: item.productId, stockId: item.stockId }));
       return item;

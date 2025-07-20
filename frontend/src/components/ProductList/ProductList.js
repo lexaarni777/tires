@@ -38,7 +38,6 @@ const ProductList = () => {
 
   // Получаем данные из Redux: список шин и их статусы
   const products = useSelector((state) => state.products.items);
-  console.log("products", products);
   const [allProducts, setAllProducts] = useState([]);
   const productsStatus = useSelector((state) => state.products.status);
 

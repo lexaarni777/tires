@@ -1,5 +1,4 @@
 export function getThumbnailPath(path) {
-    console.log('getThumbnailPath path: ', path)
   if (!path) return path;
   const parts = path.split('.');
   if (parts.length < 2) return path; // на случай отсутствия расширения

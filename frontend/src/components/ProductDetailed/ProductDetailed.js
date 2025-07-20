@@ -42,7 +42,6 @@ const ProductDetailed = () => {
 
   // Найдём нужный товар по id
   const product = products.find((p) => String(p.id) === String(id));
-  console.log('product.images', product.images);
   // Остатки только по этому товару
   const productStock = stock.filter((row) => String(row.tyre_id) === String(id));
   const filteredProductStock = productStock.filter(s => cityWarehouses.includes(s.location));

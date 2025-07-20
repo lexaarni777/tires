@@ -53,7 +53,6 @@ exports.getImagesForProductFromDB = async (productId) => {
 exports.updateFeaturedImage = async (productId, imageId) => {
   const client = await pool.connect();
 
-  console.log('productId', productId, 'imageId', imageId)
 
   try {
     await client.query('BEGIN'); // Начинаем транзакцию

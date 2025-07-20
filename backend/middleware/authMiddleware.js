@@ -2,10 +2,11 @@ const jwt = require('jsonwebtoken');
 
 // Middleware для проверки токена авторизации
 exports.verifyToken = (req, res, next) => {
-  console.log('verifyToken req: ', req)
+  // Проверяем наличие заголовка Authorization
+  console.log('Проверка токена авторизации', req.headers);
+
     const authHeader = req.headers.authorization;
-    console.log('verifyToken: ', authHeader)
-    console.log('verifyToken req.headers: ', req.headers)
+
    
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(403).json({ message: 'Доступ запрещен' });
@@ -16,6 +17,7 @@ exports.verifyToken = (req, res, next) => {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded; // Добавляем информацию о пользователе в запрос
+      console.log('▶️ Данные, пришедшие в createTyre:', req.body); 
       next(); // Переход к следующей функции в маршруте
     } catch (err) {
             if (err.name === 'TokenExpiredError') {
@@ -29,9 +31,9 @@ exports.verifyToken = (req, res, next) => {
   // Middleware для проверки роли администратора
   exports.verifyAdmin = (req, res, next) => {
     // Проверяем, был ли выполнен middleware для проверки токена
-    console.log('verifyAdmin: ', req)
-    if (!req.user || !req.user.roles.includes('admin')) {
+    if (!req.user || !Array.isArray(req.user.roles) || !req.user.roles.includes('admin')) {
       return res.status(403).json({ message: 'Необходимо иметь права администратора' });
     }
+
     next(); // Переход к следующей функции в маршруте
   };

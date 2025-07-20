@@ -17,7 +17,7 @@ exports.registerUserInDB = async (email, hashedPassword) => {
 
 // Найти пользователя по email
 exports.findUserByEmail = async (email) => {
-    console.log(email)
+
   const query = 'SELECT * FROM users WHERE email = $1';
   const { rows } = await pool.query(query, [email]);
   return rows[0];
@@ -53,7 +53,7 @@ exports.findUserByEmail = async (email) => {
       roles: rows.map(row => row.role).filter(role => role !== null),
     };
 
-    console.log("UserModel User: ", user)
+
   
     return user;
   };

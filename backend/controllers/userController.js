@@ -11,11 +11,9 @@ const SMS_GATEWAY_PASS = process.env.SMS_GATEWAY_PASS;
 
 // Получить профиль и адреса
 exports.getProfile = async (req, res) => {
-    console.log("getProfile called", req.user);
   try {
     const userId = req.user.id;
     const user = await getUserWithRoles(userId);
-    console.log("getProfile user: ", user)
     const addressesRes = await pool.query(
   'SELECT id, address FROM addresses WHERE user_id = $1',
   [userId]
@@ -76,7 +74,6 @@ exports.changePassword = async (req, res) => {
 exports.getAddresses = async (req, res) => {
   try {
     const userId = req.user.id;
-    console.log("getAddresses called", userId);
     const result = await pool.query(
   'SELECT id, address FROM addresses WHERE user_id = $1',
   [userId]

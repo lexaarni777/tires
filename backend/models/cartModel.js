@@ -103,7 +103,6 @@ exports.clearCart = async (userId) => {
  * @param {number[]} cart_ids - массив cart_id для удаления
  */
 exports.removeManyFromCart = async (cart_ids) => {
-  console.log('Удаляем товары из корзины:', cart_ids);
   if (!cart_ids.length) return;
   // Удаляем все товары одним SQL-запросом
   await pool.query(

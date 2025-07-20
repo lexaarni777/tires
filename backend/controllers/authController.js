@@ -29,7 +29,7 @@ const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 // Регистрация пользователя по номеру телефона с подтверждением через SMS
 exports.registerUser = async (req, res) => {
-  console.log('req.body', req.body);
+
   const { email, password, phone, code } = req.body;
   if (phone && !phoneRegex.test(phone)) {
     return res.status(400).json({ error: 'Неверный формат телефона' });
@@ -149,7 +149,7 @@ exports.loginUser = async (req, res) => {
     return res.status(400).json({ error: 'Неверный формат email' });
   }
 
-  console.log('req.body:', req.body);
+
 
   try {
     let user;
@@ -436,7 +436,6 @@ exports.verifyEmail = async (req, res) => {
 };
 
 exports.refreshAccessToken = async (req, res) => {
-  console.log('req.cookies:', req.cookies);
   const token = req.cookies.refreshToken;
   if (!token) return res.status(401).json({ message: 'Нет refresh токена' });
 

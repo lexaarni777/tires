@@ -218,7 +218,6 @@ const authSlice = createSlice({
     },
     reducers: {
         logout: (state) => {
-            {console.log('logout', state)};
             state.user = null;
             state.token = null;
             state.roles = [];

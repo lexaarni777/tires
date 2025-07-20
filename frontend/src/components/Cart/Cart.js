@@ -125,9 +125,9 @@ const Cart = () => {
       comment,
     };
 
-    console.log('Order data:', orderData);
+
     const result = await dispatch(placeOrder(orderData));
-    console.log('Order result:', result);
+
 
     if (placeOrder.fulfilled.match(result)) {
 
