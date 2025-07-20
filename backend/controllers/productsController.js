@@ -39,10 +39,21 @@ exports.getTyreById = async (req, res) => {
 // Создать новую шину в каталоге
 exports.createTyre = async (req, res) => {
   try {
-    const {article, name, brand, model, size, load_index, speed_index,
+    const toNullableNumber = (val) =>
+      val === '' || val === null || val === undefined ? null : Number(val);
+
+    const toNullableBoolean = (val) => {
+      if (val === 'true') return true;
+      if (val === 'false') return false;
+      return null;
+    };
+
+    const {
+      article, name, brand, model, size, load_index, speed_index,
       season, vehicle_type, tread_depth, section_width, recommended_rim_width,
       diameter, country, description, studs, profile
     } = req.body;
+
     const { rows } = await pool.query(
       `INSERT INTO tyre_catalog (
         article, name, brand, model, size, load_index, speed_index,
@@ -53,17 +64,33 @@ exports.createTyre = async (req, res) => {
         $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
       ) RETURNING *`,
       [
-        article, name, brand, model, size, load_index, speed_index,
-        season, vehicle_type, tread_depth, section_width, recommended_rim_width,
-        diameter, country, description, studs, profile
+        article || null,
+        name || null,
+        brand || null,
+        model || null,
+        size || null,
+        load_index || null,
+        speed_index || null,
+        season || null,
+        vehicle_type || null,
+        toNullableNumber(tread_depth),
+        toNullableNumber(section_width),
+        toNullableNumber(recommended_rim_width),
+        toNullableNumber(diameter),
+        country || null,
+        description || null,
+        toNullableBoolean(studs),
+        toNullableNumber(profile),
       ]
     );
+
     res.status(201).json(rows[0]);
   } catch (err) {
     console.error('Ошибка при создании шины:', err);
     res.status(500).send('Ошибка сервера');
   }
 };
+
 
 // Массовый импорт шин из Excel/CSV
 exports.uploadTyresXlsx = async (req, res) => {
