@@ -219,7 +219,7 @@ const handleAddToCart = (e) => {
                 <th>Склад</th>
                 <th>Остаток</th>
                 <th>Розничная цена</th>
-                <th>Оптовая цена</th>
+                {/* <th>Оптовая цена</th> */}
               </tr>
             </thead>
             <tbody>
@@ -228,7 +228,7 @@ const handleAddToCart = (e) => {
                   <td>{row.location}</td>
                   <td>{row.stock ?? "-"}</td>
                   <td>{row.price_retail != null ? `${row.price_retail} ₽` : "-"}</td>
-                  <td>{row.price_wholesale != null ? `${row.price_wholesale} ₽` : "-"}</td>
+                  {/* <td>{row.price_wholesale != null ? `${row.price_wholesale} ₽` : "-"}</td> */}
                 </tr>
               ))}
             </tbody>
