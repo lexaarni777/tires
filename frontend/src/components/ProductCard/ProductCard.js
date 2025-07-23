@@ -256,7 +256,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                 <th>Склад</th>
                 <th>Остаток</th>
                 <th>Розничная цена</th>
-                <th>Оптовая цена</th>
+                {/* <th>Оптовая цена</th> */}
               </tr>
             </thead>
             <tbody>
@@ -268,11 +268,11 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                   <td>
                     {row.price_retail != null ? `${row.price_retail} ₽` : "-"}
                   </td>
-                  <td>
+                  {/* <td>
                     {row.price_wholesale != null
                       ? `${row.price_wholesale} ₽`
                       : "-"}
-                  </td>
+                  </td> */}
                 </tr>
               ))}
             </tbody>
