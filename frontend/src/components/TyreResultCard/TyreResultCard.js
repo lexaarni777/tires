@@ -18,12 +18,14 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
   const cityWarehouses = warehouseList
     .filter(w => w.city === selectedCity)
     .map(w => w.location);
-
+  console.log('IMGtyres', tyres)
   return (
+    
     <div className={styles.cardGroup}>
       <div className={styles.header}>
       <img
         className={styles.image}
+        
         src={tyres[0]?.images?.[0]?.image_path
               ? `${API_URL}${getThumbnailPath(tyres[0].images[0].image_path)}`
               : 'https://via.placeholder.com/100'}
