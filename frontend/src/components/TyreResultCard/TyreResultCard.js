@@ -4,6 +4,7 @@ import { addToCart, decrementToCart } from '../../slices/cartSlice';
 import styles from './TyreResultCard.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
 import { useNavigate } from 'react-router-dom';
+import { getThumbnailPath } from '../../utils/thumb';
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
 const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
@@ -21,11 +22,13 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
   return (
     <div className={styles.cardGroup}>
       <div className={styles.header}>
-        <img
-          className={styles.image}
-          src={tyres[0]?.images?.[0]?.image_path ? `${API_URL}${tyres[0].images[0].image_path}` : 'https://via.placeholder.com/100'}
-          alt={tyres[0].name}
-        />
+      <img
+        className={styles.image}
+        src={tyres[0]?.images?.[0]?.image_path
+              ? `${API_URL}${getThumbnailPath(tyres[0].images[0].image_path)}`
+              : 'https://via.placeholder.com/100'}
+        alt={tyres[0].name}
+      />
         <div className={styles.title}>{brand} {model}</div>
       </div>
 
@@ -58,7 +61,7 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
 
             const getImage = () => {
               return tyre.images?.[0]?.image_path
-                ? `${API_URL}${tyre.images[0].image_path}`
+                ? `${API_URL}${getThumbnailPath(tyre.images[0].image_path)}`
                 : 'https://via.placeholder.com/150';
             };
 
