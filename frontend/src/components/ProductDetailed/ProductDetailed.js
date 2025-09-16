@@ -25,7 +25,7 @@ const ProductDetailed = () => {
 
   // Стор
   const products = useSelector((state) => state.products.items);
-  
+  console.log('products', products)
   const productsStatus = useSelector((state) => state.products.status);
   const stock = useSelector((state) => state.stock.items);
   const stockStatus = useSelector((state) => state.stock.status);
@@ -79,7 +79,7 @@ const getFeaturedImage = () => {
       : `${API_URL}${product.images[0].image_path}`;
   }
 
-  // 🔁 ДОБАВЛЕНО: если нет индивидуальных — использовать model_images
+  // ДОБАВЛЕНО: если нет индивидуальных — использовать model_images
   if (product?.model_images && product.model_images.length > 0) {
     const featured = product.model_images.find((img) => img.is_featured_image);
     return featured

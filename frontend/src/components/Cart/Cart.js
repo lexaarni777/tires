@@ -11,6 +11,7 @@ const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
+  console.log('cartItems', cartItems)
   const auth = useSelector((state) => state.auth);
 
   const [selectedIds, setSelectedIds] = useState([]);
@@ -182,7 +183,7 @@ const Cart = () => {
                   checked={selectedIds.includes(item.cart_id)}
                   onChange={() => handleSelect(item.cart_id)}
                 />
-                {console.log(item.product_image)}
+                {console.log('item.product_image', item.product_image)}
                 {item.product_image && (
                   <img
                     src={`${API_URL}${getThumbnailPath(item.product_image)}`}

@@ -5,6 +5,7 @@ import styles from './TyreResultCard.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
 import { useNavigate } from 'react-router-dom';
 import { getThumbnailPath } from '../../utils/thumb';
+import { minimg } from '../../utils/minimg';
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
 const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
@@ -18,17 +19,19 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
   const cityWarehouses = warehouseList
     .filter(w => w.city === selectedCity)
     .map(w => w.location);
-  console.log('IMGtyres', tyres)
+
   return (
-    
     <div className={styles.cardGroup}>
       <div className={styles.header}>
+          {console.log('tyres[0]',tyres[0].model_images[0].image_path)}
       <img
         className={styles.image}
-        
+      
         src={tyres[0]?.images?.[0]?.image_path
-              ? `${API_URL}${getThumbnailPath(tyres[0].images[0].image_path)}`
+              ? `${API_URL}${minimg(tyres[0].model_images)}`
               : 'https://via.placeholder.com/100'}
+
+        
         alt={tyres[0].name}
       />
         <div className={styles.title}>{brand} {model}</div>
