@@ -27,9 +27,7 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
       <img
         className={styles.image}
       
-        src={tyres[0]?.images?.[0]?.image_path
-              ? `${API_URL}${minimg(tyres[0].model_images)}`
-              : 'https://via.placeholder.com/100'}
+        src={`${minimg(tyres[0])}`}
 
         
         alt={tyres[0].name}

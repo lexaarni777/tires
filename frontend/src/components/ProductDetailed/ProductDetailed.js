@@ -25,7 +25,6 @@ const ProductDetailed = () => {
 
   // Стор
   const products = useSelector((state) => state.products.items);
-  console.log('products', products)
   const productsStatus = useSelector((state) => state.products.status);
   const stock = useSelector((state) => state.stock.items);
   const stockStatus = useSelector((state) => state.stock.status);
@@ -72,6 +71,7 @@ const ProductDetailed = () => {
 
   // Главное изображение
 const getFeaturedImage = () => {
+  console.log('product',product)
   if (product?.images && product.images.length > 0) {
     const featured = product.images.find((img) => img.is_featured_image);
     return featured
