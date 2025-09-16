@@ -64,9 +64,9 @@ const TyreSelector = () => {
   const handleSubmit = async () => {
     const filters = [];
     const selectedSeasons = [];
-    if (season.summer) selectedSeasons.push('Летняя');
-    if (season.winter) selectedSeasons.push('Зимняя');
-    if (season.allseason) selectedSeasons.push('Всесезонная');
+    if (season.summer) selectedSeasons.push('Летние');
+    if (season.winter) selectedSeasons.push('Зимнии');
+    if (season.allseason) selectedSeasons.push('Всесезонные');
 
     // Передняя ось
     const frontFilter = {};
@@ -138,7 +138,7 @@ const TyreSelector = () => {
 
           <select value={profile} onChange={e => setProfile(e.target.value)}>
             <option value=''>Профиль (Любой)</option>
-            {getOptionStates('profile').map(opt => (
+            {getOptionStates('tread_depth').map(opt => (
               <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
             ))}
           </select>
@@ -162,7 +162,7 @@ const TyreSelector = () => {
 
             <select value={profileRear} onChange={e => setProfileRear(e.target.value)}>
               <option value=''>Профиль (задние)</option>
-              {getOptionStates('profile').map(opt => (
+              {getOptionStates('tread_depth').map(opt => (
                 <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
               ))}
             </select>
