@@ -29,10 +29,10 @@ const Header = () => {
             {/* Верхний блок */}
             <div className={classes.headerTop}>
                 <div className={classes.storeInfo}>
-                    <h1>Магазин шин</h1>
-                    <p>Телефон: +7 (123) 456-78-90</p>
+                    <h1>Интернет магазин шин и дисков MskTires</h1>
+                    <p>Телефон: +7 (999) 914-30-09</p>
                     <div className={classes.socialLinks}>
-                        <a href="https://facebook.com" target="_blank" rel="noopener noreferrer">Facebook</a>
+                        <a href="https://vk.com/msktires" target="_blank" rel="noopener noreferrer">VK</a>
                         <a href="https://instagram.com" target="_blank" rel="noopener noreferrer">Instagram</a>
                     </div>
                 </div>
