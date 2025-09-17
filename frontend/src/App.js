@@ -15,6 +15,7 @@ import Delivery from './components/Delivery/Delivery';
 import EditProfile from './components/EditProfile/EditProfile';
 import TyreSelector from './components/TyreSelector/TyreSelector';
 import AdminOrders from './components/AdminOrders/AdminOrders';
+import Contacts from './components/Contacts/Contacts';
 
 function App() {
 
@@ -77,8 +78,12 @@ function App() {
           <Cart />
       }/>
         {/* Новый маршрут для управления пользователями - доступен только администраторам */}
-      <Route path='services/delivery' element={  
+      <Route path='services/delivery' element={
           <Delivery />
+      }/>
+      {/* Контакты */}
+      <Route path='/contacts' element={
+          <Contacts />
       }/>
       <Route path='/account/edit' element={
       <PrivateRoute rolesRequired={['buyer', 'admin']}>

@@ -65,7 +65,7 @@ const TyreSelector = () => {
     const filters = [];
     const selectedSeasons = [];
     if (season.summer) selectedSeasons.push('Летние');
-    if (season.winter) selectedSeasons.push('Зимнии');
+    if (season.winter) selectedSeasons.push('Зимние');
     if (season.allseason) selectedSeasons.push('Всесезонные');
 
     // Передняя ось

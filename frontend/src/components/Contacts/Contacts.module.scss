@@ -1,0 +1,182 @@
+@import '../../styles/variables.scss';
+@import '../../styles/typography.scss';
+@import '../../styles/mixins.scss';
+
+.contactsPage {
+  @include flex-column;
+  gap: 24px;
+  padding: 32px 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: $shadow-light;
+  color: $text-primary;
+
+  h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+  }
+
+  @include respond(sm) {
+    padding: 24px 16px;
+  }
+}
+
+.sectionStack {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.socialBlock {
+  @include flex-column;
+  gap: 16px;
+}
+
+.locationsBlock {
+  @include flex-column;
+  gap: 24px;
+}
+
+.mapItems {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+
+.mapItem {
+  @include flex-column;
+  gap: 12px;
+
+  h4 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+}
+
+.mapDetails {
+  @include flex-column;
+  gap: 8px;
+
+  p,
+  span {
+    margin: 0;
+  }
+}
+
+.mapPhone {
+  font-size: 18px;
+  font-weight: 600;
+
+  a {
+    color: inherit;
+    text-decoration: none;
+
+    &:hover {
+      color: $primary;
+    }
+  }
+}
+
+.mapActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.mapButton {
+  padding: 8px 14px;
+  border: 1px solid $primary;
+  border-radius: 6px;
+  background-color: transparent;
+  color: $primary;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    background-color: $primary;
+    color: #fff;
+    box-shadow: $shadow-light;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.4);
+    outline-offset: 2px;
+  }
+}
+
+.contactsBlock {
+  @include flex-column;
+  gap: 16px;
+  padding: 20px;
+  background-color: #f9f9f9;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  min-height: 100%;
+}
+
+.socialList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  a {
+    color: $primary;
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+address {
+  margin: 0;
+  font-style: normal;
+  line-height: 1.4;
+}
+
+.schedule {
+  font-size: 13px;
+  color: $text-muted;
+}
+
+.note {
+  font-size: 13px;
+  color: $text-muted;
+}
+
+.mapWrapper {
+  position: relative;
+  width: 100%;
+  padding-top: 56.25%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+
+  iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+}
+
+.mapHint {
+  font-size: 13px;
+  color: $text-muted;
+}
+
+@include respond(xs) {
+  .mapWrapper {
+    padding-top: 75%;
+  }
+}
