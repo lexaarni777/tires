@@ -21,9 +21,8 @@ const ProductList = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate(); // Хук для работы с маршрутизацией
 
-  // Состояния для фильтрации — здесь пример только с брендом, размером и сезоном
+  // Состояния для фильтрации — бренд, сезон, типоразмер и сопутствующие параметры
   const [brand, setBrand] = useState("");
-  const [size, setSize] = useState("");
   const [season, setSeason] = useState("");
   const [sectionWidth, setSectionWidth] = useState("");
   const [profile, setProfile] = useState("");
@@ -82,34 +81,29 @@ const ProductList = () => {
   if (country) filters.country = country;
   if (brand) filters.brand = brand;
 
-    useEffect(() => {
-      // useEffect — хук для побочных эффектов, срабатывает при монтировании компонента и при изменении зависимостей
-      // Здесь: загружаем содержимое корзины при первом рендере
-      // [dispatch] — массив зависимостей, эффект выполнится один раз при загрузке страницы
-      dispatch(fetchCart())
-    }, [dispatch]);
-
-  // Загружаем каталог и остатки при изменении фильтров
   useEffect(() => {
-  dispatch(fetchProducts({})).then(action => {
-    if (action.payload) setAllProducts(action.payload);
-  });
-}, [dispatch]);
+    // Загружаем содержимое корзины при первом рендере
+    dispatch(fetchCart());
+  }, [dispatch]);
+
+  // Загружаем полный каталог один раз, чтобы сформировать списки опций
+  useEffect(() => {
+    dispatch(fetchProducts({})).then(action => {
+      if (action.payload) setAllProducts(action.payload);
+    });
+  }, [dispatch]);
 
   // Загружаем все остатки после загрузки каталога
   useEffect(() => {
     if (products.length > 0) {
-      // Получаем все ID шин, которые сейчас в каталоге
-      const ids = products.map((product) => product.id);
-      // Можно запросить все остатки для этих шин через параметр tyre_id[]
-      // (в fetchStock доработай если хочешь массовую загрузку, иначе просто fetchStock() без параметров — все остатки)
       dispatch(fetchStock());
     }
   }, [dispatch, products]);
 
+  // Обновляем список товаров при изменении активных фильтров
   useEffect(() => {
-  dispatch(fetchProducts(filters));
-}, [dispatch, brand, sectionWidth, profile, diameter, loadIndex, speedIndex, season, studs, country]);
+    dispatch(fetchProducts(filters));
+  }, [dispatch, brand, sectionWidth, profile, diameter, loadIndex, speedIndex, season, studs, country]);
 
 
 
@@ -117,214 +111,226 @@ const ProductList = () => {
   // { 1: [остатки], 2: [остатки], ... }
 
 
-    // Функция удаления товара
-    const handleDelete = (id) => {
-      dispatch(deleteProduct(id));
-    };
-      // Функция редактирования товара
+  // Функция удаления товара
+  const handleDelete = (id) => {
+    dispatch(deleteProduct(id));
+  };
+
+  // Функция редактирования товара
   const handleEdit = (product) => {
     // Переход на страницу редактирования товара
     navigate(`/edit/${product.id}`, { state: { product } });
   };
-  const getOptions = (field) =>
-  [...new Set(allProducts.map(p => p[field]).filter(Boolean))]
-  .sort((a, b) => (!isNaN(Number(a)) && !isNaN(Number(b))) ? Number(a) - Number(b) : String(a).localeCompare(String(b), "ru"));
-
   const getOptionStates = (field) => {
-  const options = [...new Set(allProducts.map(p => p[field]).filter(Boolean))];
-  return options.map(opt => {
-    // Виртуально подставляем эту опцию, остальные фильтры берем из текущего state
-    const virtualFilters = { ...filters, [field]: opt };
-    const filtered = allProducts.filter(p =>
-      Object.entries(virtualFilters).every(([k, v]) => !v || String(p[k]) === String(v))
-    );
-    return { value: opt, enabled: filtered.length > 0 };
-  });
-};
+    const options = [...new Set(allProducts.map(p => p[field]).filter(Boolean))];
+    return options.map(opt => {
+      // Виртуально подставляем эту опцию, остальные фильтры берем из текущего state
+      const virtualFilters = { ...filters, [field]: opt };
+      const filtered = allProducts.filter(p =>
+        Object.entries(virtualFilters).every(([k, v]) => !v || String(p[k]) === String(v))
+      );
+      return { value: opt, enabled: filtered.length > 0 };
+    });
+  };
+
+  const resetFilters = () => {
+    setBrand("");
+    setSeason("");
+    setSectionWidth("");
+    setProfile("");
+    setDiameter("");
+    setLoadIndex("");
+    setSpeedIndex("");
+    setStuds("");
+    setCountry("");
+    setInStockOnly(true);
+  };
 
 
   // Примитивный фильтр — можно сделать выпадающие списки, чекбоксы и т.д.
   return (
     <div className={styles.wrapper}>
-      {/* Фильтр каталога шин */}
-      <div className={styles.filterBar}>
-     <div className={styles.filterBar}>
-  <label>
-    В наличии
-    <input
-      type="checkbox"
-      checked={inStockOnly}
-      onChange={e => setInStockOnly(e.target.checked)}
-    />
-  </label>
+      <aside className={styles.sidebar}>
+        <div className={styles.filtersCard}>
+          <div className={styles.filtersHeader}>
+            <h3>Подбор шин</h3>
+            <button type="button" className={styles.resetButton} onClick={resetFilters}>
+              Сбросить
+            </button>
+          </div>
+          <div className={styles.filtersGrid}>
+            <label className={`${styles.filterControl} ${styles.checkboxControl}`}>
+              <input
+                type="checkbox"
+                checked={inStockOnly}
+                onChange={e => setInStockOnly(e.target.checked)}
+              />
+              <span>Только в наличии</span>
+            </label>
 
-  <label>
-    Ширина
-    <select value={sectionWidth} onChange={e => setSectionWidth(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('section_width').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Ширина</span>
+              <select
+                value={sectionWidth}
+                onChange={e => setSectionWidth(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('section_width').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-  <label>
-    Профиль
-    <select value={profile} onChange={e => setProfile(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('profile').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Профиль</span>
+              <select
+                value={profile}
+                onChange={e => setProfile(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('profile').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-  <label>
-    Диаметр
-    <select value={diameter} onChange={e => setDiameter(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('diameter').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Диаметр</span>
+              <select
+                value={diameter}
+                onChange={e => setDiameter(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('diameter').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-  <label>
-    Индекс нагрузки
-    <select value={loadIndex} onChange={e => setLoadIndex(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('load_index').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Индекс нагрузки</span>
+              <select
+                value={loadIndex}
+                onChange={e => setLoadIndex(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('load_index').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-  <label>
-    Индекс скорости
-    <select value={speedIndex} onChange={e => setSpeedIndex(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('speed_index').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Индекс скорости</span>
+              <select
+                value={speedIndex}
+                onChange={e => setSpeedIndex(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('speed_index').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-  <label>
-    Сезон
-    <select value={season} onChange={e => setSeason(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('season').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Сезон</span>
+              <select
+                value={season}
+                onChange={e => setSeason(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('season').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-  <label>
-    Шипы
-    <select value={studs} onChange={e => setStuds(e.target.value)}>
-      <option value="">Неважно</option>
-      <option value="true">Есть шипы</option>
-      <option value="false">Без шипов</option>
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Шипы</span>
+              <select
+                value={studs}
+                onChange={e => setStuds(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                <option value="true">Есть шипы</option>
+                <option value="false">Без шипов</option>
+              </select>
+            </label>
 
-  <label>
-    Страна
-    <select value={country} onChange={e => setCountry(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('country').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
+            <label className={styles.filterControl}>
+              <span>Страна</span>
+              <select
+                value={country}
+                onChange={e => setCountry(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('country').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-  <label>
-    Бренд
-    <select value={brand} onChange={e => setBrand(e.target.value)}>
-      <option value="">Неважно</option>
-      {getOptionStates('brand').map(({ value, enabled }) =>
-        <option
-          key={value}
-          value={value}
-          disabled={!enabled}
-          style={!enabled ? { color: "#bbb" } : {}}
-        >
-          {value}
-        </option>
-      )}
-    </select>
-  </label>
-</div>
+            <label className={styles.filterControl}>
+              <span>Бренд</span>
+              <select
+                value={brand}
+                onChange={e => setBrand(e.target.value)}
+                className={styles.select}
+              >
+                <option value="">Неважно</option>
+                {getOptionStates('brand').map(({ value, enabled }) => (
+                  <option key={value} value={value} disabled={!enabled}>
+                    {value}
+                  </option>
+                ))}
+              </select>
+            </label>
 
-      </div>
+          </div>
+        </div>
+      </aside>
 
-      {/* Выводим статус загрузки каталога/остатков */}
-      {(productsStatus === "loading" || stockStatus === "loading") && (
-        <div>Загрузка товаров...</div>
-      )}
-      {/* Выводим список карточек товаров */}
-      <div className={styles.list}>
-        {products.length === 0 && productsStatus === "succeeded" && (
-          <div>Нет товаров по выбранным фильтрам.</div>
+      <div className={styles.catalogContent}>
+        {(productsStatus === "loading" || stockStatus === "loading") && (
+          <div className={styles.statusMessage}>Загрузка товаров...</div>
         )}
-        {filteredProducts.map((product) => (
-
-          <ProductCard
-            key={product.id}
-            product={product}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
-            stock={stockByTyreId[product.id] || []}
-          />
-        ))}
+        <div className={styles.list}>
+          {products.length === 0 && productsStatus === "succeeded" && (
+            <div className={styles.statusMessage}>Нет товаров по выбранным фильтрам.</div>
+          )}
+          {filteredProducts.map((product) => (
+            <ProductCard
+              key={product.id}
+              product={product}
+              onDelete={handleDelete}
+              onEdit={handleEdit}
+              stock={stockByTyreId[product.id] || []}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

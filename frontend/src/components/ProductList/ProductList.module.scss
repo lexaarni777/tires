@@ -5,28 +5,145 @@
   max-width: 1440px;                  // Ограничение по ширине контейнера
   margin: 0 auto;                     // Центровка
   padding: 16px;                      // Отступы слева и справа
+  display: grid;
+  grid-template-columns: 320px minmax(0, 1fr);
+  gap: 24px;
+  align-items: start;
 }
 
-.filterBar {
-  display: flex;                      // Горизонтальное расположение
-  flex-wrap: wrap;                    // Перенос строк на малых экранах
-  gap: 12px;                          // Отступ между инпутами
-  margin-bottom: 20px;                // Отступ снизу
+.sidebar {
+  position: sticky;
+  top: 16px;
+  align-self: start;
+}
+
+.catalogContent {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.filtersCard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid $border-color;
+  border-radius: 12px;
+  box-shadow: $shadow-light;
+}
+
+.filtersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: $text-primary;
+  }
+}
+
+.resetButton {
+  padding: 8px 14px;
+  background: transparent;
+  border: 1px solid $border-color;
+  border-radius: 6px;
+  color: $text-muted;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: $primary;
+    color: $primary;
+  }
+
+  &:focus-visible {
+    outline: 2px solid rgba($primary, 0.3);
+    outline-offset: 2px;
+  }
+}
+
+.filtersGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.filterControl {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  color: $text-primary;
+
+  span {
+    font-weight: 500;
+  }
+}
+
+.checkboxControl {
+  flex-direction: row;
+  align-items: center;
+  padding: 10px 12px;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  background: #f7f9fb;
 
   input {
-    flex: 1;                          // Каждый инпут занимает одинаковую ширину
-    min-width: 180px;                // Минимальная ширина
-    padding: 10px;                   // Внутренний отступ
-    font-size: 14px;                 // Размер текста
-    border: 1px solid $border-color; // Граница
-    border-radius: 4px;              // Скругление углов
-    background: #fff;                // Белый фон
+    margin-right: 10px;
+    width: 16px;
+    height: 16px;
 
-    &:focus {
-      outline: none;                 // Убираем синий обвод
-      border-color: $primary;       // Синий бордер при фокусе
-      box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.2); // Светлая подсветка
+    &:focus-visible {
+      outline: 2px solid rgba($primary, 0.35);
+      outline-offset: 2px;
     }
+  }
+
+  span {
+    font-weight: 600;
+  }
+}
+
+.select {
+  padding: 10px 12px;
+  border: 1px solid $border-color;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 14px;
+  color: $text-primary;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  appearance: none;
+  background-image: linear-gradient(45deg, transparent 50%, $primary 50%),
+    linear-gradient(135deg, $primary 50%, transparent 50%);
+  background-position: calc(100% - 16px) calc(50% - 4px), calc(100% - 11px) calc(50% - 4px);
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+
+  &:hover {
+    border-color: $primary;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba($primary, 0.12);
+  }
+
+  &:disabled {
+    color: $text-muted;
+    background-image: none;
+  }
+
+  option:disabled {
+    color: $text-muted;
   }
 }
 
@@ -36,10 +153,25 @@
   gap: 20px;                         // Расстояние между карточками
 }
 
+.statusMessage {
+  font-size: 15px;
+  color: $text-muted;
+}
+
 // === Адаптивность для маленьких экранов ===
+@include respond(md) {
+  .wrapper {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: static;
+  }
+}
+
 @include respond(sm) {
-  .filterBar {
-    flex-direction: column;         // Фильтры идут вертикально
+  .filtersGrid {
+    grid-template-columns: 1fr;
   }
 
   .list {
