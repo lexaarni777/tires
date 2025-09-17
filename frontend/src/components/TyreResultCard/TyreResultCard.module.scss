@@ -1,4 +1,5 @@
 @import '../../styles/variables';
+@import '../../styles/mixins';
 
 .cardGroup {
   margin-top: $space-xl;
@@ -8,16 +9,78 @@
   background-color: #fff;
 }
 
+.cardLayout {
+  display: flex;
+  gap: $space-xl;
+  align-items: flex-start;
+
+  @include respond(md) {
+    flex-direction: column;
+  }
+}
+
+.imageWrapper {
+  flex: 0 0 200px;
+  max-width: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #f5f7fa;
+  border-radius: 8px;
+  padding: $space-md;
+
+  @include respond(md) {
+    width: 100%;
+    max-width: none;
+  }
+}
+
+.image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: $space-md;
+}
+
 .title {
   font-size: 20px;
   font-weight: bold;
-  margin-bottom: $space-md;
+  margin: 0;
 }
 
 .cardList {
   display: flex;
   flex-direction: column;
   gap: $space-md;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+
+  th,
+  td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #e5e8ec;
+    text-align: left;
+  }
+
+  th {
+    background: #f2f4f7;
+    font-weight: 600;
+    color: $text-primary;
+  }
+
+  tbody tr:hover {
+    background: #fafbfc;
+  }
 }
 
 .axisLabel {

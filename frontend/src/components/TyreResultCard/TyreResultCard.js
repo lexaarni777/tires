@@ -22,20 +22,20 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
 
   return (
     <div className={styles.cardGroup}>
-      <div className={styles.header}>
-          {console.log('tyres[0]',tyres[0].model_images[0].image_path)}
-      <img
-        className={styles.image}
-      
-        src={`${minimg(tyres[0])}`}
+      <div className={styles.cardLayout}>
+        <div className={styles.imageWrapper}>
+          <img
+            className={styles.image}
+            src={minimg(tyres[0])}
+            alt={tyres[0].name}
+            loading="lazy"
+          />
+        </div>
 
-        
-        alt={tyres[0].name}
-      />
-        <div className={styles.title}>{brand} {model}</div>
-      </div>
+        <div className={styles.content}>
+          <div className={styles.title}>{brand} {model}</div>
 
-      <table className={styles.table}>
+          <table className={styles.table}>
         <thead>
           <tr>
             <th>Модель</th>
@@ -154,6 +154,8 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
           })}
         </tbody>
       </table>
+        </div>
+      </div>
     </div>
   );
 };
