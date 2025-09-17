@@ -20,7 +20,8 @@ const mapLocations = [
     hint: "Навигатор: координаты 55.625559, 37.436271.",
     display: "+7 (999) 914-30-09",
     link: "+79999143009",
-
+    photo: "moscow-workshop.webp",
+    photoAlt: "Вход в шинный центр MskTires в Москве",
   },
   {
     city: "Волгоград",
@@ -34,6 +35,8 @@ const mapLocations = [
     hint: "Навигатор: координаты 48.758023, 44.523404.",
     display: "+7 (905) 434-30-09",
     link: "+79054343009",
+    photo: "volgograd-workshop.webp",
+    photoAlt: "Фасад магазина и шиномонтажа MskTires в Волгограде",
   },
 ];
 
@@ -102,13 +105,46 @@ const Contacts = () => {
                 zoom,
                 hint,
                 link,
-                display
+                display,
+                photo,
+                photoAlt,
               } = location;
               const mapSrc = `https://yandex.ru/map-widget/v1/?ll=${longitude}%2C${latitude}&pt=${longitude},${latitude},${markerPreset}&z=${zoom}`;
 
               return (
                 <div key={city} className={styles.mapItem}>
                   <h4>{city}</h4>
+                  <div className={styles.mapTop}>
+                    <div className={styles.mapDetails}>
+                      <p className={styles.mapPhone}>
+                        <a href={`tel:${link}`}>{display}</a>
+                      </p>
+                      <address>{address}</address>
+                      <span className={styles.schedule}>{schedule}</span>
+                      <p className={styles.mapHint}>{hint}</p>
+                      <div className={styles.mapActions}>
+                        <button
+                          type="button"
+                          className={styles.mapButton}
+                          onClick={handleCopyCoordinates(city, coordinates)}
+                        >
+                          {copiedCity === city ? "Скопировано" : "Скопировать координаты"}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.mapButton}
+                          onClick={handleOpenNavigator(latitude, longitude)}
+                        >
+                          Построить маршрут
+                        </button>
+                      </div>
+                    </div>
+                    {photo && (
+                      <div className={styles.mapPhoto}>
+                        <img src={photo} alt={photoAlt} loading="lazy" />
+                      </div>
+                    )}
+                  </div>
                   <div className={styles.mapWrapper}>
                     <iframe
                       title={`Магазин MskTires в городе ${city}`}
@@ -116,30 +152,6 @@ const Contacts = () => {
                       frameBorder="0"
                       allowFullScreen
                     />
-                  </div>
-                  <div className={styles.mapDetails}>
-                    <p className={styles.mapPhone}>
-                      <a href={`tel:${link}`}>{display}</a>
-                    </p>
-                    <address>{address}</address>
-                    <span className={styles.schedule}>{schedule}</span>
-                    <p className={styles.mapHint}>{hint}</p>
-                    <div className={styles.mapActions}>
-                      <button
-                        type="button"
-                        className={styles.mapButton}
-                        onClick={handleCopyCoordinates(city, coordinates)}
-                      >
-                        {copiedCity === city ? "Скопировано" : "Скопировать координаты"}
-                      </button>
-                      <button
-                        type="button"
-                        className={styles.mapButton}
-                        onClick={handleOpenNavigator(latitude, longitude)}
-                      >
-                        Построить маршрут
-                      </button>
-                    </div>
                   </div>
                 </div>
               );
