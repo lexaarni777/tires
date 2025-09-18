@@ -1,159 +1,521 @@
-@import '../../styles/variables.scss';  // Цвета, шрифты, отступы
-@import '../../styles/mixins.scss';     // Медиа-запросы
+@import '../../styles/_mixins.scss';
 
 .header {
-  background-color: #fff;                     // Белый фон шапки
-  border-bottom: 1px solid $border-color;     // Низ с тонкой серой линией
+  background-color: var(--c-surface);
+  color: var(--c-text);
+  border-bottom: 1px solid var(--c-line);
+  box-shadow: var(--shadow-soft);
+  position: sticky;
+  top: 0;
+  z-index: 15;
 }
 
-.headerTop {
-  display: flex;                              // Горизонтальное распределение
-  justify-content: space-between;            // Контент по краям
-  align-items: center;                        // Центровка по вертикали
-  padding: 10px 20px;                         // Отступы сверху и по бокам
+.utilityBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-16);
+  padding: var(--sp-8) var(--sp-32);
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--c-text-muted);
+  background-color: var(--c-bg);
 }
 
-.IconHeader {
-  display: flex;                              // Горизонтальный блок с иконками
-  align-items: center;                        // Центровка по вертикали
+.utilityGroup {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-16);
+  flex-wrap: wrap;
 }
 
-.storeInfo {
-  h1 {
-    margin: 0;                                // Убираем внешние отступы
-    font-size: 24px;                          // Размер заголовка
-    color: $text-primary;                     // Цвет заголовка
+.utilityText {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  color: inherit;
+
+  svg {
+    color: var(--c-primary);
+    font-size: 1rem;
+  }
+}
+
+.contactLink {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  text-decoration: none;
+  color: var(--c-text);
+  font-weight: 600;
+  transition: color 0.2s ease;
+
+  svg {
+    color: var(--c-primary);
+    font-size: 1rem;
   }
 
-  p {
-    margin: 5px 0;                            // Отступы сверху и снизу
-    color: $text-muted;                       // Серый вторичный текст
+  &:hover {
+    color: var(--c-primary);
   }
 }
 
-.socialLinks {
-  margin-top: 6px;                            // Отступ от номера телефона
+.social {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-12);
 
   a {
-    margin-right: 10px;                       // Промежуток между ссылками
-    text-decoration: none;                    // Без подчеркивания
-    color: $text-muted;                       // Серый цвет
-    font-size: 14px;                          // Меньший текст
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border-radius: 50%;
+    border: 1px solid transparent;
+    background-color: var(--c-surface);
+    color: var(--c-primary);
+    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 
     &:hover {
-      color: $primary;                        // При наведении — синий
+      background-color: var(--c-primary);
+      color: var(--c-text-inverse);
+      box-shadow: var(--shadow-soft);
     }
   }
 }
 
-.cartIcon {
-  cursor: pointer;                            // Курсор — рука
-  margin: 0 10px;                             // Отступ между иконками
-  color: $text-primary;                       // Цвет иконки
+.brandRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--sp-16);
+  padding: var(--sp-16) var(--sp-32);
+}
+
+.brandBlock {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-16);
+}
+
+.navToggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: var(--radius-12);
+  border: 1px solid var(--c-line);
+  background: transparent;
+  color: var(--c-text);
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+
+  svg {
+    font-size: 1.25rem;
+  }
 
   &:hover {
-    color: $accent;                           // При наведении — оранжевый
+    border-color: var(--c-primary);
+    color: var(--c-primary);
   }
 }
 
-.headerBottom {
-  background-color: $background;              // Светло-серый фон меню
-  height: 60px;                               // Высота блока
+.logo {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+}
+
+.logoTitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.logoSubtitle {
+  font-size: 0.875rem;
+  color: var(--c-text-muted);
+}
+
+.actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-12);
+  flex-wrap: wrap;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  border: 0;
+}
+
+.citySelector {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  padding: var(--sp-8) var(--sp-12);
+  border-radius: var(--radius-12);
+  border: 1px solid var(--c-line);
+  background-color: var(--c-surface);
+  color: var(--c-text);
+  font-weight: 600;
+  cursor: pointer;
+
+  svg {
+    color: var(--c-primary);
+    font-size: 1rem;
+  }
+
+  select {
+    border: none;
+    background: transparent;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+    appearance: none;
+    padding-right: var(--sp-8);
+
+    &:focus {
+      outline: none;
+    }
+  }
+}
+
+.iconButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  padding: var(--sp-8) var(--sp-12);
+  min-height: 2.75rem;
+  border-radius: var(--radius-12);
+  border: 1px solid var(--c-line);
+  background-color: var(--c-surface);
+  color: var(--c-text);
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+
+  svg {
+    font-size: 1.25rem;
+  }
+
+  &:hover {
+    border-color: var(--c-primary);
+    color: var(--c-primary);
+  }
+}
+
+.badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 var(--sp-4);
+  border-radius: 999px;
+  background-color: var(--c-accent);
+  color: var(--c-text-inverse);
+  font-size: 0.75rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.badgeDot {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background-color: var(--c-primary);
+}
+
+.iconLabel {
+  display: none;
+  font-size: 0.875rem;
+}
+
+.nav {
+  width: 100%;
+  border-top: 1px solid var(--c-line);
+  background-color: var(--c-surface);
+}
+
+.navOpen {
+  display: block !important;
 }
 
 .menu {
-  display: flex;                              // Горизонтальное меню
-  justify-content: space-around;             // Равномерное распределение
-  align-items: center;                        // Центровка по вертикали
-  height: 100%;                               // Высота как у родителя
-  list-style: none;                           // Убираем маркеры списка
-  margin: 0;                                  // Убираем внешние отступы
-  padding: 0;                                 // Убираем внутренние
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-24);
+  margin: 0;
+  padding: var(--sp-12) var(--sp-32);
+  list-style: none;
 }
 
-.menu li a {
-  color: $text-primary;                       // Цвет ссылок
-  text-decoration: none;                      // Без подчёркивания
-  padding: 10px 20px;                         // Отступы вокруг текста
-  font-weight: 500;                           // Полужирный шрифт
+.menuItem {
+  position: relative;
+}
+
+.menuLink {
+  text-decoration: none;
+  color: var(--c-text);
+  font-weight: 600;
+  font-size: 0.9375rem;
+  position: relative;
+}
+
+.menuLinkActive {
+  color: var(--c-primary);
+}
+
+.menuItemWithChildren {
+  position: relative;
+}
+
+.menuItemExpanded .menuButton svg {
+  transform: rotate(180deg);
+}
+
+.menuItemExpanded .menuButton {
+  color: var(--c-primary);
+}
+
+.menuButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-4);
+  border: none;
+  background: none;
+  color: var(--c-text);
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.9375rem;
+  transition: color 0.2s ease;
+
+  svg {
+    transition: transform 0.2s ease;
+  }
 
   &:hover {
-    color: $accent;                           // Цвет при наведении — акцент
+    color: var(--c-primary);
   }
-}
-
-.submenuHead {
-  position: relative;                         // Для позиционирования вложенного меню
-  cursor: pointer;                            // Курсор по ховеру
-  padding-bottom: 12px;
 }
 
 .submenu {
-  display: none;                              // По умолчанию скрыт
-  position: absolute;                         // Выпадающее меню
-  background-color: $background;              // Цвет подложки
-  list-style: none;                           // Без маркеров
-  padding: 10px;                              // Внутренний отступ
-  margin: 0;                                  // Без внешних отступов
-  width: 150px;                               // Фиксированная ширина
-  z-index: 5;                                 // Поверх основного меню
+  display: none;
+  flex-direction: column;
+  gap: var(--sp-4);
+  margin: 0;
+  padding: var(--sp-12);
+  list-style: none;
+  background-color: var(--c-surface);
+  border: 1px solid var(--c-line);
+  border-radius: var(--radius-12);
+  box-shadow: var(--shadow-soft);
+  position: absolute;
+  top: calc(100% + var(--sp-12));
+  left: 0;
+  min-width: 220px;
+  z-index: 10;
+}
 
-  li {
-    margin: 10px 0;                           // Отступы между пунктами
-    width: 100%;                              // На всю ширину
+.submenuOpen {
+  display: flex;
+}
 
-    a {
-      padding: 5px 10px;                      // Отступ внутри ссылок
-      display: block;                         // Блочная ссылка
-      color: $text-primary;                   // Цвет текста
-      width: 100%;                            // Растягивание
+.submenuItem {
+  width: 100%;
+}
 
-      &:hover {
-        background-color: lighten($background, 4%); // Подсветка строки
-        color: $accent;                             // Цвет текста при наведении
-      }
-    }
+.submenuLink {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-8);
+  padding: var(--sp-8) var(--sp-12);
+  border-radius: var(--radius-8);
+  text-decoration: none;
+  color: var(--c-text-muted);
+  font-weight: 500;
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.submenuLink:hover,
+.submenuLinkActive {
+  background-color: rgba(0, 87, 184, 0.08);
+  color: var(--c-primary);
+}
+
+@include respond(lg) {
+  .utilityBar {
+    padding: var(--sp-8) var(--sp-16);
   }
-}
 
-.submenuHead:hover .submenu,
-.submenu:hover {
-  display: block;
-}
+  .brandRow {
+    padding: var(--sp-16);
+  }
 
-.menu li:hover .submenu,
-.submenu:hover {
-  display: flex;                              // Отображаем подменю при наведении
-  flex-direction: column;                     // Столбец
-  top: 30px;                                  // Смещение по оси Y
-  left: -30px;                                // Смещение влево
-}
-
-// === Адаптивность ===
-@include respond(sm) {
-  .headerTop {
-    flex-direction: column;                   // Вертикальное расположение
-    align-items: flex-start;                  // Выравнивание по левому краю
+  .nav {
+    display: none;
   }
 
   .menu {
-    flex-direction: column;                   // Вертикальное меню
-    align-items: flex-start;                  // По левому краю
-    padding: 10px 20px;                       // Отступы внутри
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--sp-8);
+    padding: var(--sp-16);
   }
 
-  .menu li {
-    width: 100%;                              // Каждая ссылка на всю ширину
+  .menuLink,
+  .menuButton {
+    width: 100%;
+    padding: var(--sp-12) var(--sp-16);
+    border-radius: var(--radius-12);
+    border: 1px solid var(--c-line);
+    background-color: var(--c-surface);
+    justify-content: space-between;
+    text-align: left;
   }
 
-  .menu li a {
-    display: block;                           // Блочная ссылка
-    padding: 10px 0;                          // Вертикальные отступы
+  .menuLink {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .menuLinkActive {
+    border-color: var(--c-primary);
+    color: var(--c-primary);
+    background-color: rgba(0, 87, 184, 0.08);
+  }
+
+  .menuButton {
+    display: inline-flex;
+    gap: var(--sp-8);
+  }
+
+  .menuItemExpanded .menuButton {
+    border-color: var(--c-primary);
+    color: var(--c-primary);
+    background-color: rgba(0, 87, 184, 0.08);
   }
 
   .submenu {
-    left: 0;                                  // Подменю не смещается влево
-    top: 100%;                                // Подменю под элементом
-    position: relative;                       // Перестраиваем поведение
+    position: static;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0 0 0 var(--sp-12);
+    margin-top: var(--sp-8);
+    border-left: 1px solid var(--c-line);
+  }
+
+  .submenuLink {
+    padding: var(--sp-8) 0;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navToggle {
+    display: none;
+  }
+
+  .menu {
+    flex-direction: row;
+    padding: var(--sp-12) var(--sp-32);
+  }
+
+  .menuLink,
+  .menuButton {
+    border: none;
+    background: none;
+    padding: var(--sp-12) 0;
+  }
+
+  .menuLink {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .menuLink::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: calc(-1 * var(--sp-4));
+    width: 100%;
+    height: 3px;
+    background-color: transparent;
+    border-radius: var(--radius-8);
+    transition: background-color 0.2s ease;
+  }
+
+  .menuLink:hover::after {
+    background-color: rgba(0, 87, 184, 0.3);
+  }
+
+  .menuLinkActive::after {
+    background-color: var(--c-primary);
+  }
+
+  .menuLinkActive {
+    color: var(--c-primary);
+  }
+
+  .menuItemWithChildren:hover .submenu {
+    display: flex;
+  }
+}
+
+@media (min-width: 768px) {
+  .iconLabel {
+    display: inline;
+  }
+}
+
+@include respond(md) {
+  .brandRow {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+@include respond(sm) {
+  .utilityGroup {
+    gap: var(--sp-8);
+  }
+
+  .actions {
+    gap: var(--sp-8);
+  }
+
+  .iconButton {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .citySelector {
+    width: 100%;
+    justify-content: center;
   }
 }

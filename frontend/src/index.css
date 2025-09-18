@@ -1,12 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+:root {
+  --c-primary: #0057B8;
+  --c-primary-600: #004a9c;
+  --c-accent: #FF6B00;
+  --c-accent-600: #E55F00;
+  --c-bg: #F4F6F8;
+  --c-surface: #FFFFFF;
+  --c-line: #E6EBF0;
+  --c-text: #111826;
+  --c-text-muted: #5B6472;
+  --c-text-inverse: #FFFFFF;
+  --st-new: #2F80ED;
+  --st-in-progress: #6C5CE7;
+  --st-packed: #56CCF2;
+  --st-shipped: #2DCEC4;
+  --st-delivered: #18A957;
+  --st-canceled: #9AA5B1;
+  --st-refunded: #D72638;
+  --radius-8: 8px;
+  --radius-12: 12px;
+  --radius-16: 16px;
+  --sp-4: 4px;
+  --sp-8: 8px;
+  --sp-12: 12px;
+  --sp-16: 16px;
+  --sp-24: 24px;
+  --sp-32: 32px;
+  --shadow-soft: 0 2px 10px rgba(17, 24, 38, 0.08);
+  --shadow-focus: 0 0 0 3px rgba(47, 128, 237, 0.35);
+  font-size: 16px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   margin: 0;
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Inter', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #FFFFFF;
-  color: #333333;
+  background-color: var(--c-bg);
+  color: var(--c-text);
+  line-height: 1.5;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+  border-radius: var(--radius-8);
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: 'Roboto Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }

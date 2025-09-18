@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, loginUser, sendSmsCode, sendResetCode, resetPassword, sendEmailCode, verifyEmail  } from '../../slices/authSlice';
 import styles from './AuthForm.module.scss';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
 import { mergeLocalCartWithServer, clearGuestCart } from '../../slices/cartSlice';
 import { validatePhone, validateEmail } from '../../utils/validators';
 
@@ -56,11 +55,18 @@ const AuthForm = () => {
     const { status, error } = useSelector((state) => state.auth);
 
     const auth = useSelector((state) => state.auth);
+    const previousUserRef = useRef(user);
+
     useEffect(() => {
-    // Только если нет guestCart, сразу переходим на /cart
-        if (user && !localStorage.getItem('guestCart')) {
-            navigate('/cart');
-        }
+    // Только при смене пользователя перенаправляем в корзину, если нет гостевой корзины
+      if (
+        user &&
+        previousUserRef.current !== user &&
+        !localStorage.getItem('guestCart')
+      ) {
+        navigate('/cart');
+      }
+      previousUserRef.current = user;
     }, [user, navigate]);
     useEffect(() => {
     // Если появился токен и в localStorage есть guestCart, показываем модалку

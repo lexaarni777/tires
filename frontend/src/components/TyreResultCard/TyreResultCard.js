@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, decrementToCart } from '../../slices/cartSlice';
 import styles from './TyreResultCard.module.scss';
@@ -36,19 +36,19 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
           <div className={styles.title}>{brand} {model}</div>
 
           <table className={styles.table}>
-        <thead>
-          <tr>
-            <th>Модель</th>
-            <th>Сезон</th>
-            <th>Индекс</th>
-            <th>Код товара</th>
-            <th>Наличие ({selectedCity})</th>
-            <th>Цена</th>
-            <th></th>
-          </tr>
-        </thead>
-        <tbody>
-          {tyres.map((tyre) => {
+            <thead>
+              <tr>
+                <th>Модель</th>
+                <th>Сезон</th>
+                <th>Индекс</th>
+                <th>Код товара</th>
+                <th>Наличие ({selectedCity})</th>
+                <th>Цена</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {tyres.map((tyre) => {
             const allStock = stockByTyreId[tyre.id] || [];
             const cityStock = allStock.find(s => cityWarehouses.includes(s.location));
             const stock = cityStock?.stock ?? '—';
@@ -115,45 +115,45 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
 
             const handleGoToCart = () => navigate('/cart');
 
-            return (
-              <tr key={tyre.id}>
-                <td>{tyre.name}</td>
-                <td>{tyre.season}</td>
-                <td>{tyre.load_index}{tyre.speed_index}</td>
-                <td>{tyre.article}</td>
-                <td>{stock}</td>
-                <td>{price}</td>
-                <td>
-                  {cityStock && cityStock.stock > 0 ? (
-                    cartItem ? (
-                      <div className={styles.cartInline}>
-                        <button onClick={handleGoToCart}>🛒</button>
-                        <button onClick={handleDecrement}>−</button>
-                        <input
-                          type="number"
-                          value={cartItem.quantity}
-                          readOnly
-                          className={styles.qtyInput}
-                        />
-                        <button
-                          onClick={handleIncrement}
-                          disabled={cartItem.quantity >= cityStock.stock}
-                        >+</button>
-                      </div>
-                    ) : (
-                      <button className={styles.cartButton} onClick={handleAdd}>
-                        В корзину
-                      </button>
-                    )
-                  ) : (
-                    <span>—</span>
-                  )}
-                </td>
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
+                return (
+                  <tr key={tyre.id}>
+                    <td>{tyre.name}</td>
+                    <td>{tyre.season}</td>
+                    <td>{tyre.load_index}{tyre.speed_index}</td>
+                    <td>{tyre.article}</td>
+                    <td>{stock}</td>
+                    <td>{price}</td>
+                    <td>
+                      {cityStock && cityStock.stock > 0 ? (
+                        cartItem ? (
+                          <div className={styles.cartInline}>
+                            <button onClick={handleGoToCart}>🛒</button>
+                            <button onClick={handleDecrement}>−</button>
+                            <input
+                              type="number"
+                              value={cartItem.quantity}
+                              readOnly
+                              className={styles.qtyInput}
+                            />
+                            <button
+                              onClick={handleIncrement}
+                              disabled={cartItem.quantity >= cityStock.stock}
+                            >+</button>
+                          </div>
+                        ) : (
+                          <button className={styles.cartButton} onClick={handleAdd}>
+                            В корзину
+                          </button>
+                        )
+                      ) : (
+                        <span>—</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
