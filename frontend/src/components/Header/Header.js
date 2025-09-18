@@ -113,7 +113,7 @@ const Header = () => {
           </span>
           <span className={classes.utilityText}>
             <FiMapPin aria-hidden="true" />
-            <span>Доставляем по всей России</span>
+            <span>Доставляем по всей Росси</span>
           </span>
         </div>
         <div className={classes.utilityGroup}>
