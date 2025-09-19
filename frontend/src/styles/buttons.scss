@@ -1,0 +1,81 @@
+@import './_button-core.scss';
+
+.btn {
+  @extend %btn-base;
+}
+
+.btn--primary {
+  @extend %btn-base;
+  @extend %btn-primary;
+}
+
+.btn--secondary {
+  @extend %btn-base;
+  @extend %btn-secondary;
+}
+
+.btn--tertiary {
+  @extend %btn-base;
+  @extend %btn-tertiary;
+}
+
+.btn--danger {
+  @extend %btn-base;
+  @extend %btn-danger;
+}
+
+.btn--ghost {
+  @extend %btn-base;
+  @extend %btn-ghost;
+}
+
+.btn--icon {
+  @extend %btn-base;
+  @extend %btn-icon;
+}
+
+.btn--block {
+  @extend %btn-base;
+  @extend %btn-block;
+}
+
+.btn--sm {
+  @extend %btn-base;
+  @extend %btn-size-sm;
+}
+
+.btn--lg {
+  @extend %btn-base;
+  @extend %btn-size-lg;
+}
+
+.btn--with-icon {
+  @extend %btn-base;
+  @extend %btn-with-icon;
+}
+
+.btn--pill {
+  @extend %btn-base;
+  @extend %btn-pill;
+}
+
+.btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn__spinner {
+  width: 1.1em;
+  height: 1.1em;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: currentColor;
+  animation: btn-spin 0.8s linear infinite;
+}
+
+@keyframes btn-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

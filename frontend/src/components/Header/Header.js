@@ -173,8 +173,7 @@ const Header = () => {
             {isNavOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
           </button>
           <NavLink to="/" className={classes.logo} data-qa="nav_logo">
-            <span className={classes.logoTitle}>MskTires</span>
-            <span className={classes.logoSubtitle}>Интернет-магазин шин и дисков</span>
+            <img className={classes.logoTitle} src="logo.png" img/>
           </NavLink>
         </div>
 
