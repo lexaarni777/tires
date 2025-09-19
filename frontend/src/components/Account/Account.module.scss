@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss';  // Цвета, отступы, шрифты
+@import '../../styles/_variables.scss';  // Цвета, отступы, шрифты
 @import '../../styles/mixins.scss';     // Медиа-запросы
 
 .account {
@@ -38,7 +38,7 @@
     transition: background-color 0.3s;   // Плавное изменение фона
 
     &:hover {
-      background-color: darken($primary, 10%); // Тёмно-синий при наведении
+      background-color: tone($primary, 10, 'darken'); // Тёмно-синий при наведении
     }
   }
 }
@@ -54,7 +54,7 @@
   transition: background-color 0.3s ease; // Плавное затемнение при наведении
 
   &:hover {
-    background-color: darken($accent, 8%); // При наведении — темнее
+    background-color: tone($accent, 8, 'darken'); // При наведении — темнее
   }
 }
 

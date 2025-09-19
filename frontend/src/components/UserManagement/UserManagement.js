@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styles from './UserManagement.module.scss'; // SCSS с модулями
+import Button from '../ui/Button';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -43,9 +44,9 @@ const UserManagement = () => {
             <tr key={user.id}>
               <td>{user.email}</td>
               <td>{user.role}</td>
-              <td>
-                <button className={styles['userManagement__btn--assign']}>Назначить роль</button>
-                <button className={styles['userManagement__btn--delete']}>Удалить</button>
+              <td className={styles.userManagement__actions}>
+                <Button size="sm" variant="secondary">Назначить роль</Button>
+                <Button size="sm" variant="danger">Удалить</Button>
               </td>
             </tr>
           ))}

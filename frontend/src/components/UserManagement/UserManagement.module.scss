@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss'; // Импорт переменных
+@import '../../styles/_variables.scss'; // Импорт переменных
 @import '../../styles/mixins.scss';    // Импорт миксинов
 
 .userManagement__container {
@@ -41,35 +41,9 @@
   color: $text-primary;                   // Цвет текста
 }
 
-// === Кнопка: Назначить роль ===
-.userManagement__btn--assign {
-  margin-right: 8px;                      // Отступ справа
-  padding: 6px 12px;                      // Отступ внутри
-  font-size: 13px;                        // Размер текста
-  background-color: $accent;              // Оранжевый фон
-  color: #fff;                            // Белый текст
-  border: none;                           // Без рамки
-  border-radius: 4px;                     // Скругление
-  cursor: pointer;                        // Курсор при наведении
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: darken($accent, 8%); // Темнее при наведении
-  }
-}
-
-// === Кнопка: Удалить пользователя ===
-.userManagement__btn--delete {
-  padding: 6px 12px;                      // Отступ
-  font-size: 13px;                        // Размер текста
-  background-color: $danger;              // Красный фон
-  color: #fff;                            // Белый текст
-  border: none;                           // Без рамки
-  border-radius: 4px;                     // Скруглённые углы
-  cursor: pointer;                        // Курсор при наведении
-  transition: background-color 0.3s;
-
-  &:hover {
-    background-color: darken($danger, 10%); // Темнее при наведении
-  }
+.userManagement__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+  flex-wrap: wrap;
 }

@@ -4,6 +4,7 @@ import { fetchCart, removeFromCart, clearCartServerSide, placeOrder, addToCart, 
 import { fetchProfile, fetchAddresses} from '../../slices/profileSlice';
 import { useNavigate } from 'react-router-dom';
 import styles from './Cart.module.scss';
+import Button from '../ui/Button';
 import { getThumbnailPath } from '../../utils/thumb';
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
@@ -202,16 +203,27 @@ const Cart = () => {
                   </div>
                   <p>Цена: {item.price} ₽</p>
                 </div>
-                <button className={styles.removeButton} onClick={() => dispatch(removeFromCart(item.cart_id))}>Удалить</button>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  onClick={() => dispatch(removeFromCart(item.cart_id))}
+                  className={styles.removeAction}
+                >
+                  Удалить
+                </Button>
               </li>
             ))}
           </ul>
           <div className={styles.cartActions}>
-            <button className={styles.clearButton} onClick={() => dispatch(clearCartServerSide())}>
+            <Button
+              variant="secondary"
+              onClick={() => dispatch(clearCartServerSide())}
+              className={styles.actionButton}
+            >
               Очистить корзину
-            </button>
-            <button
-              className={styles.checkoutButton}
+            </Button>
+            <Button
+              variant="primary"
               onClick={() => {
                 if (!auth.token) {
                   navigate('/authform');
@@ -220,9 +232,10 @@ const Cart = () => {
                 }
               }}
               disabled={!selectedIds.length}
+              className={styles.actionButton}
             >
               Оформить заказ
-            </button>
+            </Button>
           </div>
         </>
       )}
@@ -329,8 +342,16 @@ const Cart = () => {
               </div>
 
               <div className={styles.formActions}>
-                <button type="button" className={styles.btnOutline} onClick={() => setShowModal(false)}>Вернуться в корзину</button>
-                <button type="submit" className={styles.btnMain}>Подтвердить заказ</button>
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Вернуться в корзину
+                </Button>
+                <Button type="submit" variant="primary">
+                  Подтвердить заказ
+                </Button>
               </div>
             </form>
           </div>

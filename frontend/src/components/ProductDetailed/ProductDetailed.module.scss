@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss'; // Подключаем переменные (цвета, отступы, тени)
+@import '../../styles/_variables.scss'; // Подключаем переменные (цвета, отступы, тени)
 
 /* Главный контейнер карточки товара */
 .detailedWrap {
@@ -115,7 +115,7 @@
   cursor: pointer;                   // Курсор "рука"
 
   &:hover {
-    background-color: darken($accent, 10%); // Затемнение при наведении
+    background-color: tone($accent, 10, 'darken'); // Затемнение при наведении
   }
 }
 
@@ -188,7 +188,7 @@
     border-radius: 4px;             // Скруглённые углы
 
     &:hover {
-      background-color: darken($danger, 10%); // Затемнение при наведении
+      background-color: tone($danger, 10, 'darken'); // Затемнение при наведении
     }
   }
 }

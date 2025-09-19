@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss';  // Цвета, шрифты, отступы
+@import '../../styles/_variables.scss';  // Цвета, шрифты, отступы
 @import '../../styles/mixins.scss';     // Медиа-запросы
 
 .authForm {
@@ -64,11 +64,11 @@
   font-size: 1em;                       // Размер текста
 
   &:hover {
-    background-color: darken($primary, 8%); // Темнее при наведении
+    background-color: tone($primary, 8, 'darken'); // Темнее при наведении
   }
 
   &:disabled {
-    background-color: lighten($primary, 30%); // Осветление при загрузке
+    background-color: tone($primary, 30, 'lighten'); // Осветление при загрузке
     cursor: not-allowed;                      // Курсор запрета
   }
 }
@@ -86,7 +86,7 @@
   margin-top: 10px;                     // Отступ сверху
 
   &:hover {
-    background-color: darken($accent, 8%); // Темнее при наведении
+    background-color: tone($accent, 8, 'darken'); // Темнее при наведении
   }
 }
 

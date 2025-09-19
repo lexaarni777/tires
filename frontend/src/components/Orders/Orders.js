@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
 import styles from './Orders.module.scss';
+import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { getThumbnailPath } from '../../utils/thumb';
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
@@ -46,23 +47,24 @@ const Orders = () => {
             </span>
           </div>
           <div className={styles.orders__actions}>
-            <button
-              className={styles.btn}
+            <Button
+              variant="primary"
+              size="sm"
               onClick={async () => {
-              await dispatch(repeatOrder(order.items));
-              navigate('/cart');
-            }}
-
+                await dispatch(repeatOrder(order.items));
+                navigate('/cart');
+              }}
             >
               Повторить заказ
-            </button>
+            </Button>
             {order.status === 'В обработке' && (
-            <button
-              className={styles.btnOutline}
-              onClick={() => dispatch(cancelOrder(order.order_id))}
-            >
-              Отменить заказ
-            </button>
+              <Button
+                variant="danger"
+                size="sm"
+                onClick={() => dispatch(cancelOrder(order.order_id))}
+              >
+                Отменить заказ
+              </Button>
           )}
           </div>
 

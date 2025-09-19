@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss';  // Цвета, отступы, фон
+@import '../../styles/_variables.scss';  // Цвета, отступы, фон
 @import '../../styles/mixins.scss';     // Медиа-запросы
 
 .cartContainer {
@@ -61,42 +61,13 @@
   flex-wrap: wrap;                       // Перенос на мобильных
 }
 
-.removeButton,
-.clearButton,
-.checkoutButton {
-  padding: 10px 20px;                    // Внутренние отступы
-  font-size: 14px;                       // Размер текста
-  color: #fff;                           // Белый текст
-  border: none;                          // Без рамки
-  border-radius: 4px;                    // Скруглённые углы
-  cursor: pointer;                       // Курсор — рука
+.actionButton {
+  flex: 1;
+  min-width: 12.5rem;
 }
 
-.removeButton {
-  background-color: $danger;             // Красный фон
-  &:hover {
-    background-color: darken($danger, 7%); // Темнее при наведении
-  }
-}
-
-.clearButton {
-  background-color: #ffc107;             // Жёлтый фон (ручной акцент)
-  &:hover {
-    background-color: #e0a800;           // Затемнение при наведении
-  }
-}
-
-.checkoutButton {
-  background-color: $success;            // Зелёный — подтверждение
-  &:hover {
-    background-color: darken($success, 7%); // Тёмно-зелёный при наведении
-  }
-    &:disabled {
-    background-color: #bdbdbd; // Серый фон для disabled
-    color: #888;               // Тусклый текст
-    cursor: not-allowed;       // Курсор "запрещено"
-    opacity: 0.7;              // Полупрозрачность
-  }
+.removeAction {
+  margin-left: var(--sp-8);
 }
 
 .emptyCart {
@@ -118,10 +89,17 @@
     align-items: stretch;                // Растягиваются по ширине
   }
 
-  .removeButton,
-  .clearButton,
-  .checkoutButton {
-    width: 100%;                         // Кнопки на всю ширину
+  .actionButton {
+    width: 100%;
+  }
+
+  .formActions {
+    flex-direction: column;
+    align-items: stretch;
+
+    > * {
+      width: 100%;
+    }
   }
 
   .productDetails {
@@ -245,35 +223,9 @@
   justify-content: flex-end;  // Кнопки прижаты вправо
   gap: 12px;                   // Расстояние между кнопками
   margin-top: 20px;            // Отступ сверху
-}
 
-// Кнопка "Оплатить"
-.btnMain {
-  background-color: $primary; // Основной цвет кнопки
-  color: #fff;                // Белый текст
-  border: none;               // Без границы
-  padding: 10px 20px;         // Внутренние отступы
-  font-weight: 600;           // Жирный текст
-  border-radius: 4px;         // Скругление углов
-  cursor: pointer;            // Курсор-рука
-
-  &:hover {
-    background-color: darken($primary, 8%); // Затемнение при наведении
-  }
-}
-
-// Кнопка "Отмена"
-.btnOutline {
-  background-color: transparent;   // Прозрачный фон
-  border: 1px solid $primary;      // Граница по цвету проекта
-  color: $primary;                 // Текст совпадает с цветом рамки
-  padding: 10px 20px;              // Отступы
-  font-weight: 600;                // Жирный текст
-  border-radius: 4px;             // Скруглённые края
-  cursor: pointer;                // Курсор-рука
-
-  &:hover {
-    background-color: rgba($primary, 0.08); // Лёгкий фон при наведении
+  > * {
+    min-width: 10rem;
   }
 }
 
@@ -295,7 +247,7 @@
     cursor: pointer;
 
     &:disabled {
-      background-color: lighten($primary, 20%);
+      background-color: tone($primary, 20, 'lighten');
       cursor: not-allowed;
     }
   }

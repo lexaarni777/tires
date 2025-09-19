@@ -19,3 +19,31 @@ $breakpoints: (
   display: flex;
   flex-direction: column;
 }
+
+// === Цветовые утилиты ===
+@function tone($token, $amount, $mode: 'lighten') {
+  @if type-of($amount) != number {
+    @error 'tone($token, $amount): $amount должен быть числом (0-100).';
+  }
+
+  $base: 100 - $amount;
+
+  @if $mode == 'lighten' {
+    @return unquote("color-mix(in srgb, #{$token} #{$base}%, white #{$amount}%)");
+  } @else if $mode == 'darken' {
+    @return unquote("color-mix(in srgb, #{$token} #{$base}%, black #{$amount}%)");
+  } @else {
+    @error 'tone(): ожидается mode lighten | darken.';
+  }
+}
+
+@function token-alpha($token, $opacity) {
+  @if type-of($opacity) != number {
+    @error 'token-alpha($token, $opacity): $opacity должен быть числом 0-1.';
+  }
+
+  $percent: $opacity * 100;
+  $transparent: 100 - $percent;
+
+  @return unquote("color-mix(in srgb, #{$token} #{$percent}%, transparent #{$transparent}%)");
+}

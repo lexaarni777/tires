@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss';  // Импорт цветовых и размерных переменных
+@import '../../styles/_variables.scss';  // Импорт цветовых и размерных переменных
 @import '../../styles/mixins.scss';     // Импорт медиазапросов и шаблонов
 @import '../../styles/typography.scss'; // Импорт типографики
 
@@ -6,13 +6,13 @@
   background: #fff;                    // Белый фон карточки
   border: 1px solid $border-color;     // Граница по переменной
   border-radius: 8px;                  // Скругление углов
-  box-shadow: $shadow-light;           // Мягкая тень
+  box-shadow: $shadow-soft;            // Мягкая тень
   padding: 16px;                       // Внутренний отступ
   cursor: pointer;                     // Курсор — рука
   transition: box-shadow 0.3s ease;    // Плавный переход тени
 
   &:hover {
-    box-shadow: $shadow-hover;         // Увеличенная тень при наведении
+    box-shadow: 0 12px 28px token-alpha($text-primary, 0.12); // Увеличенная тень при наведении
   }
 }
 
@@ -112,7 +112,7 @@
     cursor: pointer;               // Рука
 
     &:disabled {
-      background-color: lighten($primary, 20%); // Осветлённый цвет при отключении
+      background-color: tone($primary, 20, 'lighten'); // Осветлённый цвет при отключении
       cursor: not-allowed;           // Курсор запрета
     }
   }
@@ -145,11 +145,11 @@
   cursor: pointer;                  // Рука
 
   &:hover {
-    background-color: darken($accent, 7%); // Затемнение при наведении
+    background-color: tone($accent, 7, 'darken'); // Затемнение при наведении
   }
 
   &:disabled {
-    background-color: lighten($accent, 20%); // Осветление при отключении
+    background-color: tone($accent, 20, 'lighten'); // Осветление при отключении
     cursor: not-allowed;                     // Курсор запрета
   }
 }

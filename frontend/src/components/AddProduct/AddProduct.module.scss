@@ -1,4 +1,4 @@
-@import '../../styles/variables.scss';  // Цвета, отступы, фон
+@import '../../styles/_variables.scss';  // Цвета, отступы, фон
 @import '../../styles/mixins.scss';     // Медиа-запросы
 
 .container {
@@ -64,7 +64,7 @@ textarea {
   color: #fff;                                // Белый текст
 
   &:hover {
-    background-color: darken($primary, 10%);  // Темнее при наведении
+    background-color: tone($primary, 10, 'darken');  // Темнее при наведении
   }
 }
 

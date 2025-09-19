@@ -1,23 +1,54 @@
-// === Цвета ===
-$primary: #0057B8;        // Основной синий
-$accent: #FF6B00;         // Акцентный оранжевый
-$background: #F4F6F8;     // Основной фон
-$text-primary: #1F1F1F;   // Основной текст
-$text-muted: #777777;     // Второстепенный текст
-$border-color: #D3D8DF;   // Границы, обводки
-$success: #27AE60;        // Успех
-$danger: #E74C3C;         // Ошибка
+// === Цветовые токены ===
+$primary: var(--c-primary);
+$primary-600: var(--c-primary-600);
+$accent: var(--c-accent);
+$accent-600: var(--c-accent-600);
+$background: var(--c-bg);
+$surface: var(--c-surface);
+$border-color: var(--c-line);
+$text-primary: var(--c-text);
+$text-muted: var(--c-text-muted);
+$text-inverse: var(--c-text-inverse);
 
-// === Шрифт ===
+$success: var(--st-delivered);
+$info: var(--st-in-progress);
+$warning: var(--st-packed);
+$danger: var(--st-refunded);
+$neutral: var(--st-canceled);
+
+// === Статусы заказов ===
+$status-new: var(--st-new);
+$status-in-progress: var(--st-in-progress);
+$status-packed: var(--st-packed);
+$status-shipped: var(--st-shipped);
+$status-delivered: var(--st-delivered);
+$status-canceled: var(--st-canceled);
+$status-refunded: var(--st-refunded);
+
+// === Типографика ===
 $font-family-base: 'Inter', sans-serif;
 
-// === Отступы (базовые шаги) ===
-$space-xs: 4px;
-$space-sm: 8px;
-$space-md: 16px;
-$space-lg: 24px;
-$space-xl: 32px;
+// === Отступы ===
+$space-xs: var(--sp-4);
+$space-sm: var(--sp-8);
+$space-md: var(--sp-16);
+$space-lg: var(--sp-24);
+$space-xl: var(--sp-32);
+
+$space-4: var(--sp-4);
+$space-8: var(--sp-8);
+$space-12: var(--sp-12);
+$space-16: var(--sp-16);
+$space-24: var(--sp-24);
+$space-32: var(--sp-32);
+
+// === Скругления ===
+$radius-8: var(--radius-8);
+$radius-12: var(--radius-12);
+$radius-16: var(--radius-16);
 
 // === Тени ===
-$shadow-light: 0 2px 8px rgba(0, 0, 0, 0.05);
-$shadow-hover: 0 4px 16px rgba(0, 0, 0, 0.1);
+$shadow-soft: var(--shadow-soft);
+$shadow-focus: var(--shadow-focus);
+$shadow-light: $shadow-soft;
+$shadow-hover: 0 12px 28px rgba(17, 24, 38, 0.12);
