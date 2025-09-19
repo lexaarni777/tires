@@ -157,21 +157,23 @@
 }
 
 .addToCartBtn {
-  background-color: $accent;       // Акцентный фон (оранжевый)
-  color: #fff;                      // Белый текст
-  padding: 10px 16px;               // Внутренние отступы
-  border: none;                     // Без границы
-  border-radius: 6px;               // Скруглённые углы
-  font-weight: 600;                 // Жирный текст
-  cursor: pointer;                  // Рука
+  // Принудительно красим кнопку акцентом, перекрывая variant "primary"
+  background-color: $accent !important;       // Акцентный фон (оранжевый)
+  color: $text-inverse !important;            // Белый текст
+  padding: 10px 16px;                         // Внутренние отступы
+  border: none !important;                    // Без границы
+  border-radius: $radius-12;                  // Скруглённые углы
+  font-weight: 600;                           // Жирный текст
+  cursor: pointer;                            // Рука
 
   &:hover {
-    background-color: tone($accent, 7, 'darken'); // Затемнение при наведении
+    background-color: tone($accent, 7, 'darken') !important; // Затемнение при наведении
   }
 
   &:disabled {
-    background-color: tone($accent, 20, 'lighten'); // Осветление при отключении
-    cursor: not-allowed;                     // Курсор запрета
+    background-color: tone($accent, 20, 'lighten') !important; // Осветление при отключении
+    cursor: not-allowed;                                       // Курсор запрета
+    opacity: .9;
   }
 }
 

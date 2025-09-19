@@ -14,8 +14,14 @@
 
 /* Обёртка для изображения товара */
 .imageWrap {
-  flex: 0 0 280px;                    // Фиксированная ширина 280px
+  flex: 0 0 320px;                    // Ширина колонки галереи
 }
+
+.mainImgWrap { margin-bottom: $space-12; }
+.thumbs { display: flex; gap: $space-8; flex-wrap: wrap; }
+.thumb { border: 1px solid $border-color; border-radius: $radius-8; padding: 2px; background: $surface; cursor: pointer; }
+.thumbActive { border-color: $primary; box-shadow: 0 0 0 2px token-alpha($primary, .2); }
+.thumb img { width: 56px; height: 56px; object-fit: contain; display: block; }
 
 /* Стилизуем изображение */
 .image {
@@ -61,6 +67,7 @@
   font-size: 15px;                   // Размер описания
   color: $text-muted;                // Приглушённый цвет
   line-height: 1.5;                  // Межстрочный интервал
+  max-width: 70ch;
 }
 
 /* Блок с остатками по складам */
@@ -93,10 +100,8 @@
 
 /* Блок управления корзиной */
 .cartControls {
-  margin-top: $space-16;             // Отступ сверху
-  display: flex;                     // Горизонтальный флекс
-  flex-direction: column;           // Вертикальное расположение
-  gap: $space-12;                    // Расстояние между элементами
+  // больше не используется, оставлено для совместимости
+  display: none;
 }
 
 /* Селектор склада */
@@ -118,6 +123,19 @@
   flex-direction: column;           // Вертикальное расположение
   gap: 8px;                          // Отступ между элементами
 }
+
+// Чипы характеристик
+.chips { display: inline-flex; gap: $space-8; flex-wrap: wrap; }
+.chip { background: $background; color: $text-primary; border: 1px solid $border-color; border-radius: $radius-12; padding: $space-4 $space-8; font-size: .8125rem; font-weight: 600; }
+
+.deliveryHint { color: $text-muted; font-size: .9375rem; }
+.stockRow { display: flex; align-items: center; gap: $space-12; margin-top: $space-12; }
+.warehouseLabel { color: $text-muted; font-size: .875rem; }
+.buyRow { display: flex; align-items: center; gap: $space-12; margin-top: $space-12; }
+.buyQty { min-width: 2rem; text-align: center; font-weight: 600; }
+.qtyBtn { width: 2.5rem; height: 2.5rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+
+.backLink { display: inline-block; margin: 0 0 $space-16; color: $primary; text-decoration: none; }
 
 /* Блок кнопок + и - */
 .BlockAddToCartBut {

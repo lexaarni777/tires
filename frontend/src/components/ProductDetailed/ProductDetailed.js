@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
@@ -22,6 +22,7 @@ const ProductDetailed = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
+  const [activeIndex, setActiveIndex] = useState(0);
 
 
   // Стор
@@ -72,7 +73,6 @@ const ProductDetailed = () => {
 
   // Главное изображение
 const getFeaturedImage = () => {
-  console.log('product',product)
   if (product?.images && product.images.length > 0) {
     const featured = product.images.find((img) => img.is_featured_image);
     return featured
@@ -173,6 +173,11 @@ const handleAddToCart = (e) => {
     })
   );
 };
+ // Изображения (галерея)
+  const galleryImages = (product?.images?.length ? product.images : product?.model_images) || [];
+  const activeImage = galleryImages[activeIndex]?.image_path
+    ? `${API_URL}${galleryImages[activeIndex].image_path}`
+    : getFeaturedImage();
 
 
 
@@ -200,12 +205,32 @@ const handleAddToCart = (e) => {
     }
   };
 
+ 
+
   return (
     <div className={styles.page}>
+    <NavLink to="/productlist" className={styles.backLink} data-qa="productd_back">← К каталогу</NavLink>
     <div className={styles.detailedWrap} data-qa="product_detailed">
       {/* Блок с фото и названием */}
       <div className={styles.imageWrap}>
-        <img src={getFeaturedImage()} alt={product.name} className={styles.image} />
+        <div className={styles.mainImgWrap}>
+          <img src={activeImage} alt={product.name} className={styles.image} />
+        </div>
+        {!!galleryImages.length && (
+          <div className={styles.thumbs}>
+            {galleryImages.map((img, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={`${styles.thumb} ${idx === activeIndex ? styles.thumbActive : ''}`}
+                onClick={() => setActiveIndex(idx)}
+                aria-label={`Фото ${idx + 1}`}
+              >
+                <img src={`${API_URL}${img.image_path}`} alt="" aria-hidden="true" />
+              </button>
+            ))}
+          </div>
+        )}
       </div>
       <div className={styles.info}>
         <div className={styles.title} data-qa="productd_title">{product.name}</div>
@@ -216,25 +241,24 @@ const handleAddToCart = (e) => {
             {totalCityStock > 0 ? `В наличии: ${totalCityStock} шт.` : 'Нет в наличии в выбранном городе'}
           </div>
         </div>
-        <div className={styles.meta}>
-          {product.brand && <span>Бренд: {product.brand}</span>}
-          {product.size && <span>Размер: {product.size}</span>}
-          {product.season && <span>Сезон: {product.season}</span>}
-          {product.load_index && <span>Индекс нагрузки: {product.load_index}</span>}
-          {product.speed_index && <span>Индекс скорости: {product.speed_index}</span>}
-          {product.model && <span>Модель: {product.model}</span>}
-          {product.profile && <span>Профиль: {product.profile}</span>}
-          {product.studs !== undefined && product.studs !== null && (
-            <span>
-              Шипы: {product.studs === true || product.studs === "true" ? "есть" : "нет"}
-            </span>
-)}
+        <div className={styles.chips}>
+          {product.size && (<span className={styles.chip} data-qa="productd_chip_size">Размер: {product.size}</span>)}
+          {product.season && (<span className={styles.chip} data-qa="productd_chip_season">Сезон: {product.season}</span>)}
+          {(product.load_index || product.speed_index) && (
+            <span className={styles.chip} data-qa="productd_chip_index">Индексы: {product.load_index || '-'} / {product.speed_index || '-'}</span>
+          )}
+          {(product.studs !== undefined && product.studs !== null) && (
+            <span className={styles.chip} data-qa="productd_chip_studs">Шипы: {product.studs === true || product.studs === 'true' ? 'есть' : 'нет'}</span>
+          )}
+          {product.brand && (<span className={styles.chip}>Бренд: {product.brand}</span>)}
         </div>
+        <div className={styles.deliveryHint} data-qa="productd_delivery_hint">Отгрузим сегодня при заказе до 18:00 • Самовывоз: {selectedCity}</div>
         <div className={styles.description}>{product.description}</div>
 
-        {/* Управление для корзины и действия для админа */}
-        <div className={styles.cartControls} onClick={(e) => e.stopPropagation()}>
-          {filteredProductStock.length > 1 && (
+        {/* Склад */}
+        <div className={styles.stockRow}>
+          <span className={styles.warehouseLabel}>Город: {selectedCity}</span>
+          {filteredProductStock.length > 1 ? (
             <select
               value={selectedStockId}
               onChange={(e) => setSelectedStockId(Number(e.target.value))}
@@ -248,72 +272,87 @@ const handleAddToCart = (e) => {
                 </option>
               ))}
             </select>
+          ) : (
+            filteredProductStock[0] && (
+              <span className={styles.warehouseLabel}>Склад: {filteredProductStock[0].location}</span>
+            )
           )}
+        </div>
 
-          {/* Если товар уже в корзине — управление количеством */}
+        {/* Покупательская строка под ценой */}
+        <div className={styles.buyRow} data-qa="productd_buy_row">
           {cartItem ? (
-            <div className={styles.BlockAddToCart}>
-              <Button variant="secondary" className={styles.goToCart} onClick={handleGoToCart} data-qa="productd_go_to_cart">
-                Перейти в корзину
-              </Button>
+            <>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<span aria-hidden="true">−</span>}
+                aria-label="Уменьшить"
+                onClick={handleDecrement}
+                className={styles.qtyBtn}
+              />
+              <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
+              <Button
+                variant="primary"
+                size="sm"
+                icon={<span aria-hidden="true">+</span>}
+                aria-label="Увеличить"
+                onClick={handleIncrement}
+                disabled={cartItem.quantity >= (selectedStock?.stock || 0)}
+                className={styles.qtyBtn}
+              />
+              <Button variant="secondary" onClick={handleGoToCart}>Перейти в корзину</Button>
+            </>
+          ) : (
+            <>
               <div className={styles.BlockAddToCartBut}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<span aria-hidden="true">+</span>}
-                  aria-label="Увеличить"
-                  onClick={handleIncrement}
-                  disabled={cartItem.quantity >= selectedStock.stock}
-                  className={styles.qtyBtn}
-                  data-qa="productd_qty_inc"
-                />
-                <input
-                  type="number"
-                  value={cartItem.quantity}
-                  min={1}
-                  max={selectedStock.stock}
-                  readOnly
-                  className={styles.qtyInput}
-                />
                 <Button
                   variant="primary"
                   size="sm"
                   icon={<span aria-hidden="true">−</span>}
                   aria-label="Уменьшить"
-                  onClick={handleDecrement}
                   className={styles.qtyBtn}
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  disabled={quantity <= 1}
                   data-qa="productd_qty_dec"
                 />
+                <input
+                  type="number"
+                  min={1}
+                  max={selectedStock?.stock || 1}
+                  value={quantity}
+                  onChange={(e) => {
+                    let val = Number(e.target.value);
+                    const max = selectedStock?.stock || 1;
+                    if (val > max) val = max;
+                    if (val < 1) val = 1;
+                    setQuantity(val);
+                  }}
+                  className={styles.qtyInput}
+                  data-qa="productd_qty_input"
+                />
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<span aria-hidden="true">+</span>}
+                  aria-label="Увеличить"
+                  className={styles.qtyBtn}
+                  onClick={() => setQuantity((q) => Math.min((selectedStock?.stock || 1), q + 1))}
+                  disabled={(selectedStock?.stock || 1) <= quantity}
+                  data-qa="productd_qty_inc"
+                />
               </div>
-            </div>
-          ) : null}
-          {!cartItem && (
-          <>
-            <input
-              type="number"
-              min={1}
-              max={selectedStock?.stock || 1}
-              value={quantity}
-              onChange={(e) => {
-                let val = Number(e.target.value);
-                if (val > (selectedStock?.stock || 1)) val = selectedStock.stock;
-                if (val < 1) val = 1;
-                setQuantity(val);
-              }}
-              className={styles.qtyInput}
-              onClick={(e) => e.stopPropagation()}
-            />
-            <Button
-              variant="primary"
-              className={styles.addToCartBtn}
-              onClick={handleAddToCart}
-              disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
-              data-qa="productd_add_to_cart"
-            >
-              В корзину
-            </Button>
-          </>
-        )}
+              <Button
+                variant="primary"
+                onClick={handleAddToCart}
+                disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
+                data-qa="productd_add_to_cart"
+              >
+                В корзину
+              </Button>
+            </>
+          )}
+        </div>
 
           {/* Действия для администратора: удалить / редактировать */}
           {auth.roles && auth.roles.indexOf("admin") !== -1 && (
@@ -336,7 +375,7 @@ const handleAddToCart = (e) => {
               aria-label="Уменьшить"
               onClick={handleDecrement}
             />
-            <span className={styles.stickyQty}>{cartItem.quantity}</span>
+            <span className={styles.stickyQty} aria-live="polite">{cartItem.quantity}</span>
             <Button
               variant="primary"
               size="sm"
@@ -345,7 +384,7 @@ const handleAddToCart = (e) => {
               onClick={handleIncrement}
               disabled={cartItem.quantity >= (selectedStock?.stock || 0)}
             />
-            <Button variant="secondary" onClick={handleGoToCart}>В корзину</Button>
+            <Button variant="secondary" onClick={handleGoToCart}>Перейти в корзину</Button>
           </div>
         ) : (
           <Button
@@ -358,7 +397,7 @@ const handleAddToCart = (e) => {
         )}
       </div>
     </div>
-    </div>
+    
   );
 };
 
