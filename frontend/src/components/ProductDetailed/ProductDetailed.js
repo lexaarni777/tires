@@ -5,6 +5,7 @@ import { fetchProducts } from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
 import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
 import styles from "./ProductDetailed.module.scss";
+import Button from "../ui/Button";
 import { deleteProduct } from "../../slices/productSlice";
 import { warehouseList } from "../../constants/warehouseList";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
@@ -185,16 +186,35 @@ const handleAddToCart = (e) => {
 
   // Рендер
   const selectedStock = filteredProductStock.find((s) => s.id === selectedStockId);
+  const totalCityStock = filteredProductStock.reduce((sum, s) => sum + (s.stock || 0), 0);
+  const minPrice = (() => {
+    const prices = filteredProductStock.map(s => s.price_retail).filter(p => p != null);
+    return prices.length ? Math.min(...prices) : null;
+  })();
+  const formatPrice = (val) => {
+    if (val == null) return '-';
+    try {
+      return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(Number(val));
+    } catch (_) {
+      return `${Number(val).toLocaleString('ru-RU')} ₽`;
+    }
+  };
 
   return (
-    <div className={styles.detailedWrap}>
+    <div className={styles.detailedWrap} data-qa="product_detailed">
       {/* Блок с фото и названием */}
       <div className={styles.imageWrap}>
         <img src={getFeaturedImage()} alt={product.name} className={styles.image} />
       </div>
       <div className={styles.info}>
-        <div className={styles.title}>{product.name}</div>
+        <div className={styles.title} data-qa="productd_title">{product.name}</div>
         <div className={styles.article}>Артикул: {product.article}</div>
+        <div className={styles.topRow}>
+          <div className={styles.price} data-qa="productd_price">{formatPrice(selectedStock?.price_retail ?? minPrice)}</div>
+          <div className={`${styles.stock} ${totalCityStock > 0 ? styles.stockOk : styles.stockOut}`} data-qa="productd_stock">
+            {totalCityStock > 0 ? `В наличии: ${totalCityStock} шт.` : 'Нет в наличии в выбранном городе'}
+          </div>
+        </div>
         <div className={styles.meta}>
           {product.brand && <span>Бренд: {product.brand}</span>}
           {product.size && <span>Размер: {product.size}</span>}
@@ -242,6 +262,8 @@ const handleAddToCart = (e) => {
               value={selectedStockId}
               onChange={(e) => setSelectedStockId(Number(e.target.value))}
               className={styles.select}
+              aria-label="Выбрать склад"
+              data-qa="productd_stock_select"
             >
               {filteredProductStock.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -254,11 +276,20 @@ const handleAddToCart = (e) => {
           {/* Если товар уже в корзине — управление количеством */}
           {cartItem ? (
             <div className={styles.BlockAddToCart}>
-              <button className={styles.goToCart} onClick={handleGoToCart}>
+              <Button variant="secondary" className={styles.goToCart} onClick={handleGoToCart} data-qa="productd_go_to_cart">
                 Перейти в корзину
-              </button>
+              </Button>
               <div className={styles.BlockAddToCartBut}>
-                <button onClick={handleIncrement} disabled={cartItem.quantity >= selectedStock.stock}>+</button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<span aria-hidden="true">+</span>}
+                  aria-label="Увеличить"
+                  onClick={handleIncrement}
+                  disabled={cartItem.quantity >= selectedStock.stock}
+                  className={styles.qtyBtn}
+                  data-qa="productd_qty_inc"
+                />
                 <input
                   type="number"
                   value={cartItem.quantity}
@@ -267,7 +298,15 @@ const handleAddToCart = (e) => {
                   readOnly
                   className={styles.qtyInput}
                 />
-                <button onClick={handleDecrement}>-</button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<span aria-hidden="true">−</span>}
+                  aria-label="Уменьшить"
+                  onClick={handleDecrement}
+                  className={styles.qtyBtn}
+                  data-qa="productd_qty_dec"
+                />
               </div>
             </div>
           ) : null}
@@ -287,13 +326,15 @@ const handleAddToCart = (e) => {
               className={styles.qtyInput}
               onClick={(e) => e.stopPropagation()}
             />
-            <button
+            <Button
+              variant="primary"
               className={styles.addToCartBtn}
               onClick={handleAddToCart}
               disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
+              data-qa="productd_add_to_cart"
             >
-              Добавить в корзину
-            </button>
+              В корзину
+            </Button>
           </>
         )}
 
@@ -305,6 +346,39 @@ const handleAddToCart = (e) => {
             </div>
           )}
         </div>
+      </div>
+      {/* Sticky action bar (mobile) */}
+      <div className={styles.stickyBar} data-qa="productd_sticky_bar">
+        <div className={styles.stickyPrice}>{formatPrice(selectedStock?.price_retail ?? minPrice)}</div>
+        {cartItem ? (
+          <div className={styles.stickyControls}>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<span aria-hidden="true">-</span>}
+              aria-label="Уменьшить"
+              onClick={handleDecrement}
+            />
+            <span className={styles.stickyQty}>{cartItem.quantity}</span>
+            <Button
+              variant="primary"
+              size="sm"
+              icon={<span aria-hidden="true">+</span>}
+              aria-label="Увеличить"
+              onClick={handleIncrement}
+              disabled={cartItem.quantity >= (selectedStock?.stock || 0)}
+            />
+            <Button variant="secondary" onClick={handleGoToCart}>В корзину</Button>
+          </div>
+        ) : (
+          <Button
+            variant="primary"
+            onClick={handleAddToCart}
+            disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
+          >
+            В корзину
+          </Button>
+        )}
       </div>
     </div>
   );

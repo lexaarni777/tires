@@ -171,6 +171,19 @@
   margin-top: 32px;             // Отступ сверху от предыдущего блока
 }
 
+.stickySummary {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  background: #fff;
+  border-top: 1px solid $border-color;
+  box-shadow: 0 -4px 12px rgba(17, 24, 38, 0.06);
+}
+
 // Строка формы (один label + input/textarea/радио)
 .formRow {
   display: flex;                // Горизонтальная компоновка

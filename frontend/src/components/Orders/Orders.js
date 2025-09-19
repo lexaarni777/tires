@@ -2,8 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
 import styles from './Orders.module.scss';
+import EmptyState from '../ui/EmptyState';
 import Button from '../ui/Button';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import { getThumbnailPath } from '../../utils/thumb';
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
@@ -26,7 +27,15 @@ const Orders = () => {
 
   if (loading) return <p className={styles.orders__loading}>Загрузка заказов...</p>;
   if (error) return <p className={styles.orders__error}>Ошибка: {error}</p>;
-  if (!orders.length) return <p className={styles.orders__empty}>У вас пока нет заказов.</p>;
+  if (!orders.length) return (
+    <EmptyState
+      data-qa="orders_empty"
+      title="У вас пока нет заказов"
+      description="Найдите нужные шины в каталоге и оформите первый заказ."
+    >
+      <Button as={NavLink} to="/productlist" variant="primary">Перейти в каталог</Button>
+    </EmptyState>
+  );
 
   return (
     <div className={styles.orders__container}>

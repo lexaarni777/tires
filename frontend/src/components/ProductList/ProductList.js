@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard";
 import ProductCardSkeleton from "../ProductCard/ProductCard.Skeleton";
-import Skeleton from "../ui/Skeleton";
+import EmptyState from "../ui/EmptyState";
+import Button from "../ui/Button";
 import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
 import { warehouseList } from "../../constants/warehouseList";
 
@@ -325,7 +326,13 @@ const ProductList = () => {
         )}
         <div className={styles.list}>
           {products.length === 0 && productsStatus === "succeeded" && (
-            <div className={styles.statusMessage}>Нет товаров по выбранным фильтрам.</div>
+            <EmptyState
+              data-qa="catalog_empty"
+              title="Нет товаров по выбранным фильтрам"
+              description="Попробуйте изменить параметры фильтра или сбросить их."
+            >
+              <Button variant="tertiary" onClick={resetFilters}>Сбросить фильтры</Button>
+            </EmptyState>
           )}
           {filteredProducts.map((product) => (
             <ProductCard

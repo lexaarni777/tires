@@ -159,8 +159,14 @@ const Cart = () => {
     )
   );
 
+  const selectedItems = cartItems.filter((item) => selectedIds.includes(item.cart_id));
+  const totalAmount = selectedItems.reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity || 1)), 0);
+  const totalQty = selectedItems.reduce((sum, it) => sum + Number(it.quantity || 0), 0);
+
   if (!cartItems.length) {
-    return <p className={styles.emptyCart}>Ваша корзина пуста</p>;
+    return (
+      <div className={styles.emptyCart} data-qa="cart_empty">Ваша корзина пуста</div>
+    );
   }
 
   return (
@@ -242,15 +248,10 @@ const Cart = () => {
             </Button>
             <Button
               variant="primary"
-              onClick={() => {
-                if (!auth.token) {
-                  navigate('/authform');
-                } else {
-                  setShowModal(true);
-                }
-              }}
+              onClick={() => { setShowModal(true); }}
               disabled={!selectedIds.length}
               className={styles.actionButton}
+              data-qa="checkout_open"
             >
               Оформить заказ
             </Button>
@@ -359,6 +360,10 @@ const Cart = () => {
                 <textarea value={comment} onChange={e => setComment(e.target.value)} className={styles.textarea} placeholder="Пожелания к заказу" />
               </div>
 
+              <div className={styles.stickySummary} data-qa="checkout_summary">
+                <span>Товаров: {totalQty}</span>
+                <strong>Итого: {new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(totalAmount)}</strong>
+              </div>
               <div className={styles.formActions}>
                 <Button
                   type="button"
