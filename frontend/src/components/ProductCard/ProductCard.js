@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -205,6 +205,18 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   // Основной рендер
   const selectedStock = filteredStock.find((s) => s.id === selectedStockId);
   // Находим объект выбранного склада (для получения цены, остатка и т.д.)
+  const totalCityStock = useMemo(
+    () => filteredStock.reduce((sum, s) => sum + (s.stock || 0), 0),
+    [filteredStock]
+  );
+  const minPrice = useMemo(() => {
+    const prices = filteredStock.map(s => s.price_retail).filter(p => p != null);
+    return prices.length ? Math.min(...prices) : null;
+  }, [filteredStock]);
+  const formatPrice = (val) => val == null ? '-' : `${Number(val).toLocaleString('ru-RU')} ₽`;
+  const badgeHit = totalCityStock >= 20;
+  const badgeFast = totalCityStock > 0;
+  const badgeMoscow = selectedCity === 'Москва' && totalCityStock > 0;
 
   return (
     <div className={styles.card} onClick={handleClick} tabIndex={0}>
@@ -219,69 +231,40 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           alt={product.name}
           className={styles.image}
         />
+        <div className={styles.badges} aria-hidden="true">
+          {badgeHit && (
+            <span className={`${styles.badge} ${styles.badgeHit}`} data-qa="product_badge_hit">Хит продаж</span>
+          )}
+          {badgeFast && (
+            <span className={`${styles.badge} ${styles.badgeFast}`} data-qa="product_badge_fast">Отгрузка 24ч</span>
+          )}
+          {badgeMoscow && (
+            <span className={`${styles.badge} ${styles.badgeMoscow}`} data-qa="product_badge_moscow">В наличии в Москве</span>
+          )}
+        </div>
         {/* Изображение товара: ссылка определяется функцией getFeaturedImage
             alt — для доступности */}
       </div>
 
       {/* Информация о шине */}
       <div className={styles.info}>
-        {/* Название и артикул */}
-        <div className={styles.title}>{product.name}</div>
-        {/* Название товара (шины) */}
-        <div className={styles.article}>Артикул: {product.article}</div>
-        {/* Артикул товара — уникальный идентификатор */}
-
-        {/* Характеристики */}
-        <div className={styles.meta}>
-          {product.brand && (
-            <span className={styles.brand}>Бренд: {product.brand}</span>
-            // Если есть бренд — отображаем его
-          )}
-          {product.size && (
-            <span className={styles.size}>Размер: {product.size}</span>
-            // Если есть размер — отображаем его
-          )}
-          {product.season && (
-            <span className={styles.season}>Сезон: {product.season}</span>
-            // Если есть сезонность — отображаем
-          )}
-          {/* Можно добавить другие характеристики */}
+        <div className={styles.topRow}>
+          <div className={styles.price} data-qa="product_price">
+            {formatPrice(selectedStock?.price_retail ?? minPrice)}
+          </div>
+          <div className={styles.stock} data-qa="product_stock">
+            {totalCityStock > 0 ? `В наличии: ${totalCityStock} шт.` : 'Нет в наличии в выбранном городе'}
+          </div>
         </div>
 
-        {/* Таблица остатков и цен */}
-        {filteredStock.length > 0 ? (
-          // Если есть склады с остатками
-          <table className={styles.stockTable}>
-            <thead>
-              <tr>
-                <th>Склад</th>
-                <th>Остаток</th>
-                <th>Розничная цена</th>
-                {/* <th>Оптовая цена</th> */}
-              </tr>
-            </thead>
-            <tbody>
+        <div className={styles.title} data-qa="product_title">{product.name}</div>
+        <div className={styles.article}>Артикул: {product.article}</div>
 
-              {filteredStock.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.location}</td>
-                  <td>{row.stock ?? "-"}</td>
-                  <td>
-                    {row.price_retail != null ? `${row.price_retail} ₽` : "-"}
-                  </td>
-                  {/* <td>
-                    {row.price_wholesale != null
-                      ? `${row.price_wholesale} ₽`
-                      : "-"}
-                  </td> */}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          // Если складов с остатками нет — выводим сообщение
-          <div className={styles.noStock}>Нет остатков на складах</div>
-        )}
+        <div className={styles.meta}>
+          {product.brand && (<span className={styles.brand}>Бренд: {product.brand}</span>)}
+          {product.size && (<span className={styles.size}>Размер: {product.size}</span>)}
+          {product.season && (<span className={styles.season}>Сезон: {product.season}</span>)}
+        </div>
 
         {/* Управление корзиной и действия для админа */}
         <div className={styles.cartControls} onClick={(e) => e.stopPropagation()}>
@@ -297,6 +280,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                 setQuantity(1); // сбрасываем количество при смене склада
               }}
               className={styles.select}
+              data-qa="product_stock_select"
             >
               {filteredStock.map((s) => (
                 <option key={s.id} value={s.id}>
@@ -314,9 +298,9 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           {cartItem ? (
             // Если товар уже добавлен в корзину
             <div className={styles.BlockAddToCart}>
-              <button className={styles.goToCart} onClick={handleGoToCart}>
+              <Button variant="secondary" className={styles.goToCart} onClick={handleGoToCart} data-qa="go_to_cart">
                 Перейти в корзину
-              </button>
+              </Button>
               {/* Кнопка "Перейти в корзину" — вызывает handleGoToCart */}
 
               <div className={styles.BlockAddToCartBut}>
@@ -354,13 +338,15 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                 onClick={(e) => e.stopPropagation()}
               />
 
-              <button
+              <Button
+                variant="primary"
                 className={styles.addToCartBtn}
                 onClick={handleAddToCart}
                 disabled={!selectedStockId || (selectedStock?.stock || 0 ) < 1}
+                data-qa="add_to_cart"
               >
-                Добавить в корзину
-              </button>
+                В корзину
+              </Button>
               {/* Кнопка "Добавить в корзину" — вызывает handleAddToCart
                   Дизейблится если не выбран склад или нет остатка */}
             </>

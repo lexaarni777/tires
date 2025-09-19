@@ -1,13 +1,13 @@
-@import '../../styles/_variables.scss';  // Импорт цветовых и размерных переменных
-@import '../../styles/mixins.scss';     // Импорт медиазапросов и шаблонов
-@import '../../styles/typography.scss'; // Импорт типографики
+@import '../../styles/_variables.scss';  // Токены
+@import '../../styles/_mixins.scss';     // Миксины
+@import '../../styles/_typography.scss'; // Типографика
 
 .card {
-  background: #fff;                    // Белый фон карточки
-  border: 1px solid $border-color;     // Граница по переменной
-  border-radius: 8px;                  // Скругление углов
+  background: $surface;                // Фон карточки
+  border: 1px solid $border-color;     // Граница
+  border-radius: $radius-12;           // Скругление углов
   box-shadow: $shadow-soft;            // Мягкая тень
-  padding: 16px;                       // Внутренний отступ
+  padding: $space-16;                  // Внутренний отступ
   cursor: pointer;                     // Курсор — рука
   transition: box-shadow 0.3s ease;    // Плавный переход тени
 
@@ -17,8 +17,9 @@
 }
 
 .imageWrap {
+  position: relative;
   text-align: center;                 // Центрирование изображения
-  margin-bottom: 12px;               // Отступ снизу
+  margin-bottom: $space-12;           // Отступ снизу
 }
 
 .image {
@@ -29,7 +30,7 @@
 
 .info {
   @include flex-column;             // Вертикальная флекс-колонка
-  gap: 8px;                         // Отступ между блоками
+  gap: $space-8;                    // Отступ между блоками
 }
 
 .title {
@@ -46,47 +47,68 @@
 .meta {
   display: flex;                    // Горизонтальное расположение
   flex-wrap: wrap;                  // Перенос строк
-  gap: 8px;                         // Отступ между элементами
+  gap: $space-8;                    // Отступ между элементами
   font-size: 14px;                  // Размер шрифта
   color: $text-muted;               // Вторичный цвет
 }
 
-.stockTable {
-  width: 100%;                      // Ширина 100%
-  border-collapse: collapse;        // Убираем промежутки между ячейками
-  font-size: 14px;                  // Размер текста
-  margin-top: 12px;                 // Отступ сверху
-
-  th, td {
-    padding: 6px 8px;               // Отступы в ячейках
-    border: 1px solid $border-color; // Границы таблицы
-    text-align: left;              // Выравнивание по левому краю
-  }
-
-  th {
-    background-color: $background; // Фон заголовков
-    font-weight: 600;              // Полужирный
-  }
+.topRow {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: $space-12;
 }
 
-.noStock {
-  color: $danger;                  // Красный текст ошибки
-  font-size: 14px;                 // Размер шрифта
-  margin-top: 8px;                 // Отступ сверху
+.price {
+  @include tabular-nums;
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: $text-primary;
 }
+
+.stock {
+  font-size: 0.875rem;
+  color: $text-muted;
+}
+
+.badges {
+  position: absolute;
+  top: $space-8;
+  right: $space-8;
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: $space-8;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-4;
+  padding: $space-4 $space-8;
+  border-radius: $radius-12;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: $text-inverse;
+  box-shadow: $shadow-soft;
+}
+.badgeHit { background-color: $accent; }
+.badgeFast { background-color: $primary; }
+.badgeMoscow { background-color: $success; }
+
+// таблица остатков больше не используется в карточке каталога
 
 .cartControls {
-  margin-top: 16px;                // Отступ сверху
+  margin-top: $space-16;           // Отступ сверху
   display: flex;                   // Flexbox
   flex-direction: column;         // Вертикально
-  gap: 12px;                       // Отступ между блоками
+  gap: $space-12;                  // Отступ между блоками
 }
 
 .select {
-  padding: 8px;                    // Внутренний отступ
+  padding: $space-8;               // Внутренний отступ
   font-size: 14px;                 // Размер шрифта
   border: 1px solid $border-color; // Граница
-  border-radius: 4px;             // Скругление
+  border-radius: $radius-8;        // Скругление
 }
 
 .BlockAddToCart {
