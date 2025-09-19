@@ -213,13 +213,29 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     const prices = filteredStock.map(s => s.price_retail).filter(p => p != null);
     return prices.length ? Math.min(...prices) : null;
   }, [filteredStock]);
-  const formatPrice = (val) => val == null ? '-' : `${Number(val).toLocaleString('ru-RU')} ₽`;
+  const formatPrice = (val) => {
+    if (val == null) return '-';
+    try {
+      return new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(Number(val));
+    } catch (_) {
+      return `${Number(val).toLocaleString('ru-RU')} ₽`;
+    }
+  };
   const badgeHit = totalCityStock >= 20;
   const badgeFast = totalCityStock > 0;
   const badgeMoscow = selectedCity === 'Москва' && totalCityStock > 0;
 
   return (
-    <div className={styles.card} onClick={handleClick} tabIndex={0}>
+    <div
+      className={styles.card}
+      onClick={handleClick}
+      tabIndex={0}
+      role="button"
+      data-qa="product_card"
+      data-product-id={product.id}
+      data-city={selectedCity}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
+    >
       {/* Корневой контейнер карточки товара
           tabIndex={0} — делает div фокусируемым для клавиатуры
           onClick — переход на детальную карточку */}
@@ -252,7 +268,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           <div className={styles.price} data-qa="product_price">
             {formatPrice(selectedStock?.price_retail ?? minPrice)}
           </div>
-          <div className={styles.stock} data-qa="product_stock">
+          <div className={`${styles.stock} ${totalCityStock > 0 ? styles.stockOk : styles.stockOut}`} data-qa="product_stock">
             {totalCityStock > 0 ? `В наличии: ${totalCityStock} шт.` : 'Нет в наличии в выбранном городе'}
           </div>
         </div>

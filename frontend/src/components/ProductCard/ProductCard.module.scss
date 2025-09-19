@@ -37,6 +37,10 @@
   font-size: 18px;                  // Размер шрифта заголовка
   font-weight: 600;                 // Полужирный
   color: $text-primary;             // Цвет основного текста
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .article {
@@ -70,6 +74,9 @@
   font-size: 0.875rem;
   color: $text-muted;
 }
+
+.stockOk { color: $success; }
+.stockOut { color: $danger; }
 
 .badges {
   position: absolute;
@@ -123,8 +130,8 @@
   align-items: center;            // Центровка по вертикали
 
   .qtyBtn {
-    width: 2rem;
-    height: 2rem;
+    width: 2.5rem;
+    height: 2.5rem;
     padding: 0;
     display: inline-flex;
     align-items: center;
