@@ -280,19 +280,27 @@ const cartSlice = createSlice({
             localStorage.removeItem('guestCart');
             },
 
-          },
-            extraReducers: (builder) => {
-                builder
-            // Получить корзину с сервера
-            .addCase(fetchCart.fulfilled, (state, action) => {
-                // action.payload — массив CartItem с серверными полями
-                state.items = action.payload.items || [];
-                // Пересчитаем общую сумму корзины
-                state.totalAmount = state.items.reduce(
-                    (sum, item) => sum + (item.price * item.quantity),
-                    0
-                );
-            })
+    },
+    extraReducers: (builder) => {
+        builder
+        .addCase(fetchCart.pending, (state) => {
+            state.status = 'loading';
+        })
+        // Получить корзину с сервера
+        .addCase(fetchCart.fulfilled, (state, action) => {
+            // action.payload — массив CartItem с серверными полями
+            state.items = action.payload.items || [];
+            // Пересчитаем общую сумму корзины
+            state.totalAmount = state.items.reduce(
+                (sum, item) => sum + (item.price * item.quantity),
+                0
+            );
+            state.status = 'succeeded';
+        })
+        .addCase(fetchCart.rejected, (state, action) => {
+            state.status = 'failed';
+            state.error = action.error?.message || 'Ошибка загрузки корзины';
+        })
             // Добавление товара в корзину
             .addCase(addToCart.fulfilled, (state, action) => {
                 // После успешного добавления сервер вернёт новую корзину через fetchCart, поэтому тут ничего не делаем

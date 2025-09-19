@@ -4,6 +4,7 @@ import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
 import styles from './Orders.module.scss';
 import EmptyState from '../ui/EmptyState';
 import Button from '../ui/Button';
+import Skeleton from '../ui/Skeleton';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { getThumbnailPath } from '../../utils/thumb';
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
@@ -25,7 +26,20 @@ const Orders = () => {
 
 
 
-  if (loading) return <p className={styles.orders__loading}>Загрузка заказов...</p>;
+  if (loading) return (
+    <div className={styles.orders__container}>
+      {Array.from({ length: 3 }).map((_, i) => (
+        <div key={i} className={styles.orders__card} aria-hidden="true">
+          <div className={styles.orders__top}>
+            <Skeleton style={{ width: 140, height: 18 }} />
+            <Skeleton style={{ width: 120, height: 14 }} />
+          </div>
+          <Skeleton style={{ width: '100%', height: 12 }} />
+          <Skeleton style={{ width: '70%', height: 12, marginTop: 8 }} />
+        </div>
+      ))}
+    </div>
+  );
   if (error) return <p className={styles.orders__error}>Ошибка: {error}</p>;
   if (!orders.length) return (
     <EmptyState

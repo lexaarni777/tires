@@ -2,9 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCart, removeFromCart, clearCartServerSide, placeOrder, addToCart, decrementToCart, clearGuestCart } from '../../slices/cartSlice';
 import { fetchProfile, fetchAddresses} from '../../slices/profileSlice';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, NavLink } from 'react-router-dom';
 import styles from './Cart.module.scss';
 import Button from '../ui/Button';
+import EmptyState from '../ui/EmptyState';
+import Skeleton from '../ui/Skeleton';
 import { getThumbnailPath } from '../../utils/thumb';
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
@@ -12,6 +14,7 @@ const Cart = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
+  const cartStatus = useSelector((state) => state.cart.status);
   console.log('cartItems', cartItems)
   const auth = useSelector((state) => state.auth);
 
@@ -163,9 +166,31 @@ const Cart = () => {
   const totalAmount = selectedItems.reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity || 1)), 0);
   const totalQty = selectedItems.reduce((sum, it) => sum + Number(it.quantity || 0), 0);
 
+  if (cartStatus === 'loading') {
+    return (
+      <div className={styles.cartContainer}>
+        <ul className={styles.cartItems}>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <li key={i} className={styles.cartItem}>
+              <Skeleton style={{ width: 24, height: 24 }} />
+              <Skeleton style={{ width: 80, height: 80, borderRadius: 8 }} />
+              <div className={styles.productDetails}>
+                <Skeleton style={{ width: '60%', height: 18 }} />
+                <Skeleton style={{ width: '40%', height: 14, marginTop: 8 }} />
+              </div>
+              <Skeleton style={{ width: 120, height: 32 }} />
+            </li>
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
   if (!cartItems.length) {
     return (
-      <div className={styles.emptyCart} data-qa="cart_empty">Ваша корзина пуста</div>
+      <EmptyState data-qa="cart_empty" title="Ваша корзина пуста" description="Добавьте товары из каталога, чтобы оформить заказ.">
+        <Button as={NavLink} to="/productlist" variant="primary">Перейти в каталог</Button>
+      </EmptyState>
     );
   }
 
@@ -347,11 +372,24 @@ const Cart = () => {
                 <input
                   type="tel"
                   required
-                  pattern="^\+?[0-9]{10,15}$"
+                  inputMode="tel"
+                  pattern="^\+7\s\d{3}\s\d{3}-\d{2}-\d{2}$"
                   value={phone}
-                  onChange={e => setPhone(e.target.value)}
+                  onChange={e => {
+                    const digits = e.target.value.replace(/\D/g, '').replace(/^8/, '7');
+                    let out = '+7';
+                    if (digits.length > 1) {
+                      const d = digits.slice(1);
+                      if (d.length <= 3) out += ' ' + d;
+                      else if (d.length <= 6) out += ' ' + d.slice(0,3) + ' ' + d.slice(3);
+                      else if (d.length <= 8) out += ' ' + d.slice(0,3) + ' ' + d.slice(3,6) + '-' + d.slice(6);
+                      else out += ' ' + d.slice(0,3) + ' ' + d.slice(3,6) + '-' + d.slice(6,8) + '-' + d.slice(8,10);
+                    }
+                    setPhone(out);
+                  }}
                   className={styles.input}
-                  placeholder="+7..."
+                  placeholder="+7 900 000-00-00"
+                  data-qa="checkout_phone"
                 />
               </div>
 
@@ -372,7 +410,7 @@ const Cart = () => {
                 >
                   Вернуться в корзину
                 </Button>
-                <Button type="submit" variant="primary">
+                <Button type="submit" variant="primary" data-qa="checkout_confirm">
                   Подтвердить заказ
                 </Button>
               </div>

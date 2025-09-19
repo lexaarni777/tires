@@ -201,6 +201,7 @@ const handleAddToCart = (e) => {
   };
 
   return (
+    <div className={styles.page}>
     <div className={styles.detailedWrap} data-qa="product_detailed">
       {/* Блок с фото и названием */}
       <div className={styles.imageWrap}>
@@ -230,30 +231,6 @@ const handleAddToCart = (e) => {
 )}
         </div>
         <div className={styles.description}>{product.description}</div>
-        {/* Таблица остатков */}
-        <div className={styles.stockBlock}>
-          <h3>Остатки и цены на складах</h3>
-          <table className={styles.stockTable}>
-            <thead>
-              <tr>
-                <th>Склад</th>
-                <th>Остаток</th>
-                <th>Розничная цена</th>
-                {/* <th>Оптовая цена</th> */}
-              </tr>
-            </thead>
-            <tbody>
-              {filteredProductStock.map((row) => (
-                <tr key={row.id}>
-                  <td>{row.location}</td>
-                  <td>{row.stock ?? "-"}</td>
-                  <td>{row.price_retail != null ? `${row.price_retail} ₽` : "-"}</td>
-                  {/* <td>{row.price_wholesale != null ? `${row.price_wholesale} ₽` : "-"}</td> */}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
 
         {/* Управление для корзины и действия для админа */}
         <div className={styles.cartControls} onClick={(e) => e.stopPropagation()}>
@@ -380,6 +357,7 @@ const handleAddToCart = (e) => {
           </Button>
         )}
       </div>
+    </div>
     </div>
   );
 };

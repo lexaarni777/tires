@@ -224,3 +224,9 @@
   .stickyControls { display: inline-flex; align-items: center; gap: $space-8; }
   .stickyQty { min-width: 2rem; text-align: center; font-weight: 600; }
 }
+// Внешний контейнер страниц детальной карточки — как catalogContent по ширине
+.page {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 16px; // как в ProductList.wrapper
+}
