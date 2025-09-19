@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard";
+import ProductCardSkeleton from "../ProductCard/ProductCard.Skeleton";
+import Skeleton from "../ui/Skeleton";
 import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
 import { warehouseList } from "../../constants/warehouseList";
 
@@ -315,7 +317,11 @@ const ProductList = () => {
 
       <div className={styles.catalogContent}>
         {(productsStatus === "loading" || stockStatus === "loading") && (
-          <div className={styles.statusMessage}>Загрузка товаров...</div>
+          <div className={styles.list}>
+            {Array.from({ length: 8 }).map((_, i) => (
+              <ProductCardSkeleton key={i} />
+            ))}
+          </div>
         )}
         <div className={styles.list}>
           {products.length === 0 && productsStatus === "succeeded" && (

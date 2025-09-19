@@ -197,9 +197,27 @@ const Cart = () => {
                   <h3>{item.name}</h3>
                   <p>Склад: {item.location}</p>
                   <div className={styles.quantityControls}>
-                    <button onClick={() => handleIncrement(item)} disabled={item.quantity >= item.stock}>+</button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={<span aria-hidden="true">+</span>}
+                      aria-label="Увеличить"
+                      onClick={() => handleIncrement(item)}
+                      disabled={item.quantity >= item.stock}
+                      className={styles.qtyBtn}
+                      data-qa="cart_qty_inc"
+                    />
                     <input type="number" value={item.quantity} min={1} max={item.stock || 1} readOnly className={styles.qtyInput} />
-                    <button onClick={() => handleDecrement(item)} disabled={item.quantity === 1}>-</button>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={<span aria-hidden="true">−</span>}
+                      aria-label="Уменьшить"
+                      onClick={() => handleDecrement(item)}
+                      disabled={item.quantity === 1}
+                      className={styles.qtyBtn}
+                      data-qa="cart_qty_dec"
+                    />
                   </div>
                   <p>Цена: {item.price} ₽</p>
                 </div>

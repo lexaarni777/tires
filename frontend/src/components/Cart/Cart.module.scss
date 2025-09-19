@@ -232,32 +232,24 @@
 // Контролы количества (инкремент/декремент)
 .quantityControls {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   align-items: center;
 
-  button {
-    width: 32px;
-    height: 32px;
-    font-size: 18px;
-    font-weight: bold;
-    background-color: $primary;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-
-    &:disabled {
-      background-color: tone($primary, 20, 'lighten');
-      cursor: not-allowed;
-    }
+  .qtyBtn {
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 }
 
 .qtyInput {
-  width: 50px;
+  width: 60px;
   text-align: center;
-  padding: 4px;
+  padding: 6px 8px;
   font-size: 14px;
   border: 1px solid $border-color;
-  border-radius: 4px;
+  border-radius: 8px;
 }
