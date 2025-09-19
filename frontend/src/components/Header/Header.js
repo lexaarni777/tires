@@ -15,6 +15,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import classes from './Header.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
 import { setCity } from '../../slices/citySlice';
+import Button from '../ui/Button';
 
 const navItems = [
   { label: 'Главная', path: '/', qa: 'nav_home' },
@@ -126,54 +127,61 @@ const Header = () => {
             <span>+7 (999) 914-30-09</span>
           </a>
           <div className={classes.social}>
-            <a
+            <Button
+              as="a"
               href="https://vk.com/msktires"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Мы во ВКонтакте"
               data-qa="header_social_vk"
-            >
-              <FaVk aria-hidden="true" />
-            </a>
-            <a
+              variant="tertiary"
+              size="sm"
+              icon={<FaVk aria-hidden="true" />}
+              className={classes.socialBtn}
+            />
+            <Button
+              as="a"
               href="https://t.me/msktires"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Мы в Telegram"
               data-qa="header_social_telegram"
-            >
-              <FaTelegramPlane aria-hidden="true" />
-            </a>
-            <a
+              variant="tertiary"
+              size="sm"
+              icon={<FaTelegramPlane aria-hidden="true" />}
+              className={classes.socialBtn}
+            />
+            <Button
+              as="a"
               href="https://instagram.com/msktires"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Мы в Instagram"
               data-qa="header_social_instagram"
-            >
-              <FaInstagram aria-hidden="true" />
-            </a>
+              variant="tertiary"
+              size="sm"
+              icon={<FaInstagram aria-hidden="true" />}
+              className={classes.socialBtn}
+            />
           </div>
         </div>
       </div>
 
       <div className={classes.brandRow}>
         <div className={classes.brandBlock}>
-          <button
-            type="button"
-            className={classes.navToggle}
+          <Button
+            variant="ghost"
+            size="sm"
+            icon={isNavOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
             aria-expanded={isNavOpen}
             aria-controls="main-navigation"
             onClick={handleNavToggle}
+            className={classes.navToggle}
+            aria-label={isNavOpen ? 'Закрыть меню' : 'Открыть меню'}
             data-qa="nav_toggle"
-          >
-            <span className={classes.srOnly}>
-              {isNavOpen ? 'Закрыть меню' : 'Открыть меню'}
-            </span>
-            {isNavOpen ? <FiX aria-hidden="true" /> : <FiMenu aria-hidden="true" />}
-          </button>
+          />
           <NavLink to="/" className={classes.logo} data-qa="nav_logo">
-            <img className={classes.logoTitle} src="logo.png" img/>
+            <img className={classes.logoTitle} src="logo.png" alt="MSK Tires" />
           </NavLink>
         </div>
 
@@ -196,28 +204,32 @@ const Header = () => {
               ))}
             </select>
           </div>
-          <button
+          <Button
             type="button"
-            className={classes.iconButton}
+            variant="secondary"
+            size="sm"
             onClick={handleCartClick}
             data-qa="nav_cart"
             aria-label={`Корзина, товаров: ${cartQuantity}`}
-          >
-            <FaShoppingCart aria-hidden="true" />
-            {cartQuantity > 0 && <span className={classes.badge}>{formattedCartQuantity}</span>}
-            <span className={classes.iconLabel}>Корзина</span>
-          </button>
-          <button
-            type="button"
+            icon={<FaShoppingCart aria-hidden="true" />}
             className={classes.iconButton}
+          >
+            <span className={classes.iconLabel}>Корзина</span>
+            {cartQuantity > 0 && <span className={classes.badge}>{formattedCartQuantity}</span>}
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
             onClick={handleAccountClick}
             data-qa="nav_account"
             aria-label={`Личный кабинет: ${userLabel}`}
+            icon={<FiUser aria-hidden="true" />}
+            className={classes.iconButton}
           >
-            <FiUser aria-hidden="true" />
-            {user && <span className={classes.badgeDot} aria-hidden="true" />}
             <span className={classes.iconLabel}>{user ? 'Профиль' : 'Войти'}</span>
-          </button>
+            {user && <span className={classes.badgeDot} aria-hidden="true" />}
+          </Button>
         </div>
       </div>
 

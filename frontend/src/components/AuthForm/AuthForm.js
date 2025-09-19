@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, loginUser, sendSmsCode, sendResetCode, resetPassword, sendEmailCode, verifyEmail  } from '../../slices/authSlice';
 import styles from './AuthForm.module.scss';
+import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { mergeLocalCartWithServer, clearGuestCart } from '../../slices/cartSlice';
 import { validatePhone, validateEmail } from '../../utils/validators';
@@ -215,9 +216,9 @@ const handleVerifyEmail = async (e) => {
         />
         {errors.phone && <div className={styles.error}>{errors.phone}</div>}
       </div>
-      <button
+      <Button
         type="button"
-        className={styles.button}
+        variant="primary"
         onClick={async () => {
           if (!form.phone) return setErrors({ phone: 'Введите телефон' });
           if (!validatePhone(form.phone)) return setErrors({ phone: 'Некорректный номер' });
@@ -227,7 +228,7 @@ const handleVerifyEmail = async (e) => {
         disabled={status === 'loading'}
       >
         Получить код
-      </button>
+      </Button>
     </>
   )}
 
@@ -255,21 +256,17 @@ const handleVerifyEmail = async (e) => {
         />
         {errors.password && <div className={styles.error}>{errors.password}</div>}
       </div>
-      <button
+      <Button
         type="button"
-        className={styles.button}
+        variant="primary"
         onClick={handleRegister}
         disabled={status === 'loading'}
       >
         Зарегистрироваться
-      </button>
-      <button
-        type="button"
-        onClick={() => setRegisterStep('start')}
-        className={styles.toggleButton}
-      >
+      </Button>
+      <Button type="button" variant="tertiary" onClick={() => setRegisterStep('start')}>
         Назад
-      </button>
+      </Button>
     </>
   )}
 
@@ -289,9 +286,9 @@ const handleVerifyEmail = async (e) => {
         />
         {errors.email && <div className={styles.error}>{errors.email}</div>}
       </div>
-      <button
+      <Button
         type="button"
-        className={styles.button}
+        variant="primary"
         onClick={async () => {
           if (!form.email) return setErrors({ email: 'Введите email' });
           if (!validateEmail(form.email)) return setErrors({ email: 'Некорректный email' });
@@ -301,7 +298,7 @@ const handleVerifyEmail = async (e) => {
         disabled={status === 'loading'}
       >
         Получить код на email
-      </button>
+      </Button>
     </>
   )}
 
@@ -391,20 +388,20 @@ const handleVerifyEmail = async (e) => {
         />
         {errors.password && <div className={styles.error}>{errors.password}</div>}
       </div>
-      <button
+      <Button
         type="button"
-        className={styles.button}
+        variant="primary"
         onClick={handleLogin}
         disabled={status === 'loading'}
       >
         Войти
-      </button>
+      </Button>
     </>
   )}
 
-  <button
+  <Button
   type="button"
-  className={styles.toggleButton}
+  variant="tertiary"
   onClick={() => {
     setIsRegistering(!isRegistering); // Переключаем режим формы
     setRegisterStep('start'); // Всегда возвращаемся на начальный шаг регистрации
@@ -420,7 +417,7 @@ const handleVerifyEmail = async (e) => {
   }}
 >
   {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
-</button>
+></Button>
 
 
 
@@ -474,7 +471,7 @@ const handleVerifyEmail = async (e) => {
         />
         {errors.resetEmail && <div className={styles.error}>{errors.resetEmail}</div>}
 
-        <button
+        <Button
           onClick={async () => {
             const errors = {};
             if (!form.resetPhone && !form.resetEmail) errors.resetPhone = 'Введите телефон или email';
@@ -491,11 +488,11 @@ const handleVerifyEmail = async (e) => {
             else
               setErrors({ resetEmail: res.payload || 'Ошибка отправки кода на Email' });
           }}
-          className={styles.button}
+          variant="primary"
         >
           Получить код
-        </button>
-        <button className={styles.toggleButton} onClick={() => setIsResetting(false)}>Назад</button>
+        </Button>
+        <Button variant="tertiary" onClick={() => setIsResetting(false)}>Назад</Button>
         {errors.resetPhone && <div className={styles.error}>{errors.resetPhone}</div>}
         {errors.resetEmail && <div className={styles.error}>{errors.resetEmail}</div>}
       </>
@@ -513,13 +510,10 @@ const handleVerifyEmail = async (e) => {
           placeholder="Код из SMS/email"
         />
         {errors.resetCode && <div className={styles.error}>{errors.resetCode}</div>}
-        <button
-          onClick={() => setResetStep('change')}
-          className={styles.button}
-        >
+        <Button variant="primary" onClick={() => setResetStep('change')}>
           Проверить код
-        </button>
-        <button className={styles.toggleButton} onClick={() => setResetStep('request')}>Назад</button>
+        </Button>
+        <Button variant="tertiary" onClick={() => setResetStep('request')}>Назад</Button>
       </>
     )}
 
@@ -544,7 +538,7 @@ const handleVerifyEmail = async (e) => {
           placeholder="Повторите пароль"
         />
         {errors.repeatPassword && <div className={styles.error}>{errors.repeatPassword}</div>}
-        <button
+        <Button
           onClick={async () => {
             const errors = {};
             if (!form.newPassword) errors.newPassword = 'Введите новый пароль';
@@ -581,11 +575,11 @@ const handleVerifyEmail = async (e) => {
               setErrors({ repeatPassword: res.payload || 'Ошибка сброса пароля' });
             }
           }}
-          className={styles.button}
+          variant="primary"
         >
           Сменить пароль и войти
-        </button>
-        <button className={styles.toggleButton} onClick={() => setResetStep('verify')}>Назад</button>
+        </Button>
+        <Button variant="tertiary" onClick={() => setResetStep('verify')}>Назад</Button>
       </>
     )}
   </div>
@@ -595,8 +589,8 @@ const handleVerifyEmail = async (e) => {
   <div className={styles.modal}>
     <div className={styles.modalContent}>
       <p>У вас осталась корзина гостя. Объединить с корзиной аккаунта?</p>
-      <button onClick={handleMerge}>Объединить</button>
-      <button onClick={handleClear}>Очистить гостевую корзину</button>
+      <Button variant="primary" onClick={handleMerge}>Объединить</Button>
+      <Button variant="secondary" onClick={handleClear}>Очистить гостевую корзину</Button>
     </div>
   </div>
 )}

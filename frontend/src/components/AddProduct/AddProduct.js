@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct, addStock, uploadProductsFromExcel } from '../../slices/productSlice';
 import styles from './AddProduct.module.scss';
+import Button from '../ui/Button';
 import { warehouseList } from '../../constants/warehouseList';
 
 /**
@@ -323,9 +324,7 @@ const uploadImages = async (productId, brand, model) => {
             onChange={(e) => setUseAsReference(e.target.checked)}
           /> Использовать как эталонное фото
         </div>
-        <button className={styles.button} type="submit">
-          Добавить вручную
-        </button>
+        <Button variant="primary" type="submit">Добавить вручную</Button>
       </form>
 
       <h2>Загрузить товары из Excel</h2>
@@ -338,7 +337,7 @@ const uploadImages = async (productId, brand, model) => {
             onChange={handleFileChange}
           />
         </div>
-        <button className={styles.button} type="submit">Загрузить из Excel</button>
+        <Button variant="primary" type="submit">Загрузить из Excel</Button>
       </form>
 
       {error && <p className={styles.error}>{error}</p>}

@@ -65,24 +65,25 @@
   display: inline-flex;
   align-items: center;
   gap: var(--sp-12);
+}
 
-  a {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 2rem;
-    height: 2rem;
-    border-radius: 50%;
-    border: 1px solid transparent;
-    background-color: var(--c-surface);
-    color: var(--c-primary);
-    transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+.socialBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  background-color: var(--c-surface);
+  color: var(--c-primary);
+  transition: background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
 
-    &:hover {
-      background-color: var(--c-primary);
-      color: var(--c-text-inverse);
-      box-shadow: var(--shadow-soft);
-    }
+  &:hover {
+    background-color: var(--c-primary);
+    color: var(--c-text-inverse);
+    box-shadow: var(--shadow-soft);
   }
 }
 

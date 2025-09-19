@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Button from "../ui/Button";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementToCart } from "../../slices/cartSlice";
@@ -369,9 +370,9 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           {auth.roles && auth.roles.indexOf("admin") !== -1 && (
             // Проверяем, что пользователь — админ (есть роль "admin")
             <div className={styles.adminControls}>
-              <button className={styles.button} onClick={(e) => { e.stopPropagation(); onEdit(product); }}>Редактировать</button>
+              <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); onEdit(product); }}>Редактировать</Button>
               {/* Кнопка "Редактировать" — вызывает onEdit с объектом product */}
-              <button className={styles.button} onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>Удалить</button>
+              <Button size="sm" variant="danger" onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>Удалить</Button>
               {/* Кнопка "Удалить" — вызывает onDelete с ID товара */}
             </div>
           )}
