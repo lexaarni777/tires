@@ -304,7 +304,16 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
               {/* Кнопка "Перейти в корзину" — вызывает handleGoToCart */}
 
               <div className={styles.BlockAddToCartBut}>
-                <button onClick={handleIncrement} disabled={!selectedStock || cartItem.quantity >= selectedStock.stock}>+</button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<span aria-hidden="true">+</span>}
+                  aria-label="Увеличить"
+                  onClick={handleIncrement}
+                  disabled={!selectedStock || cartItem.quantity >= selectedStock.stock}
+                  className={styles.qtyBtn}
+                  data-qa="qty_inc"
+                />
                 {/* Кнопка "+" — вызывает handleIncrement; дизейблится если достигнут максимум по складу */}
                 <input
                   type="number"
@@ -315,7 +324,15 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                   className={styles.qtyInput}
                 />
                 {/* Поле количества — выводит актуальное количество товара в корзине на этом складе */}
-                <button onClick={handleDecrement}>-</button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<span aria-hidden="true">−</span>}
+                  aria-label="Уменьшить"
+                  onClick={handleDecrement}
+                  className={styles.qtyBtn}
+                  data-qa="qty_dec"
+                />
                 {/* Кнопка "-" — вызывает handleDecrement */}
               </div>
             </div>

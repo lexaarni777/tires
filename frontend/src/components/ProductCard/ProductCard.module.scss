@@ -119,24 +119,16 @@
 
 .BlockAddToCartBut {
   display: flex;                   // Горизонтальный флекс
-  gap: 6px;                        // Отступ между кнопками
+  gap: $space-8;                   // Отступ между кнопками
   align-items: center;            // Центровка по вертикали
 
-  button {
-    width: 32px;                   // Ширина кнопки
-    height: 32px;                  // Высота кнопки
-    font-size: 18px;               // Размер текста
-    font-weight: bold;             // Жирный текст
-    background-color: $primary;    // Синий фон
-    color: #fff;                   // Белый текст
-    border: none;                  // Без границ
-    border-radius: 4px;            // Скругление
-    cursor: pointer;               // Рука
-
-    &:disabled {
-      background-color: tone($primary, 20, 'lighten'); // Осветлённый цвет при отключении
-      cursor: not-allowed;           // Курсор запрета
-    }
+  .qtyBtn {
+    width: 2rem;
+    height: 2rem;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
   }
 
   input {
@@ -150,11 +142,11 @@
 }
 
 .qtyInput {
-  width: 60px;                     // Ширина инпута количества
-  padding: 6px;                    // Внутренний отступ
+  width: 3.75rem;                  // Ширина инпута количества
+  padding: $space-4 $space-8;      // Внутренний отступ
   text-align: center;              // Центрирование текста
   border: 1px solid $border-color; // Цвет границы
-  border-radius: 4px;              // Скругление
+  border-radius: $radius-8;        // Скругление
 }
 
 .addToCartBtn {
