@@ -8,6 +8,7 @@
   position: sticky;
   top: 0;
   z-index: 15;
+  min-width: 430px;
 }
 
 .utilityBar {
@@ -517,6 +518,14 @@
    display: none;
   }
 }
+
+@media (max-width: 450px) {
+.utilityGroup {
+  gap: var(--sp-4);
+}
+}
+
+
 
 
 
