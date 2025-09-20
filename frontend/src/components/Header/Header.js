@@ -189,7 +189,7 @@ const Header = () => {
           <label htmlFor="city-select" className={classes.srOnly}>
             Выберите город
           </label>
-          <div className={classes.citySelector}>
+          <div className={classes.citySelectorDesc}>
             <FiMapPin aria-hidden="true" />
             <select
               id="city-select"
@@ -240,6 +240,21 @@ const Header = () => {
         aria-label="Основное меню"
       >
         <ul className={classes.menu}>
+            <div className={classes.citySelectorMob}>
+            <FiMapPin aria-hidden="true" />
+            <select
+              id="city-select"
+              value={currentCity}
+              onChange={handleCityChange}
+              data-qa="select_city"
+            >
+              {cities.map((city) => (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              ))}
+            </select>
+          </div>
           {navItems.map(renderNavLink)}
           <li
             className={`${classes.menuItem} ${classes.menuItemWithChildren} ${
