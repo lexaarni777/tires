@@ -110,11 +110,11 @@ const Header = () => {
         <div className={classes.utilityGroup}>
           <span className={classes.utilityText}>
             <FiTruck aria-hidden="true" />
-            <span>Отгрузим сегодня при заказе до 18:00</span>
+            <span className={classes.utilityTextSend}>Отгрузим сегодня при заказе до 18:00</span>
           </span>
-          <span className={classes.utilityText}>
+         <span className={`${classes.utilityText} ${classes.utilityTextFerst}`}>
             <FiMapPin aria-hidden="true" />
-            <span>Доставляем по всей Росси</span>
+            <span className={classes.utilityText}>Доставляем по всей России</span>
           </span>
         </div>
         <div className={classes.utilityGroup}>
@@ -129,19 +129,7 @@ const Header = () => {
           <div className={classes.social}>
             <Button
               as="a"
-              href="https://vk.com/msktires"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Мы во ВКонтакте"
-              data-qa="header_social_vk"
-              variant="tertiary"
-              size="sm"
-              icon={<FaVk aria-hidden="true" />}
-              className={classes.socialBtn}
-            />
-            <Button
-              as="a"
-              href="https://t.me/msktires"
+              href="https://t.me/+79999143009"
               target="_blank"
               rel="noopener noreferrer"
               aria-label="Мы в Telegram"
@@ -161,7 +149,19 @@ const Header = () => {
               variant="tertiary"
               size="sm"
               icon={<FaInstagram aria-hidden="true" />}
-              className={classes.socialBtn}
+              className={`${classes.socialBtn} ${classes.socialBtnIns}`}
+            />
+            <Button
+              as="a"
+              href="https://vk.com/msktires"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Мы во ВКонтакте"
+              data-qa="header_social_vk"
+              variant="tertiary"
+              size="sm"
+              icon={<FaVk aria-hidden="true" />}
+              className={`${classes.socialBtn} ${classes.socialBtnVk}`}
             />
           </div>
         </div>
@@ -230,6 +230,7 @@ const Header = () => {
             <span className={classes.iconLabel}>{user ? 'Профиль' : 'Войти'}</span>
             {user && <span className={classes.badgeDot} aria-hidden="true" />}
           </Button>
+
         </div>
       </div>
 

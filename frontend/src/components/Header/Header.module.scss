@@ -21,13 +21,13 @@
   line-height: 1.4;
   color: var(--c-text-muted);
   background-color: var(--c-bg);
+  max-height: 52px;
 }
 
 .utilityGroup {
   display: inline-flex;
   align-items: center;
   gap: var(--sp-16);
-  flex-wrap: wrap;
 }
 
 .utilityText {
@@ -479,40 +479,44 @@
   }
 }
 
+@media (max-width: 920px) {
+  .utilityTextSend {
+    width: 150px;
+  }
+
+}
+
+@media (max-width: 790px) {
+  .utilityTextFerst span{
+    width: 150px;
+  }
+}
+
 @media (min-width: 768px) {
   .iconLabel {
     display: inline;
   }
+
 }
 
-@include respond(md) {
-  .brandRow {
-    flex-direction: column;
-    align-items: flex-start;
+@media (max-width:750px) {
+  .socialBtnVk {
+    display: none;
   }
 
-  .actions {
-    width: 100%;
-    justify-content: flex-start;
+}
+
+@media (max-width: 690px) {
+  .utilityTextFerst {
+   display: none;
   }
 }
 
-@include respond(sm) {
-  .utilityGroup {
-    gap: var(--sp-8);
-  }
-
-  .actions {
-    gap: var(--sp-8);
-  }
-
-  .iconButton {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .citySelector {
-    width: 100%;
-    justify-content: center;
+@media (max-width: 500px) {
+  .socialBtnIns {
+   display: none;
   }
 }
+
+
+
