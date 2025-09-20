@@ -301,7 +301,11 @@ const handleAddToCart = (e) => {
                 disabled={cartItem.quantity >= (selectedStock?.stock || 0)}
                 className={styles.qtyBtn}
               />
-              <Button variant="secondary" onClick={handleGoToCart}>Перейти в корзину</Button>
+              <Button 
+                variant="secondary" 
+                className={styles.goToCart}
+                onClick={handleGoToCart}>Перейти в корзину
+              </Button>
             </>
           ) : (
             <>
@@ -316,21 +320,11 @@ const handleAddToCart = (e) => {
                   disabled={quantity <= 1}
                   data-qa="productd_qty_dec"
                 />
-                <input
-                  type="number"
+                <span
                   min={1}
                   max={selectedStock?.stock || 1}
-                  value={quantity}
-                  onChange={(e) => {
-                    let val = Number(e.target.value);
-                    const max = selectedStock?.stock || 1;
-                    if (val > max) val = max;
-                    if (val < 1) val = 1;
-                    setQuantity(val);
-                  }}
-                  className={styles.qtyInput}
-                  data-qa="productd_qty_input"
-                />
+                  className={styles.buyQty}
+                >{quantity}</span>
                 <Button
                   variant="primary"
                   size="sm"
@@ -343,6 +337,7 @@ const handleAddToCart = (e) => {
                 />
               </div>
               <Button
+                className = {styles.addToCartBtn}
                 variant="primary"
                 onClick={handleAddToCart}
                 disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}

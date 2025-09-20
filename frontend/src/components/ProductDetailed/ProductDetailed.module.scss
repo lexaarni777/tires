@@ -132,7 +132,7 @@
 .stockRow { display: flex; align-items: center; gap: $space-12; margin-top: $space-12; }
 .warehouseLabel { color: $text-muted; font-size: .875rem; }
 .buyRow { display: flex; align-items: center; gap: $space-12; margin-top: $space-12; }
-.buyQty { min-width: 2rem; text-align: center; font-weight: 600; }
+.buyQty { display: flex; min-width: 2rem; justify-content: center; align-items: center; font-weight: 600; border: 2px solid; border-radius: $radius-12; width: 40px; height: 40px; color: $primary;}
 .qtyBtn { width: 2.5rem; height: 2.5rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 
 .backLink { display: inline-block; margin: 0 0 $space-16; color: $primary; text-decoration: none; }
@@ -155,9 +155,9 @@
 
 /* Инпут количества */
 .qtyInput {
-  width: 3.75rem;                   // Ширина поля
+  width: 3,75em;                   // Ширина поля
   padding: $space-4 $space-8;       // Внутренние отступы
-  font-size: 14px;                  // Размер текста
+  font-size: 18px;                  // Размер текста
   text-align: center;              // Центрирование текста
   border: 1px solid $border-color;  // Граница
   border-radius: $radius-8;         // Скруглённые углы
@@ -165,7 +165,24 @@
 
 /* Кнопка "Добавить в корзину" */
 .addToCartBtn {
-  // теперь используется Button
+  // Принудительно красим кнопку акцентом, перекрывая variant "primary"
+  background-color: $accent !important;       // Акцентный фон (оранжевый)
+  color: $text-inverse !important;            // Белый текст
+  padding: 10px 16px;                         // Внутренние отступы
+  border: none !important;                    // Без границы
+  border-radius: $radius-12;                  // Скруглённые углы
+  font-weight: 600;                           // Жирный текст
+  cursor: pointer;                            // Рука
+
+  &:hover {
+    background-color: tone($accent, 7, 'darken') !important; // Затемнение при наведении
+  }
+
+  &:disabled {
+    background-color: tone($accent, 20, 'lighten') !important; // Осветление при отключении
+    cursor: not-allowed;                                       // Курсор запрета
+    opacity: .9;
+  }
 }
 
 /* Блок с админскими действиями */
@@ -219,6 +236,20 @@
 // Sticky action bar (мобайл)
 .stickyBar {
   display: none;
+}
+.goToCart {
+  background-color: transparent;    // Прозрачный фон
+  color: $primary;                  // Синий текст
+  border: 2px solid $primary;       // Синяя граница
+  padding: 8px 12px;                // Отступы
+  border-radius: $radius-12;               // Скругление
+  font-size: 14px;                  // Размер шрифта
+  cursor: pointer;                  // Курсор
+
+  &:hover {
+    background-color: $primary;     // Синий фон при наведении
+
+  }
 }
 
 @include respond(md) {

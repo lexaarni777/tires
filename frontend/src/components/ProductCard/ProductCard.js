@@ -124,7 +124,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     // Ищем выбранный склад среди доступных
     if (!selectedStock) return;
     // Если склад не найден — ничего не делаем
-
+    setQuantity(1);
     dispatch(
       addToCart({
         userId: auth.id || 0,
@@ -314,10 +314,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           {cartItem ? (
             // Если товар уже добавлен в корзину
             <div className={styles.BlockAddToCart}>
-              <Button variant="secondary" className={styles.goToCart} onClick={handleGoToCart} data-qa="go_to_cart">
-                Перейти в корзину
-              </Button>
-              {/* Кнопка "Перейти в корзину" — вызывает handleGoToCart */}
+
 
               <div className={styles.BlockAddToCartBut}>
                 <Button
@@ -331,14 +328,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                   data-qa="qty_inc"
                 />
                 {/* Кнопка "+" — вызывает handleIncrement; дизейблится если достигнут максимум по складу */}
-                <input
-                  type="number"
-                  value={cartItem.quantity}
-                  min={1}
-                  max={selectedStock?.stock || 1}
-                  readOnly
-                  className={styles.qtyInput}
-                />
+                <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
                 {/* Поле количества — выводит актуальное количество товара в корзине на этом складе */}
                 <Button
                   variant="primary"
@@ -351,34 +341,25 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                 />
                 {/* Кнопка "-" — вызывает handleDecrement */}
               </div>
+                            <Button variant="secondary" className={styles.goToCart} onClick={handleGoToCart} data-qa="go_to_cart">
+                Перейти в корзину
+              </Button>
+              {/* Кнопка "Перейти в корзину" — вызывает handleGoToCart */}
             </div>
           ) : (
             // Если товара ещё нет в корзине — показываем выбор количества и кнопку "Добавить"
             <>
-              <input
-                type="number"
-                min={1}
-                max={selectedStock?.stock || 1}
-                value={quantity}
-                onChange={(e) => {
-                  let val = Number(e.target.value);
-                  const maxStock = selectedStock?.stock || 1;
-                  if (val > maxStock) val = maxStock;
-                  if (val < 1) val = 1;
-                  setQuantity(val);
-                }}
-                className={styles.qtyInput}
-                onClick={(e) => e.stopPropagation()}
-              />
-
+            
+              
               <Button
                 variant="primary"
                 className={styles.addToCartBtn}
-                onClick={handleAddToCart}
+                onClick={handleAddToCart
+                }
                 disabled={!selectedStockId || (selectedStock?.stock || 0 ) < 1}
                 data-qa="add_to_cart"
               >
-                В корзину
+                Добавить в корзину
               </Button>
               {/* Кнопка "Добавить в корзину" — вызывает handleAddToCart
                   Дизейблится если не выбран склад или нет остатка */}
