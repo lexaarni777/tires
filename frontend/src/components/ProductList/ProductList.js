@@ -6,6 +6,7 @@ import EmptyState from "../ui/EmptyState";
 import Button from "../ui/Button";
 import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
 import { warehouseList } from "../../constants/warehouseList";
+import { FiChevronDown } from 'react-icons/fi';
 
 // Импортируем асинхронные thunks из productSlice и stockSlice
 import { fetchProducts,deleteProduct} from "../../slices/productSlice";
@@ -35,6 +36,7 @@ const ProductList = () => {
   const [studs, setStuds] = useState(""); // "true", "false", ""
   const [country, setCountry] = useState("");
   const [inStockOnly, setInStockOnly] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
  
 
 
@@ -155,13 +157,18 @@ const ProductList = () => {
     <div className={styles.wrapper}>
       <aside className={styles.sidebar}>
         <div className={styles.filtersCard}>
-          <div className={styles.filtersHeader}>
-            <h3>Подбор шин</h3>
+          <div className={styles.filtersHeader}  onClick={() => setFiltersOpen(!filtersOpen)}>
+            <h3>Фильтр по каталогу</h3>  
+              <FiChevronDown 
+                className={styles.filtersHeaderDown} 
+                aria-hidden="true"
+                
+              />
+          </div>
+          <div className={`${styles.filtersGrid} ${filtersOpen ? styles.show : ""}`}>
             <button type="button" className={styles.resetButton} onClick={resetFilters}>
               Сбросить
             </button>
-          </div>
-          <div className={styles.filtersGrid}>
             <label className={`${styles.filterControl} ${styles.checkboxControl}`}>
               <input
                 type="checkbox"
@@ -311,7 +318,9 @@ const ProductList = () => {
                 ))}
               </select>
             </label>
-
+            <button type="button" className={`${styles.resetButton} ${styles.resetButtonFiltersMob}`}onClick={() => setFiltersOpen(!filtersOpen)}>
+                Свернуть фильтры
+            </button>
           </div>
         </div>
       </aside>

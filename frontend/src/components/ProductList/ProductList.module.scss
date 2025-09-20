@@ -9,6 +9,7 @@
   grid-template-columns: 320px minmax(0, 1fr);
   gap: 24px;
   align-items: start;
+  min-width: 430px;
 }
 
 .sidebar {
@@ -46,6 +47,10 @@
     font-weight: 600;
     color: $text-primary;
   }
+}
+
+.filtersHeaderDown{
+  display: none;
 }
 
 .resetButton {
@@ -87,6 +92,9 @@
     font-weight: 500;
   }
 }
+  .resetButtonFiltersMob{
+    display: none;
+  }
 
 .checkboxControl {
   flex-direction: row;
@@ -163,10 +171,32 @@
   .wrapper {
     grid-template-columns: 1fr;
   }
-
+  .filtersHeaderDown{
+    display: inline;
+  }
   .sidebar {
     position: static;
   }
+  .filtersGrid {
+  display: none;
+  &.show {
+    display: flex;  // возвращаем исходное
+    flex-direction: column;
+    gap: 16px;
+  }
+  .resetButtonFiltersMob{
+    display: inline;
+  }
+}
+
+.filtersHeaderDown {
+  cursor: pointer;
+  transition: transform 0.3s ease;
+  &.open {
+    transform: rotate(180deg); // поворот стрелки
+  }
+}
+
 }
 
 @include respond(sm) {
