@@ -210,6 +210,14 @@
 }
 
 // === Адаптивность для маленьких экранов ===
+@media (max-width: 630px) {
+  .goToCart {
+    background-color: transparent;    // Прозрачный фон
+    padding: 8px 8px;                // Отступы
+  
+  }
+}
+
 @include respond(sm) {
   .stockTable {
     font-size: 12px;                // Уменьшение текста в таблице
@@ -225,9 +233,9 @@
 
   .BlockAddToCartBut {
 
-    flex-direction: column;         // Вертикальное выравнивание
+    flex-direction: row;
     align-items: stretch;           // Растягивание элементов
-
+    max-height: 60px;
     button, input {
       width: 100%;                  // На всю ширину блока
     }
