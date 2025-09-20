@@ -6,7 +6,7 @@
   margin: 0 auto;                     // Центровка
   padding: 16px;                      // Отступы слева и справа
   display: grid;
-  grid-template-columns: 320px minmax(0, 1fr);
+  grid-template-columns: minmax(150px, 320px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
   min-width: 430px;
@@ -33,6 +33,7 @@
   border: 1px solid $border-color;
   border-radius: 12px;
   box-shadow: $shadow-light;
+
 }
 
 .filtersHeader {
@@ -167,6 +168,12 @@
 }
 
 // === Адаптивность для маленьких экранов ===
+@media (max-width: 1100px) {
+  .wrapper {
+    grid-template-columns: minmax(150px, 250px) minmax(0, 1fr);
+  }
+}
+
 @include respond(md) {
   .wrapper {
     grid-template-columns: 1fr;

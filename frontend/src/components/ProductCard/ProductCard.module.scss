@@ -210,7 +210,7 @@
 }
 
 // === Адаптивность для маленьких экранов ===
-@media (max-width: 630px) {
+@media (max-width: 1000px) {
   .goToCart {
     background-color: transparent;    // Прозрачный фон
     padding: 8px 8px;                // Отступы
