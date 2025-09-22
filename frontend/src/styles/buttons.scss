@@ -9,6 +9,11 @@
   @extend %btn-primary;
 }
 
+.btn--accent {
+  @extend %btn-base;
+  @extend %btn-accent;
+}
+
 .btn--secondary {
   @extend %btn-base;
   @extend %btn-secondary;

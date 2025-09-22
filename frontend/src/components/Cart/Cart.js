@@ -218,7 +218,7 @@ const Cart = () => {
                 {console.log('item.product_image', item.product_image)}
                 {item.product_image && (
                   <img
-                    src={`${API_URL}${getThumbnailPath(item.product_image)}`}
+                    src={getThumbnailPath(item.product_image)}
                     alt={item.name}
                     className={styles.productImage}
                     onClick={() => navigate(`/productdetailed/${item.product_id}`)}  

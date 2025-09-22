@@ -302,8 +302,7 @@ const handleAddToCart = (e) => {
                 className={styles.qtyBtn}
               />
               <Button 
-                variant="secondary" 
-                className={styles.goToCart}
+                variant="accent" 
                 onClick={handleGoToCart}>Перейти в корзину
               </Button>
             </>
@@ -337,13 +336,12 @@ const handleAddToCart = (e) => {
                 />
               </div>
               <Button
-                className = {styles.addToCartBtn}
-                variant="primary"
+                variant="accent"
                 onClick={handleAddToCart}
                 disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
                 data-qa="productd_add_to_cart"
               >
-                В корзину
+                Добавить в корзину
               </Button>
             </>
           )}
@@ -379,15 +377,15 @@ const handleAddToCart = (e) => {
               onClick={handleIncrement}
               disabled={cartItem.quantity >= (selectedStock?.stock || 0)}
             />
-            <Button variant="secondary" onClick={handleGoToCart}>Перейти в корзину</Button>
+            <Button variant="accent" onClick={handleGoToCart}>Перейти в корзину</Button>
           </div>
         ) : (
           <Button
-            variant="primary"
+            variant="accent"
             onClick={handleAddToCart}
             disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
           >
-            В корзину
+            Добавить в корзину
           </Button>
         )}
       </div>

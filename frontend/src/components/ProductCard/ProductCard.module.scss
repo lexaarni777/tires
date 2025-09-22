@@ -156,39 +156,9 @@
   border-radius: $radius-8;        // Скругление
 }
 .buyQty { display: flex; min-width: 2rem; justify-content: center; align-items: center; font-weight: 600; border: 2px solid; border-radius: $radius-12; width: 40px; height: 40px; color: $primary;}
-.addToCartBtn {
-  // Принудительно красим кнопку акцентом, перекрывая variant "primary"
-  background-color: $accent !important;       // Акцентный фон (оранжевый)
-  color: $text-inverse !important;            // Белый текст
-  padding: 10px 16px;                         // Внутренние отступы
-  border: none !important;                    // Без границы
-  border-radius: $radius-12;                  // Скруглённые углы
-  font-weight: 600;                           // Жирный текст
-  cursor: pointer;                            // Рука
 
-  &:hover {
-    background-color: tone($accent, 7, 'darken') !important; // Затемнение при наведении
-  }
-
-  &:disabled {
-    background-color: tone($accent, 20, 'lighten') !important; // Осветление при отключении
-    cursor: not-allowed;                                       // Курсор запрета
-    opacity: .9;
-  }
-}
-
-.goToCart {
-  background-color: transparent;    // Прозрачный фон
-  color: $primary;                  // Синий текст
-  border: 2px solid $primary;       // Синяя граница
-  padding: 8px 12px;                // Отступы
-  border-radius: $radius-12;               // Скругление
+.goToCartPC {
   font-size: 14px;                  // Размер шрифта
-  cursor: pointer;                  // Курсор
-
-  &:hover {
-    background-color: $primary;     // Синий фон при наведении
-  }
 }
 
 .adminControls {
@@ -211,8 +181,7 @@
 
 // === Адаптивность для маленьких экранов ===
 @media (max-width: 1000px) {
-  .goToCart {
-    background-color: transparent;    // Прозрачный фон
+  .goToCartPC {
     padding: 8px 8px;                // Отступы
   
   }

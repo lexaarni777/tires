@@ -46,6 +46,20 @@
   }
 }
 
+%btn-accent {
+  background-color: var(--c-accent);
+  color: var(--c-text-inverse);
+  border-color: transparent;
+
+  &:hover:not(:disabled):not([aria-disabled='true']) {
+    background-color: var(--c-accent-600);
+  }
+ы
+  &:active:not(:disabled):not([aria-disabled='true']) {
+    transform: translateY(1px);
+  }
+}
+
 %btn-primary {
   background-color: var(--c-primary);
   color: var(--c-text-inverse);

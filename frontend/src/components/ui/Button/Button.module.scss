@@ -8,6 +8,10 @@
   @extend %btn-primary;
 }
 
+.variantAccent {
+  @extend %btn-accent;
+}
+
 .variantSecondary {
   @extend %btn-secondary;
 }

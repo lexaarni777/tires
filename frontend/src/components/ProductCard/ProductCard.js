@@ -252,7 +252,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
             <span className={`${styles.badge} ${styles.badgeHit}`} data-qa="product_badge_hit">Хит продаж</span>
           )}
           {badgeFast && (
-            <span className={`${styles.badge} ${styles.badgeFast}`} data-qa="product_badge_fast">Отгрузка 24ч</span>
+            <span className={`${styles.badge} ${styles.badgeFast}`} data-qa="product_badge_fast">Отгрузка сегодня</span>
           )}
           {badgeMoscow && (
             <span className={`${styles.badge} ${styles.badgeMoscow}`} data-qa="product_badge_moscow">В наличии в Москве</span>
@@ -341,7 +341,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                 />
                 {/* Кнопка "-" — вызывает handleDecrement */}
               </div>
-                            <Button variant="secondary" className={styles.goToCart} onClick={handleGoToCart} data-qa="go_to_cart">
+              <Button variant="accent" className={styles.goToCartPC} onClick={handleGoToCart} data-qa="go_to_cart">
                 Перейти в корзину
               </Button>
               {/* Кнопка "Перейти в корзину" — вызывает handleGoToCart */}
@@ -352,10 +352,8 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
             
               
               <Button
-                variant="primary"
-                className={styles.addToCartBtn}
-                onClick={handleAddToCart
-                }
+                variant="accent"
+                onClick={handleAddToCart}
                 disabled={!selectedStockId || (selectedStock?.stock || 0 ) < 1}
                 data-qa="add_to_cart"
               >
