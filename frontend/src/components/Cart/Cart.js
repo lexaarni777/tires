@@ -8,7 +8,9 @@ import Button from '../ui/Button';
 import EmptyState from '../ui/EmptyState';
 import Skeleton from '../ui/Skeleton';
 import { getThumbnailPath } from '../../utils/thumb';
+import { MdDeleteForever } from "react-icons/md";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -36,13 +38,24 @@ const Cart = () => {
     }
   }, [auth.token, dispatch]);
 
+  // Убираем лишний useEffect, оставляем только:
   useEffect(() => {
-    if (selectAll) {
+    if (cartItems.length > 0) {
       setSelectedIds(cartItems.map((item) => item.cart_id));
-    } else if (!selectAll && selectedIds.length === cartItems.length) {
-      setSelectedIds([]);
     }
-  }, [selectAll, cartItems, selectedIds.length]);
+  }, [cartItems]);
+
+  // вычисляем selectAll на лету:
+  const allSelected = selectedIds.length === cartItems.length;
+
+  // обработчик "Выбрать всё"
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(cartItems.map((item) => item.cart_id));
+    }
+  };
 
   useEffect(() => {
     if (showModal) {
@@ -200,11 +213,11 @@ const Cart = () => {
         <>
           <h2>Корзина</h2>
           <label>
-            <input
-              type="checkbox"
-              checked={selectAll}
-              onChange={() => setSelectAll(!selectAll)}
-            />
+          <input
+            type="checkbox"
+            checked={allSelected}
+            onChange={toggleSelectAll}
+          />
             Выбрать всё
           </label>
           <ul className={styles.cartItems}>
@@ -252,14 +265,14 @@ const Cart = () => {
                   </div>
                   <p>Цена: {item.price} ₽</p>
                 </div>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => dispatch(removeFromCart(item.cart_id))}
-                  className={styles.removeAction}
-                >
-                  Удалить
-                </Button>
+                <MdDeleteForever 
+                    onClick={() => dispatch(removeFromCart(item.cart_id))}
+                    size={28}
+                    className={styles.removeAction}
+                />
+
+                
+               
               </li>
             ))}
           </ul>
@@ -272,7 +285,7 @@ const Cart = () => {
               Очистить корзину
             </Button>
             <Button
-              variant="primary"
+              variant="accent"
               onClick={() => { setShowModal(true); }}
               disabled={!selectedIds.length}
               className={styles.actionButton}

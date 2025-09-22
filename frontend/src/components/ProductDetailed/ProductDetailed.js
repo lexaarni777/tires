@@ -290,6 +290,7 @@ const handleAddToCart = (e) => {
                 aria-label="Уменьшить"
                 onClick={handleDecrement}
                 className={styles.qtyBtn}
+                disabled={cartItem.quantity === 1}
               />
               <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
               <Button

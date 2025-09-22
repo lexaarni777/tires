@@ -317,7 +317,20 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
 
 
               <div className={styles.BlockAddToCartBut}>
-                <Button
+                 <Button
+                  variant="primary"
+                  size="sm"
+                  icon={<span aria-hidden="true">−</span>}
+                  aria-label="Уменьшить"
+                  onClick={handleDecrement}
+                  className={styles.qtyBtn}
+                  data-qa="qty_dec"
+                  disabled={cartItem.quantity === 1}
+                />
+                {/* Кнопка "+" — вызывает handleIncrement; дизейблится если достигнут максимум по складу */}
+                <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
+                {/* Поле количества — выводит актуальное количество товара в корзине на этом складе */}
+                 <Button
                   variant="primary"
                   size="sm"
                   icon={<span aria-hidden="true">+</span>}
@@ -326,18 +339,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                   disabled={!selectedStock || cartItem.quantity >= selectedStock.stock}
                   className={styles.qtyBtn}
                   data-qa="qty_inc"
-                />
-                {/* Кнопка "+" — вызывает handleIncrement; дизейблится если достигнут максимум по складу */}
-                <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
-                {/* Поле количества — выводит актуальное количество товара в корзине на этом складе */}
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<span aria-hidden="true">−</span>}
-                  aria-label="Уменьшить"
-                  onClick={handleDecrement}
-                  className={styles.qtyBtn}
-                  data-qa="qty_dec"
                 />
                 {/* Кнопка "-" — вызывает handleDecrement */}
               </div>
