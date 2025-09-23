@@ -17,6 +17,14 @@
   flex: 0 0 320px;                    // Ширина колонки галереи
 }
 
+.descriptionMob{
+  display: none;
+  font-size: 15px;                   // Размер описания
+  color: $text-muted;                // Приглушённый цвет
+  line-height: 1.5;                  // Межстрочный интервал
+  max-width: 70ch;
+}
+
 .mainImgWrap { margin-bottom: $space-12; }
 .thumbs { display: flex; gap: $space-8; flex-wrap: wrap; }
 .thumb { border: 1px solid $border-color; border-radius: $radius-8; padding: 2px; background: $surface; cursor: pointer; }
@@ -229,9 +237,14 @@
   color: $text-primary;
 }
 
-.stock { font-size: 0.9375rem; color: $text-muted; }
+.stock { 
+  font-size: 0.9375rem; 
+  color: $text-muted;
+  text-align: right;
+ }
 .stockOk { color: $success; }
 .stockOut { color: $danger; }
+.stockWarning { color: $accent; }
 
 // Sticky action bar (мобайл)
 .stickyBar {
@@ -268,11 +281,38 @@
     box-shadow: 0 -8px 16px token-alpha($text-primary, 0.08);
     z-index: 20;
   }
-
+  .buyRow{
+    display: none;
+  }
   .stickyPrice { @include tabular-nums; font-weight: 700; font-size: 1.25rem; color: $text-primary; }
   .stickyControls { display: inline-flex; align-items: center; gap: $space-8; }
   .stickyQty { min-width: 2rem; text-align: center; font-weight: 600; }
+
 }
+
+@media (max-width: 650px) {
+  .imageWrap{
+      flex: 0 0 200px;  
+  }
+
+}
+
+@media (max-width: 500px) {
+  .detailedWrap{
+      flex-direction: column;
+  }
+  .imageWrap{
+    max-width: 250px;
+    margin: 0 auto;
+  }
+}
+
+@media (max-width: 450px) {
+  .page{
+    min-width: 450px;
+  }
+}
+
 // Внешний контейнер страниц детальной карточки — как catalogContent по ширине
 .page {
   max-width: 1440px;

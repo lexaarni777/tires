@@ -232,13 +232,34 @@ const handleAddToCart = (e) => {
           </div>
         )}
       </div>
+      
       <div className={styles.info}>
         <div className={styles.title} data-qa="productd_title">{product.name}</div>
         <div className={styles.article}>Артикул: {product.article}</div>
         <div className={styles.topRow}>
           <div className={styles.price} data-qa="productd_price">{formatPrice(selectedStock?.price_retail ?? minPrice)}</div>
-          <div className={`${styles.stock} ${totalCityStock > 0 ? styles.stockOk : styles.stockOut}`} data-qa="productd_stock">
-            {totalCityStock > 0 ? `В наличии: ${totalCityStock} шт.` : 'Нет в наличии в выбранном городе'}
+          <div
+            className={
+              `${styles.stock} ` +
+              (
+                totalCityStock === 0
+                  ? styles.stockOut
+                  : totalCityStock <= 4
+                  ? styles.stockOut
+                  : totalCityStock >= 5 && totalCityStock <= 8
+                  ? styles.stockWarning
+                  : styles.stockOk
+              )
+            }
+            data-qa="productd_stock"
+          >
+            {totalCityStock === 0
+              ? 'Нет в наличии в выбранном городе'
+              : totalCityStock <= 4
+              ? 'Остался последний комплект'
+              : totalCityStock >= 5 && totalCityStock <= 8
+              ? 'Осталось мало'
+              : `В наличии: ${totalCityStock} шт.`}
           </div>
         </div>
         <div className={styles.chips}>
@@ -309,33 +330,7 @@ const handleAddToCart = (e) => {
             </>
           ) : (
             <>
-              <div className={styles.BlockAddToCartBut}>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<span aria-hidden="true">−</span>}
-                  aria-label="Уменьшить"
-                  className={styles.qtyBtn}
-                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  disabled={quantity <= 1}
-                  data-qa="productd_qty_dec"
-                />
-                <span
-                  min={1}
-                  max={selectedStock?.stock || 1}
-                  className={styles.buyQty}
-                >{quantity}</span>
-                <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<span aria-hidden="true">+</span>}
-                  aria-label="Увеличить"
-                  className={styles.qtyBtn}
-                  onClick={() => setQuantity((q) => Math.min((selectedStock?.stock || 1), q + 1))}
-                  disabled={(selectedStock?.stock || 1) <= quantity}
-                  data-qa="productd_qty_inc"
-                />
-              </div>
+
               <Button
                 variant="accent"
                 onClick={handleAddToCart}
@@ -356,7 +351,9 @@ const handleAddToCart = (e) => {
             </div>
           )}
         </div>
+
       </div>
+      
       {/* Sticky action bar (mobile) */}
       <div className={styles.stickyBar} data-qa="productd_sticky_bar">
         <div className={styles.stickyPrice}>{formatPrice(selectedStock?.price_retail ?? minPrice)}</div>
@@ -368,6 +365,7 @@ const handleAddToCart = (e) => {
               icon={<span aria-hidden="true">-</span>}
               aria-label="Уменьшить"
               onClick={handleDecrement}
+              disabled={cartItem.quantity === 1}
             />
             <span className={styles.stickyQty} aria-live="polite">{cartItem.quantity}</span>
             <Button
