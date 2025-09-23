@@ -268,9 +268,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           <div className={styles.price} data-qa="product_price">
             {formatPrice(selectedStock?.price_retail ?? minPrice)}
           </div>
-          <div className={`${styles.stock} ${totalCityStock > 0 ? styles.stockOk : styles.stockOut}`} data-qa="product_stock">
-            {totalCityStock > 0 ? `В наличии: ${totalCityStock} шт.` : 'Нет в наличии в выбранном городе'}
-          </div>
         </div>
 
         <div className={styles.title} data-qa="product_title">{product.name}</div>
@@ -308,7 +305,29 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
             // показываем select, где можно выбрать склад (по ID)
             // При смене склада сбрасывается quantity на 1
           )}
-
+          <div
+            className={
+              `${styles.stock} ` +
+              (
+                totalCityStock === 0
+                  ? styles.stockOut
+                  : totalCityStock <= 4
+                  ? styles.stockOut
+                  : totalCityStock >= 5 && totalCityStock <= 8
+                  ? styles.stockWarning
+                  : styles.stockOk
+              )
+            }
+            data-qa="product_stock"
+          >
+            {totalCityStock === 0
+              ? 'Нет в наличии в выбранном городе'
+              : totalCityStock <= 4
+              ? 'Остался последний комплект'
+              : totalCityStock >= 5 && totalCityStock <= 8
+              ? 'Осталось мало'
+              : `В наличии: ${totalCityStock} шт.`}
+          </div>
           {/* Если товар уже в корзине — управление количеством */}
 
           {cartItem ? (

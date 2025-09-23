@@ -208,7 +208,7 @@ const handleAddToCart = (e) => {
  
 
   return (
-    <div className={styles.page}>
+    <div className={styles.ç}>
     <NavLink to="/productlist" className={styles.backLink} data-qa="productd_back">← К каталогу</NavLink>
     <div className={styles.detailedWrap} data-qa="product_detailed">
       {/* Блок с фото и названием */}
@@ -238,8 +238,7 @@ const handleAddToCart = (e) => {
         <div className={styles.article}>Артикул: {product.article}</div>
         <div className={styles.topRow}>
           <div className={styles.price} data-qa="productd_price">{formatPrice(selectedStock?.price_retail ?? minPrice)}</div>
-          <div
-            className={
+          <div className={
               `${styles.stock} ` +
               (
                 totalCityStock === 0
