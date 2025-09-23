@@ -1,3 +1,10 @@
+.productControls {
+  display: flex;
+  gap: 8px;
+}
+.productControlsMob {
+  display: none;
+}
 @import '../../styles/_variables.scss';  // Цвета, отступы, фон
 @import '../../styles/mixins.scss';     // Медиа-запросы
 
@@ -67,6 +74,7 @@
 }
 
 .removeAction {
+  margin-left: 20px;
   cursor: pointer;
   color: $primary;
   opacity: 0.7;
@@ -263,7 +271,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-  }
+}
 }
 
 .qtyInput {
@@ -273,4 +281,23 @@
   font-size: 14px;
   border: 1px solid $border-color;
   border-radius: 8px;
+}
+@include respond(md) {
+  .productControls {
+  flex-direction: column;
+  text-align: center;
+}
+  p{
+    margin: 0 auto;
+  }
+}
+@media (max-width: 620px) {
+  .productControls {
+  display: none;
+  }
+  .productControlsMob{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
 }

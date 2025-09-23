@@ -417,7 +417,7 @@ const handleVerifyEmail = async (e) => {
   }}
 >
   {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
-></Button>
+</Button>
 
 
 

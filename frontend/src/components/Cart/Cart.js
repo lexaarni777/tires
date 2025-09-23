@@ -175,6 +175,12 @@ const Cart = () => {
     )
   );
 
+  const warehouseNames = {
+  "Москва": "Территория Торговый Комплекс Автомастер, М69-70",
+  "Волгоград": "ул. Землячки, 47Г",
+  "Санкт-Петербург": "склад",
+};
+
   const selectedItems = cartItems.filter((item) => selectedIds.includes(item.cart_id));
   const totalAmount = selectedItems.reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity || 1)), 0);
   const totalQty = selectedItems.reduce((sum, it) => sum + Number(it.quantity || 0), 0);
@@ -238,8 +244,12 @@ const Cart = () => {
                   />
                 )}
                 <div className={styles.productDetails}>
-                  <h3>{item.name}</h3>
+                  {console.log(item)}
+                  <h3>{item.product_name}</h3>
                   <p>Склад: {item.location}</p>
+                </div>
+                <div className={styles.productControls}>
+                  <p>Цена: {item.price} ₽</p>
                   <div className={styles.quantityControls}>
                     <Button
                       variant="primary"
@@ -251,7 +261,14 @@ const Cart = () => {
                       className={styles.qtyBtn}
                       data-qa="cart_qty_dec"
                     />
-                    <input type="number" value={item.quantity} min={1} max={item.stock || 1} readOnly className={styles.qtyInput} />
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      min={1}
+                      max={item.stock || 1}
+                      readOnly
+                      className={styles.qtyInput}
+                    />
                     <Button
                       variant="primary"
                       size="sm"
@@ -263,17 +280,53 @@ const Cart = () => {
                       data-qa="cart_qty_inc"
                     />
                   </div>
-                  <p>Цена: {item.price} ₽</p>
+                  
                 </div>
+
                 <MdDeleteForever 
                     onClick={() => dispatch(removeFromCart(item.cart_id))}
                     size={28}
                     className={styles.removeAction}
                 />
 
+              <div className={styles.productControlsMob}>
+                  <p>Цена: {item.price} ₽</p>
+                  <div className={styles.quantityControls}>
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={<span aria-hidden="true">−</span>}
+                      aria-label="Уменьшить"
+                      onClick={() => handleDecrement(item)}
+                      disabled={item.quantity === 1}
+                      className={styles.qtyBtn}
+                      data-qa="cart_qty_dec"
+                    />
+                    <input
+                      type="number"
+                      value={item.quantity}
+                      min={1}
+                      max={item.stock || 1}
+                      readOnly
+                      className={styles.qtyInput}
+                    />
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      icon={<span aria-hidden="true">+</span>}
+                      aria-label="Увеличить"
+                      onClick={() => handleIncrement(item)}
+                      disabled={item.quantity >= item.stock}
+                      className={styles.qtyBtn}
+                      data-qa="cart_qty_inc"
+                    />
+                  </div>
+                  
+                </div>
                 
                
               </li>
+
             ))}
           </ul>
           <div className={styles.cartActions}>
@@ -326,15 +379,17 @@ const Cart = () => {
                   </label>
                 </div>
               </div>
-
+              
               {deliveryMethod === 'pickup' && (
                 <div className={styles.formRow}>
                   <label className={styles.formLabel}>Склад для самовывоза:</label>
                   <select value={pickupWarehouse} onChange={e => setPickupWarehouse(e.target.value)} className={styles.input}>
                     <option value="">Выберите склад</option>
-                    {availableWarehouses.map(wh => (
-                      <option key={wh} value={wh}>{wh}</option>
-                    ))}
+                      {availableWarehouses.map(wh => (
+                        <option key={wh} value={wh}>
+                          {warehouseNames[wh] || wh}
+                        </option>
+                      ))}
                   </select>
                 </div>
               )}
@@ -386,7 +441,7 @@ const Cart = () => {
                   type="tel"
                   required
                   inputMode="tel"
-                  pattern="^\+7\s\d{3}\s\d{3}-\d{2}-\d{2}$"
+                  
                   value={phone}
                   onChange={e => {
                     const digits = e.target.value.replace(/\D/g, '').replace(/^8/, '7');
