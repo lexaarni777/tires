@@ -229,102 +229,96 @@ const Cart = () => {
           <ul className={styles.cartItems}>
             {cartItems.map((item) => (
               <li key={item.cart_id} className={styles.cartItem}>
-                <input
-                  type="checkbox"
-                  checked={selectedIds.includes(item.cart_id)}
-                  onChange={() => handleSelect(item.cart_id)}
-                />
-                {console.log('item.product_image', item.product_image)}
-                {item.product_image && (
-                  <img
-                    src={getThumbnailPath(item.product_image)}
-                    alt={item.name}
-                    className={styles.productImage}
-                    onClick={() => navigate(`/productdetailed/${item.product_id}`)}  
-                  />
-                )}
-                <div className={styles.productDetails}>
-                  {console.log(item)}
-                  <h3>{item.product_name}</h3>
-                  <p>Склад: {item.location}</p>
-                </div>
-                <div className={styles.productControls}>
-                  <p>Цена: {item.price} ₽</p>
-                  <div className={styles.quantityControls}>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      icon={<span aria-hidden="true">−</span>}
-                      aria-label="Уменьшить"
-                      onClick={() => handleDecrement(item)}
-                      disabled={item.quantity === 1}
-                      className={styles.qtyBtn}
-                      data-qa="cart_qty_dec"
-                    />
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      min={1}
-                      max={item.stock || 1}
-                      readOnly
-                      className={styles.qtyInput}
-                    />
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      icon={<span aria-hidden="true">+</span>}
-                      aria-label="Увеличить"
-                      onClick={() => handleIncrement(item)}
-                      disabled={item.quantity >= item.stock}
-                      className={styles.qtyBtn}
-                      data-qa="cart_qty_inc"
-                    />
+
+                  <div className={styles.cartItemHeadSecond}>
+                    <div className={styles.cartItemHeadFerst}>
+                      <input
+                        type="checkbox"
+                        checked={selectedIds.includes(item.cart_id)}
+                        onChange={() => handleSelect(item.cart_id)}
+                      />
+                      {console.log('item.product_image', item.product_image)}
+                      {item.product_image && (
+                        <img
+                          src={getThumbnailPath(item.product_image)}
+                          alt={item.name}
+                          className={styles.productImage}
+                          onClick={() => navigate(`/productdetailed/${item.product_id}`)}  
+                        />
+                      )}
+                      <div className={styles.productDetails}>
+                        {console.log(item)}
+                        <h3>{item.product_name}</h3>
+                        <p>Склад: {item.location}</p>
+                      </div>
+                    </div>
+                    <div className={styles.productControls}>
+                      <div className={styles.productControlsHead}> 
+                        <p>Цена: {item.price} ₽</p>
+                        <div className={styles.quantityControls}>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            icon={<span aria-hidden="true">−</span>}
+                            aria-label="Уменьшить"
+                            onClick={() => handleDecrement(item)}
+                            disabled={item.quantity === 1}
+                            className={styles.qtyBtn}
+                            data-qa="cart_qty_dec"
+                          />
+                          <span className={styles.buyQty} aria-live="polite">{item.quantity}</span>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            icon={<span aria-hidden="true">+</span>}
+                            aria-label="Увеличить"
+                            onClick={() => handleIncrement(item)}
+                            disabled={item.quantity >= item.stock}
+                            className={styles.qtyBtn}
+                            data-qa="cart_qty_inc"
+                          />
+                        </div>
+                      </div>
+                      <MdDeleteForever 
+                        onClick={() => dispatch(removeFromCart(item.cart_id))}
+                        size={28}
+                        className={styles.removeAction}
+                      />
+                    </div>
+                  </div>
+
+                  
+
+                  <div className={styles.productControlsMob}>
+                    <p>Цена: {item.price} ₽</p>
+                    <div className={styles.quantityControls}>
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        icon={<span aria-hidden="true">−</span>}
+                        aria-label="Уменьшить"
+                        onClick={() => handleDecrement(item)}
+                        disabled={item.quantity === 1}
+                        className={styles.qtyBtn}
+                        data-qa="cart_qty_dec"
+                      />
+                      <span className={styles.buyQty} aria-live="polite">{item.quantity}</span>
+
+                      <Button
+                        variant="primary"
+                        size="sm"
+                        icon={<span aria-hidden="true">+</span>}
+                        aria-label="Увеличить"
+                        onClick={() => handleIncrement(item)}
+                        disabled={item.quantity >= item.stock}
+                        className={styles.qtyBtn}
+                        data-qa="cart_qty_inc"
+                      />
+                    </div>
+                    
                   </div>
                   
-                </div>
 
-                <MdDeleteForever 
-                    onClick={() => dispatch(removeFromCart(item.cart_id))}
-                    size={28}
-                    className={styles.removeAction}
-                />
-
-              <div className={styles.productControlsMob}>
-                  <p>Цена: {item.price} ₽</p>
-                  <div className={styles.quantityControls}>
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      icon={<span aria-hidden="true">−</span>}
-                      aria-label="Уменьшить"
-                      onClick={() => handleDecrement(item)}
-                      disabled={item.quantity === 1}
-                      className={styles.qtyBtn}
-                      data-qa="cart_qty_dec"
-                    />
-                    <input
-                      type="number"
-                      value={item.quantity}
-                      min={1}
-                      max={item.stock || 1}
-                      readOnly
-                      className={styles.qtyInput}
-                    />
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      icon={<span aria-hidden="true">+</span>}
-                      aria-label="Увеличить"
-                      onClick={() => handleIncrement(item)}
-                      disabled={item.quantity >= item.stock}
-                      className={styles.qtyBtn}
-                      data-qa="cart_qty_inc"
-                    />
-                  </div>
-                  
-                </div>
-                
-               
               </li>
 
             ))}

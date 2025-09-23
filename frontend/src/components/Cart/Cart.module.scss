@@ -1,22 +1,48 @@
-.productControls {
-  display: flex;
-  gap: 8px;
-}
-.productControlsMob {
-  display: none;
-}
 @import '../../styles/_variables.scss';  // Цвета, отступы, фон
 @import '../../styles/mixins.scss';     // Медиа-запросы
 
 .cartContainer {
-  max-width: 800px;                      // Ограничиваем ширину корзины
+  max-width: 1440px;                      // Ограничиваем ширину корзины
   margin: 20px auto;                     // Центруем по горизонтали с вертикальным отступом
   padding: 20px;                         // Внутренние отступы
   border: 1px solid $border-color;       // Серая рамка по переменной
   border-radius: 8px;                    // Скругляем углы
   background-color: #fff;                // Белый фон
+  min-width: 430px;
 }
 
+.cartItemHead{
+  width: 100%;
+}
+
+.cartItemHeadFerst{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+}
+.cartItemHeadSecond{
+  display: flex;
+  align-items: center;
+  width: 100%;
+  
+}
+
+.productControls {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.productControlsMob {
+  display: none;
+}
+
+.productControlsHead{
+  display: flex;
+  text-align: center;
+  p{
+    width: 150px;
+  }
+}
 .cartContainer h2 {
   text-align: center;                    // Центровка заголовка
   color: $text-primary;                  // Основной цвет текста
@@ -93,36 +119,6 @@
   padding: 40px 0;                       // Отступы сверху и снизу
 }
 
-// === Мобильная адаптация ===
-@include respond(sm) {
-  .cartItem {
-    flex-direction: column;              // Вертикальная раскладка
-    align-items: flex-start;             // Выравнивание по левому краю
-  }
-
-  .cartActions {
-    flex-direction: column;              // Кнопки друг под другом
-    align-items: stretch;                // Растягиваются по ширине
-  }
-
-  .actionButton {
-    width: 100%;
-  }
-
-  .formActions {
-    flex-direction: column;
-    align-items: stretch;
-
-    > * {
-      width: 100%;
-    }
-  }
-
-  .productDetails {
-    margin-left: 0;                      // Убираем отступ при вертикальном расположении
-    margin-top: 10px;                    // Отступ сверху
-  }
-}
 
 // -----------------------------
 // Блок: итог заказа (summary)
@@ -273,31 +269,41 @@
     justify-content: center;
 }
 }
-
-.qtyInput {
-  width: 60px;
+.buyQty { 
+  display: flex; 
+  min-width: 2rem; 
+  justify-content: center; 
+  align-items: center; 
+  font-weight: 600; 
+  border: 2px solid; 
+  border-radius: $radius-12; 
+  width: 40px; 
+  height: 40px; 
+  color: $primary;
   text-align: center;
-  padding: 6px 8px;
-  font-size: 14px;
-  border: 1px solid $border-color;
-  border-radius: 8px;
 }
+
 @include respond(md) {
-  .productControls {
+  .productControlsHead {
   flex-direction: column;
   text-align: center;
-}
   p{
-    margin: 0 auto;
+    margin-top: 0px;
   }
 }
+
+}
 @media (max-width: 620px) {
-  .productControls {
+  .productControlsHead {
   display: none;
+  }
+  .cartItem{
+    display: flex;
+    flex-direction: column;
   }
   .productControlsMob{
     display: flex;
-    flex-direction: column;
     gap: 8px;
+    justify-content: center;
   }
 }
