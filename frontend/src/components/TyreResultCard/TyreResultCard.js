@@ -117,11 +117,19 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
               }
             };
 
+            const handleClick = () => {
+              // handleClick — обработчик клика по карточке товара
+              // При вызове переводит пользователя на страницу детального просмотра товара
+              navigate(`/productdetailed/${tyre.id}`);
+              // Программный переход, путь содержит ID товара
+            };
+
+
             const handleGoToCart = () => navigate('/cart');
 
                 return (
                   <tr key={tyre.id}>
-                    <td>{tyre.name}</td>
+                    <td onClick={handleClick}>{tyre.name}</td>
                     <td>{tyre.season}</td>
                     <td>{tyre.load_index}{tyre.speed_index}</td>
                     <td>{tyre.article}</td>
@@ -133,22 +141,13 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
                           <div className={styles.cartInline}>
                             <Button
                               size="sm"
-                              variant="ghost"
+                              variant="accent"
                               aria-label="Перейти в корзину"
                               onClick={handleGoToCart}
                               data-qa="go_to_cart"
                             >
-                              🛒
+                              Перейти в корзину
                             </Button>
-                            <Button
-                              size="sm"
-                              aria-label="Уменьшить"
-                              onClick={handleDecrement}
-                              data-qa="cart_qty_dec"
-                            >
-                              −
-                            </Button>
-                            <span className={styles.qty} aria-live="polite">{cartItem.quantity}</span>
                             <Button
                               size="sm"
                               aria-label="Увеличить"
@@ -158,10 +157,20 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
                             >
                               +
                             </Button>
+                            <span className={styles.qty} aria-live="polite">{cartItem.quantity}</span>
+                            <Button
+                              size="sm"
+                              aria-label="Уменьшить"
+                              onClick={handleDecrement}
+                              data-qa="cart_qty_dec"
+                              disabled={cartItem.quantity === 1}
+                            >
+                              −
+                            </Button>
                           </div>
                         ) : (
                           <Button className={styles.cartButton} variant="accent" size="sm" onClick={handleAdd} data-qa="add_to_cart">
-                            В корзину
+                            Добавить в корзину
                           </Button>
                         )
                       ) : (
