@@ -18,7 +18,7 @@ const AuthForm = () => {
    
     const [showMergeModal, setShowMergeModal] = useState(false);
     const [form, setForm] = useState({
-      phone: '',
+      phone: '+7',
       email: '',
       password: '',
       code: '',
@@ -187,7 +187,7 @@ const handleVerifyEmail = async (e) => {
           setRegisterStep('start');
           setForm({
             ...form,
-            phone: '',
+            phone: '+7',
             email: '',
             code: '',
             password: '',
@@ -407,7 +407,7 @@ const handleVerifyEmail = async (e) => {
     setRegisterStep('start'); // Всегда возвращаемся на начальный шаг регистрации
     setForm({
       ...form,
-      phone: '',
+      phone: '+7',
       email: '',
       code: '',
       password: '',
@@ -432,7 +432,7 @@ const handleVerifyEmail = async (e) => {
       setResetStep('request');
       setForm({
         ...form,
-        resetPhone: '',
+        resetPhone: '+7',
         resetEmail: '',
         resetCode: '',
         newPassword: '',
@@ -560,7 +560,7 @@ const handleVerifyEmail = async (e) => {
               setErrors({});
               setForm({
                 ...form,
-                resetPhone: '',
+                resetPhone: '+7',
                 resetEmail: '',
                 resetCode: '',
                 newPassword: '',

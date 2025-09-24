@@ -1,12 +1,14 @@
 @import '../../styles/_variables';
 @import '../../styles/mixins';
+@import '../../styles/typography';
 
 .cardGroup {
   margin-top: $space-xl;
   padding: $space-md;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  background-color: #fff;
+  border: 1px solid var(--c-line);
+  border-radius: $radius-16;
+  background-color: var(--c-surface);
+  box-shadow: $shadow-soft;
 }
 
 .cardLayout {
@@ -25,8 +27,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f5f7fa;
-  border-radius: 8px;
+  background: var(--c-bg);
+  border-radius: $radius-12;
   padding: $space-md;
 
   @include respond(md) {
@@ -68,18 +70,18 @@
   th,
   td {
     padding: 10px 12px;
-    border-bottom: 1px solid #e5e8ec;
+    border-bottom: 1px solid var(--c-line);
     text-align: left;
   }
 
   th {
-    background: #f2f4f7;
+    background: var(--c-bg);
     font-weight: 600;
     color: $text-primary;
-  }
+    }
 
   tbody tr:hover {
-    background: #fafbfc;
+    background: token-alpha($surface, 0.4);
   }
 }
 
@@ -87,4 +89,31 @@
   font-weight: 600;
   font-size: 16px;
   margin: 12px 0 4px;
+}
+
+.price {
+  @include tabular-nums;
+  font-weight: 700;
+  text-align: right;
+}
+
+.cartInline {
+  display: inline-flex;
+  align-items: center;
+  gap: $space-8;
+}
+
+.qty {
+  min-width: 1.5rem;
+  text-align: center;
+}
+
+.noStock {
+  display: flex;
+  flex-direction: column;
+  gap: $space-8;
+}
+
+.noStockText {
+  color: $text-muted;
 }

@@ -3,7 +3,12 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../../slices/productSlice';
 import { fetchStock } from '../../slices/stockSlice';
 import TyreResultCard from '../TyreResultCard/TyreResultCard';
+import Button from '../ui/Button';
 import styles from './TyreSelector.module.scss';
+import { LuSun, LuSunSnow } from "react-icons/lu";
+import { IoIosSnow } from "react-icons/io";
+import { FiAlertTriangle } from "react-icons/fi";
+
 
 const TyreSelector = () => {
   const dispatch = useDispatch();
@@ -102,6 +107,66 @@ const TyreSelector = () => {
     setRawFilteredProducts(results);
   };
 
+  const previewCount = useMemo(() => {
+    const selectedSeasons = [];
+    if (season.summer) selectedSeasons.push('Летние');
+    if (season.winter) selectedSeasons.push('Зимние');
+    if (season.allseason) selectedSeasons.push('Всесезонные');
+
+    const matchBy = (p, cfg) => {
+      if (cfg.section_width && p.section_width !== cfg.section_width) return false;
+      if (cfg.profile && p.profile !== cfg.profile) return false;
+      if (cfg.diameter && p.diameter !== cfg.diameter) return false;
+      if (cfg.season && p.season !== cfg.season) return false;
+      if (cfg.studs && !p.studs) return false;
+      return true;
+    };
+
+    const frontCfg = {
+      section_width: sectionWidth || undefined,
+      profile: profile || undefined,
+      diameter: diameter || undefined,
+      season: selectedSeasons.length === 1 ? selectedSeasons[0] : undefined,
+      studs: season.studs || undefined,
+    };
+
+    const rearCfg = isWidePair
+      ? {
+          section_width: sectionWidthRear || undefined,
+          profile: profileRear || undefined,
+          diameter: diameterRear || undefined,
+          season: selectedSeasons.length === 1 ? selectedSeasons[0] : undefined,
+          studs: season.studs || undefined,
+        }
+      : null;
+
+    let local = allProducts.filter(
+      (p) => matchBy(p, frontCfg) || (rearCfg ? matchBy(p, rearCfg) : false)
+    );
+
+    if (inStockOnly && selectedCity) {
+      local = local.filter((p) => {
+        const items = stockByTyreId[p.id] || [];
+        return items.some((i) => i.location === selectedCity && i.stock > 0);
+      });
+    }
+
+    return local.length;
+  }, [
+    allProducts,
+    sectionWidth,
+    profile,
+    diameter,
+    sectionWidthRear,
+    profileRear,
+    diameterRear,
+    season,
+    isWidePair,
+    inStockOnly,
+    selectedCity,
+    stockByTyreId,
+  ]);
+
   useEffect(() => {
     let result = rawFilteredProducts;
     if (inStockOnly && selectedCity) {
@@ -122,86 +187,130 @@ const TyreSelector = () => {
 
   return (
     <div className={styles.wrapper}>
-      <div className={styles.tabs}>
-        <button className={`${styles.tab} ${styles.active}`}>По параметрам</button>
-        <button className={`${styles.tab} ${styles.disabled}`}>По автомобилю</button>
-      </div>
-
-      <div className={styles.form}>
-        <div className={styles.selects}>
-          <select value={sectionWidth} onChange={e => setSectionWidth(e.target.value)}>
-            <option value=''>Ширина (Любая)</option>
-            {getOptionStates('section_width').map(opt => (
-              <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
-            ))}
-          </select>
-
-          <select value={profile} onChange={e => setProfile(e.target.value)}>
-            <option value=''>Профиль (Любой)</option>
-            {getOptionStates('tread_depth').map(opt => (
-              <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
-            ))}
-          </select>
-
-          <select value={diameter} onChange={e => setDiameter(e.target.value)}>
-            <option value=''>Диаметр (Любой)</option>
-            {getOptionStates('diameter').map(opt => (
-              <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
-            ))}
-          </select>
+      <h2 className={styles.title}>Подбор шин</h2>
+      <div className={styles.titleHead}>
+        <div className={styles.tabs}>
+          <button className={`${styles.tab} ${styles.active}`}>По параметрам</button>
+          <button className={`${styles.tab} ${styles.disabled}`}>По автомобилю</button>
         </div>
 
-        {isWidePair && (
-          <div className={styles.selects}>
-            <select value={sectionWidthRear} onChange={e => setSectionWidthRear(e.target.value)}>
-              <option value=''>Ширина (задние)</option>
-              {getOptionStates('section_width').map(opt => (
-                <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
-              ))}
-            </select>
+        <div className={styles.form}>
+          <div className={styles.FormHead}>
+            <div className={styles.FormHeadSecond}>
+              <div className={styles.FormHeadTh}>
+                <div>Ширина</div>
+                <div>Профиль</div>
+                <div>Радиус</div>
+              </div>
+              <div className={styles.selects}>
+                <select value={sectionWidth} onChange={e => setSectionWidth(e.target.value)}>
+                  <option value=''>Любая</option>
+                  {getOptionStates('section_width').map(opt => (
+                    <option key={opt.value} value={opt.value} disabled={opt.disabled} title={opt.disabled ? 'Недоступно с выбранными параметрами' : undefined}>{opt.value}</option>
+                  ))}
+                </select>
+                  /
+                <select value={profile} onChange={e => setProfile(e.target.value)}>
+                  <option value=''>Любой</option>
+                  {getOptionStates('profile').map(opt => (
+                    <option key={opt.value} value={opt.value} disabled={opt.disabled} title={opt.disabled ? 'Недоступно с выбранными параметрами' : undefined}>{opt.value}</option>
+                  ))}
+                </select>
+                  R
+                <select value={diameter} onChange={e => setDiameter(e.target.value)}>
+                  <option value=''>Любой</option>
+                  {getOptionStates('diameter').map(opt => (
+                    <option key={opt.value} value={opt.value} disabled={opt.disabled} title={opt.disabled ? 'Недоступно с выбранными параметрами' : undefined}>{opt.value}</option>
+                  ))}
+                </select>
+              </div>
 
-            <select value={profileRear} onChange={e => setProfileRear(e.target.value)}>
-              <option value=''>Профиль (задние)</option>
-              {getOptionStates('tread_depth').map(opt => (
-                <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
-              ))}
-            </select>
-
-            <select value={diameterRear} onChange={e => setDiameterRear(e.target.value)}>
-              <option value=''>Диаметр (задние)</option>
-              {getOptionStates('diameter').map(opt => (
-                <option key={opt.value} value={opt.value} disabled={opt.disabled}>{opt.value}</option>
-              ))}
-            </select>
+              {isWidePair && (
+                <div className={styles.selects}>
+                  <select value={sectionWidthRear} onChange={e => setSectionWidthRear(e.target.value)}>
+                    <option value=''>Любая</option>
+                    {getOptionStates('section_width').map(opt => (
+                      <option key={opt.value} value={opt.value} disabled={opt.disabled} title={opt.disabled ? 'Недоступно с выбранными параметрами' : undefined}>{opt.value}</option>
+                    ))}
+                  </select>
+                    /
+                  <select value={profileRear} onChange={e => setProfileRear(e.target.value)}>
+                    <option value=''>Любой</option>
+                    {getOptionStates('profile').map(opt => (
+                      <option key={opt.value} value={opt.value} disabled={opt.disabled} title={opt.disabled ? 'Недоступно с выбранными параметрами' : undefined}>{opt.value}</option>
+                    ))}
+                  </select>
+                    R
+                  <select value={diameterRear} onChange={e => setDiameterRear(e.target.value)}>
+                    <option value=''>Любой</option>
+                    {getOptionStates('diameter').map(opt => (
+                      <option key={opt.value} value={opt.value} disabled={opt.disabled} title={opt.disabled ? 'Недоступно с выбранными параметрами' : undefined}>{opt.value}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+            </div>
+            <div className={styles.checkboxGroup}>
+              <div className={styles.checkboxGroupSecond}>Сезон</div>
+              <div className={styles.checkboxGroupFerst}>
+                <div>
+                  <label><input type="checkbox" checked={season.summer} onChange={e => setSeason({ ...season, summer: e.target.checked })}/><LuSun size={24} color="#ffc800ff"/> Летние</label>
+                  <label><input type="checkbox" checked={season.winter} onChange={e => setSeason({ ...season, winter: e.target.checked })}/><IoIosSnow size={24} color="#0057B8"/> Зимние</label>
+                </div>
+                <div>
+                  <label><input type="checkbox" checked={season.allseason} onChange={e => setSeason({ ...season, allseason: e.target.checked })}/>
+                    <div style={{ position: "relative", width: "24px", height: "24px" }}>
+                      <LuSunSnow
+                        size={24}
+                        color="#ffc800" // левая половина (жёлтая)
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          clipPath: "inset(0 50% 0 0)" // показываем только левую часть
+                        }}
+                      />
+                      <LuSunSnow
+                        size={24}
+                        color="#0057B8" // правая половина (синяя)
+                        style={{
+                          position: "absolute",
+                          top: 0,
+                          left: 0,
+                          clipPath: "inset(0 0 0 50%)" // показываем только правую часть
+                        }}
+                      />
+                    </div> 
+                  Всесезонные</label>
+                  <label><input type="checkbox" checked={season.studs} onChange={e => setSeason({ ...season, studs: e.target.checked })}/><FiAlertTriangle size={24} color="#D72638"/> Шипы </label>
+                </div>
+              </div>
+            </div>
           </div>
-        )}
-
-        <div className={styles.checkboxGroup}>
-          <label><input type="checkbox" checked={season.summer} onChange={e => setSeason({ ...season, summer: e.target.checked })}/> Летние ☀️</label>
-          <label><input type="checkbox" checked={season.winter} onChange={e => setSeason({ ...season, winter: e.target.checked })}/> Зимние ❄️</label>
-          <label><input type="checkbox" checked={season.allseason} onChange={e => setSeason({ ...season, allseason: e.target.checked })}/> Всесезонные ❄️</label>
-          <label><input type="checkbox" checked={season.studs} onChange={e => setSeason({ ...season, studs: e.target.checked })}/> Шипы ⚠️</label>
+          <div>
+            <label className={styles.widePair}>
+              <input type="checkbox" checked={isWidePair} onChange={e => setIsWidePair(e.target.checked)} />Разноширокие
+            </label>
+            {filteredProducts.length > 0 && (
+              <div className={styles.stockToggle}>
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={inStockOnly}
+                    onChange={e => setInStockOnly(e.target.checked)}
+                    data-qa="filter_in_stock"
+                  />В наличии
+                </label>
+              </div>
+            )}
+            <Button variant="accent" onClick={handleSubmit} data-qa="filter_apply">
+              Показать {previewCount} товаров
+            </Button>
+          </div>
         </div>
 
-        <label className={styles.widePair}>
-          <input type="checkbox" checked={isWidePair} onChange={e => setIsWidePair(e.target.checked)} /> Разноширокие
-        </label>
 
-        <button className={styles.submit} onClick={handleSubmit}>Подобрать</button>
       </div>
-
-      {filteredProducts.length > 0 && (
-        <div className={styles.stockToggle}>
-          <label>
-            <input
-              type="checkbox"
-              checked={inStockOnly}
-              onChange={e => setInStockOnly(e.target.checked)}
-            /> В наличии
-          </label>
-        </div>
-      )}
-
       <div className={styles.results}>
         {Object.entries(groupedByBrandModel).map(([key, tyres]) => {
           const [brand, model] = key.split('||');

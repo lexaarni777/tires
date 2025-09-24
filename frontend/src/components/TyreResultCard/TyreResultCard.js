@@ -2,6 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, decrementToCart } from '../../slices/cartSlice';
 import styles from './TyreResultCard.module.scss';
+import Button from '../ui/Button';
 import { warehouseList } from '../../constants/warehouseList';
 import { useNavigate } from 'react-router-dom';
 import { getThumbnailPath } from '../../utils/thumb';
@@ -20,6 +21,11 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
     .filter(w => w.city === selectedCity)
     .map(w => w.location);
 
+  const formatPrice = (val) =>
+    val != null
+      ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(val)
+      : '—';
+
   return (
     <div className={styles.cardGroup}>
       <div className={styles.cardLayout}>
@@ -35,16 +41,16 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
         <div className={styles.content}>
           <div className={styles.title}>{brand} {model}</div>
 
-          <table className={styles.table}>
+          <table className={styles.table} aria-label="Доступные размеры и цены">
             <thead>
               <tr>
-                <th>Модель</th>
-                <th>Сезон</th>
-                <th>Индекс</th>
-                <th>Код товара</th>
-                <th>Наличие ({selectedCity})</th>
-                <th>Цена</th>
-                <th></th>
+                <th scope="col">Модель</th>
+                <th scope="col">Сезон</th>
+                <th scope="col">Индекс</th>
+                <th scope="col">Код товара</th>
+                <th scope="col">Наличие ({selectedCity})</th>
+                <th scope="col">Цена</th>
+                <th scope="col"></th>
               </tr>
             </thead>
             <tbody>
@@ -52,9 +58,7 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
             const allStock = stockByTyreId[tyre.id] || [];
             const cityStock = allStock.find(s => cityWarehouses.includes(s.location));
             const stock = cityStock?.stock ?? '—';
-            const price = cityStock?.price_retail != null
-              ? `${cityStock.price_retail.toLocaleString()} ₽`
-              : '—';
+            const price = formatPrice(cityStock?.price_retail);
 
             const cartItem = cartItems.find(
               item =>
@@ -122,31 +126,49 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
                     <td>{tyre.load_index}{tyre.speed_index}</td>
                     <td>{tyre.article}</td>
                     <td>{stock}</td>
-                    <td>{price}</td>
+                    <td className={styles.price}>{price}</td>
                     <td>
                       {cityStock && cityStock.stock > 0 ? (
                         cartItem ? (
                           <div className={styles.cartInline}>
-                            <button onClick={handleGoToCart}>🛒</button>
-                            <button onClick={handleDecrement}>−</button>
-                            <input
-                              type="number"
-                              value={cartItem.quantity}
-                              readOnly
-                              className={styles.qtyInput}
-                            />
-                            <button
+                            <Button
+                              size="sm"
+                              variant="ghost"
+                              aria-label="Перейти в корзину"
+                              onClick={handleGoToCart}
+                              data-qa="go_to_cart"
+                            >
+                              🛒
+                            </Button>
+                            <Button
+                              size="sm"
+                              aria-label="Уменьшить"
+                              onClick={handleDecrement}
+                              data-qa="cart_qty_dec"
+                            >
+                              −
+                            </Button>
+                            <span className={styles.qty} aria-live="polite">{cartItem.quantity}</span>
+                            <Button
+                              size="sm"
+                              aria-label="Увеличить"
                               onClick={handleIncrement}
                               disabled={cartItem.quantity >= cityStock.stock}
-                            >+</button>
+                              data-qa="cart_qty_inc"
+                            >
+                              +
+                            </Button>
                           </div>
                         ) : (
-                          <button className={styles.cartButton} onClick={handleAdd}>
+                          <Button className={styles.cartButton} variant="accent" size="sm" onClick={handleAdd} data-qa="add_to_cart">
                             В корзину
-                          </button>
+                          </Button>
                         )
                       ) : (
-                        <span>—</span>
+                        <div className={styles.noStock}>
+                          <span className={styles.noStockText}>Нет в наличии в выбранном городе</span>
+                          <Button variant="tertiary" size="sm" onClick={() => { /* TODO: уведомления */ }} data-qa="notify_me">Сообщить о поступлении</Button>
+                        </div>
                       )}
                     </td>
                   </tr>
