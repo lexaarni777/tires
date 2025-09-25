@@ -1,6 +1,7 @@
 @import '../../styles/_variables';
 @import '../../styles/mixins';
 @import '../../styles/typography';
+@import '../../styles/button-core';
 
 .cardGroup {
   margin-top: $space-xl;
@@ -11,31 +12,6 @@
   box-shadow: $shadow-soft;
 }
 
-.cardLayout {
-  display: flex;
-  gap: $space-xl;
-  align-items: flex-start;
-
-  @include respond(md) {
-    flex-direction: column;
-  }
-}
-
-.imageWrapper {
-  flex: 0 0 200px;
-  max-width: 220px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--c-bg);
-  border-radius: $radius-12;
-  padding: $space-md;
-
-  @include respond(md) {
-    width: 100%;
-    max-width: none;
-  }
-}
 
 .image {
   width: 100%;
@@ -84,6 +60,22 @@
     background: token-alpha($surface, 0.4);
   }
 }
+.cardLayout {
+  display: flex;
+  gap: $space-xl;
+  align-items: flex-start;
+}
+
+.imageWrapper {
+  flex: 0 0 200px;
+  max-width: 220px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--c-bg);
+  border-radius: $radius-12;
+  padding: $space-md;
+}
 
 .axisLabel {
   font-weight: 600;
@@ -95,6 +87,13 @@
   @include tabular-nums;
   font-weight: 700;
   text-align: right;
+
+}
+.priceMob {
+  @include tabular-nums;
+  font-weight: 600;
+  text-align: right;
+  display: none;
 }
 
 .cartInline {
@@ -102,11 +101,25 @@
   align-items: center;
   gap: $space-8;
 }
+.cartInlineHead{
+  display: flex;
+}
 
 .qty {
-  min-width: 1.5rem;
   text-align: center;
+  display: flex; 
+  min-width: 2rem; 
+  justify-content: center; 
+  align-items: center; 
+  font-weight: 600; 
+  border: 2px solid; 
+  border-radius: $radius-12; 
+  width: 40px; 
+  height: 40px; 
+  color: $primary;
+  margin: 0 8px;
 }
+
 
 .noStock {
   display: flex;
@@ -117,3 +130,47 @@
 .noStockText {
   color: $text-muted;
 }
+
+@media (max-width: 1200px) {
+  .cartInline {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+@media (max-width: 1030px) {
+  .cardLayout {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (max-width: 530px) {
+
+  .cardGroup {
+  margin-top: $space-xs;
+  padding: $space-xs;
+  border-radius: $radius-8;
+      .table {
+      border-collapse: collapse;
+      font-size: 10px;
+        th,td {
+          padding: 5px 6px;
+        }
+        
+      }     
+}
+}
+
+@media (max-width: 530px) {
+  .price{
+    display: none;
+  }
+  .priceMob{
+    display: block;
+  }
+  .tablePrice{
+    display: none;
+  }
+}
+

@@ -370,7 +370,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
             // Если товара ещё нет в корзине — показываем выбор количества и кнопку "Добавить"
             <>
             
-              
               <Button
                 variant="accent"
                 onClick={handleAddToCart}

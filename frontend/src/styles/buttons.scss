@@ -44,6 +44,11 @@
   @extend %btn-block;
 }
 
+.btn--xs {
+  @extend %btn-base;
+  @extend %btn-size-xs;
+}
+
 .btn--sm {
   @extend %btn-base;
   @extend %btn-size-sm;

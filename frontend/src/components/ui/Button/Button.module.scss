@@ -36,6 +36,10 @@
   @extend %btn-size-lg;
 }
 
+.sizeXs {
+  @extend %btn-size-xs;
+}
+
 .fullWidth {
   @extend %btn-block;
 }

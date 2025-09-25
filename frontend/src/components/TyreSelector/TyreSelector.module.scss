@@ -129,3 +129,21 @@
 .stockToggle {
   margin-bottom: 16px;
 }
+
+@media (max-width: 760px) {
+  .wrapper {
+  padding: $space-xs;
+  
+}
+
+}
+
+@media (max-width: 609px) {
+  .FormHead {
+  flex-direction: column;
+}
+  .FormHeadTh{
+  justify-content: flex-start;
+}
+
+}
