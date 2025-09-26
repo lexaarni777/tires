@@ -174,9 +174,12 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
                             </Button>
                           </div>
                         ) : (
-                          <Button className={styles.cartButton} variant="accent" size="sm" onClick={handleAdd} data-qa="add_to_cart">
-                            Добавить в корзину
-                          </Button>
+                          <div className={styles.priceMobAddToCart}>
+                            {<span className={styles.priceMob}>{`Цена за 1 шт: ${price}`}</span>}
+                            <Button className={styles.cartButton} variant="accent" size="sm" onClick={handleAdd} data-qa="add_to_cart">
+                              Добавить в корзину
+                            </Button>
+                          </div>
                         )
                       ) : (
                         <div className={styles.noStock}>

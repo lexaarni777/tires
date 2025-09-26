@@ -60,6 +60,14 @@
     background: token-alpha($surface, 0.4);
   }
 }
+
+.priceMobAddToCart{
+  margin: 0 auto;
+  .priceMob{
+    text-align: center;
+  }
+}
+
 .cardLayout {
   display: flex;
   gap: $space-xl;
@@ -148,29 +156,24 @@
 @media (max-width: 530px) {
 
   .cardGroup {
-  margin-top: $space-xs;
-  padding: $space-xs;
-  border-radius: $radius-8;
-      .table {
-      border-collapse: collapse;
-      font-size: 10px;
-        th,td {
-          padding: 5px 6px;
+    margin-top: $space-xs;
+    padding: $space-xs;
+    border-radius: $radius-8;
+        .table {
+          border-collapse: collapse;
+          font-size: 10px;
+          th,td {
+            padding: 5px 6px;
+          }
+        .price{
+          display: none;
         }
-        
-      }     
+          .priceMob{
+          display: block;
+        }
+          .tablePrice{
+          display: none;
+        }
+        }     
 }
 }
-
-@media (max-width: 530px) {
-  .price{
-    display: none;
-  }
-  .priceMob{
-    display: block;
-  }
-  .tablePrice{
-    display: none;
-  }
-}
-
