@@ -6,7 +6,7 @@ import Button from '../ui/Button';
 import { useNavigate } from 'react-router-dom';
 import { mergeLocalCartWithServer, clearGuestCart } from '../../slices/cartSlice';
 import { validatePhone, validateEmail } from '../../utils/validators';
-
+import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 
 
 const AuthForm = () => {
@@ -38,6 +38,12 @@ const AuthForm = () => {
 
 
     const [isResetting, setIsResetting] = useState(false);
+    const [resetMethod, setResetMethod] = useState('phone'); // 'phone' | 'email'
+    const [showPwdRegPhone, setShowPwdRegPhone] = useState(false);
+    const [showPwdRegEmail, setShowPwdRegEmail] = useState(false);
+    const [showPwdLogin, setShowPwdLogin] = useState(false);
+    const [showPwdNew, setShowPwdNew] = useState(false);
+    const [showPwdRepeat, setShowPwdRepeat] = useState(false);
     const [resetStep, setResetStep] = useState('request'); // request, verify, change
     const handleChange = (e) => {
     const { name, value } = e.target;
@@ -169,35 +175,66 @@ const handleVerifyEmail = async (e) => {
 
 
 
+    const errId = (name) => `${name}-error`;
+    const errorProps = (name) => ({
+      'aria-invalid': errors[name] ? true : undefined,
+      'aria-describedby': errors[name] ? errId(name) : undefined,
+    });
+
     return (
 <div className={styles.authForm}>
   <h2 className={styles.title}>{isRegistering ? 'Регистрация' : 'Авторизация'}</h2>
   
 
   
+{!isResetting && (
 <form className={styles.form}>
   {/* Чекбокс выбора email/телефон */}
   <div className={styles.toggleEmailRow}>
-    <label className={styles.toggleEmailLabel}>
-      <input
-        type="checkbox"
-        checked={authMode === 'email'}
-        onChange={() => {
-          setAuthMode(authMode === 'email' ? 'phone' : 'email');
-          setRegisterStep('start');
-          setForm({
-            ...form,
-            phone: '+7',
-            email: '',
-            code: '',
-            password: '',
-            emailCode: ''
-          });
-          setErrors({});
+    <div className={styles.segmented} role="tablist" aria-label="Способ входа">
+      <button
+        type="button"
+        className={`${styles.segmentedBtn} ${authMode === 'phone' ? styles.active : ''}`}
+        aria-pressed={authMode === 'phone'}
+        onClick={() => {
+          if (authMode !== 'phone') {
+            setAuthMode('phone');
+            setRegisterStep('start');
+            setForm({
+              ...form,
+              phone: '+7',
+              email: '',
+              code: '',
+              password: '',
+              emailCode: ''
+            });
+            setErrors({});
+          }
         }}
-      />
-      Использовать Email вместо телефона
-    </label>
+        data-qa="auth_mode_phone"
+      >Телефон</button>
+      <button
+        type="button"
+        className={`${styles.segmentedBtn} ${authMode === 'email' ? styles.active : ''}`}
+        aria-pressed={authMode === 'email'}
+        onClick={() => {
+          if (authMode !== 'email') {
+            setAuthMode('email');
+            setRegisterStep('start');
+            setForm({
+              ...form,
+              phone: '+7',
+              email: '',
+              code: '',
+              password: '',
+              emailCode: ''
+            });
+            setErrors({});
+          }
+        }}
+        data-qa="auth_mode_email"
+      >Email</button>
+    </div>
   </div>
 
   {/* Регистрация — телефон */}
@@ -210,11 +247,14 @@ const handleVerifyEmail = async (e) => {
           name="phone"
           value={form.phone}
           onChange={handleChange}
-          className={styles.input}
+          className={`${styles.input} ${errors.phone ? styles.inputError : ''}`}
           placeholder="+7..."
           autoFocus
+          inputMode="tel"
+          autoComplete="tel"
+          {...errorProps('phone')}
         />
-        {errors.phone && <div className={styles.error}>{errors.phone}</div>}
+        {errors.phone && <div id={errId('phone')} role="alert" className={styles.error}>{errors.phone}</div>}
       </div>
       <Button
         type="button"
@@ -241,30 +281,46 @@ const handleVerifyEmail = async (e) => {
           name="code"
           value={form.code}
           onChange={handleChange}
-          className={styles.input}
+          className={`${styles.input} ${errors.code ? styles.inputError : ''}`}
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          {...errorProps('code')}
         />
-        {errors.code && <div className={styles.error}>{errors.code}</div>}
+        {errors.code && <div id={errId('code')} role="alert" className={styles.error}>{errors.code}</div>}
       </div>
       <div className={styles.fieldGroup}>
         <label className={styles.label}>Пароль:</label>
-        <input
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          className={styles.input}
-        />
-        {errors.password && <div className={styles.error}>{errors.password}</div>}
+        <div className={styles.inputWrap}>
+          <input
+            type={showPwdRegPhone ? 'text' : 'password'}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+            autoComplete="new-password"
+            {...errorProps('password')}
+          />
+          <button
+            type="button"
+            className={styles.eyeBtn}
+            aria-label={showPwdRegPhone ? 'Скрыть пароль' : 'Показать пароль'}
+            aria-pressed={showPwdRegPhone}
+            onClick={() => setShowPwdRegPhone(v => !v)}
+            data-qa="auth_pwd_toggle_register_phone"
+          >{showPwdRegPhone ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}</button>
+        </div>
+        {errors.password && <div id={errId('password')} role="alert" className={styles.error}>{errors.password}</div>}
       </div>
       <Button
         type="button"
         variant="primary"
         onClick={handleRegister}
         disabled={status === 'loading'}
+        data-qa="auth_register_submit_phone"
       >
         Зарегистрироваться
       </Button>
-      <Button type="button" variant="tertiary" onClick={() => setRegisterStep('start')}>
+      <Button type="button" variant="tertiary" onClick={() => setRegisterStep('start')} data-qa="auth_back">
         Назад
       </Button>
     </>
@@ -280,11 +336,13 @@ const handleVerifyEmail = async (e) => {
           name="email"
           value={form.email}
           onChange={handleChange}
-          className={styles.input}
+          className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
           autoFocus
           placeholder="you@example.com"
+          autoComplete="email"
+          {...errorProps('email')}
         />
-        {errors.email && <div className={styles.error}>{errors.email}</div>}
+        {errors.email && <div id={errId('email')} role="alert" className={styles.error}>{errors.email}</div>}
       </div>
       <Button
         type="button"
@@ -296,6 +354,7 @@ const handleVerifyEmail = async (e) => {
           if (res.meta.requestStatus === 'fulfilled') setRegisterStep('code');
         }}
         disabled={status === 'loading'}
+        data-qa="auth_register_send_code_email"
       >
         Получить код на email
       </Button>
@@ -311,38 +370,55 @@ const handleVerifyEmail = async (e) => {
           name="emailCode"
           value={form.emailCode}
           onChange={handleChange}
-          className={styles.input}
+          className={`${styles.input} ${errors.emailCode ? styles.inputError : ''}`}
           placeholder="4-значный код"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          {...errorProps('emailCode')}
         />
-        {errors.emailCode && <div className={styles.error}>{errors.emailCode}</div>}
+        {errors.emailCode && <div id={errId('emailCode')} role="alert" className={styles.error}>{errors.emailCode}</div>}
       </div>
       <div className={styles.fieldGroup}>
         <label className={styles.label}>Пароль:</label>
-        <input
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          className={styles.input}
-          placeholder="Придумайте пароль"
-        />
-        {errors.password && <div className={styles.error}>{errors.password}</div>}
+        <div className={styles.inputWrap}>
+          <input
+            type={showPwdRegEmail ? 'text' : 'password'}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+            placeholder="Придумайте пароль"
+            autoComplete="new-password"
+            {...errorProps('password')}
+          />
+          <button
+            type="button"
+            className={styles.eyeBtn}
+            aria-label={showPwdRegEmail ? 'Скрыть пароль' : 'Показать пароль'}
+            aria-pressed={showPwdRegEmail}
+            onClick={() => setShowPwdRegEmail(v => !v)}
+            data-qa="auth_pwd_toggle_register_email"
+          >{showPwdRegEmail ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}</button>
+        </div>
+        {errors.password && <div id={errId('password')} role="alert" className={styles.error}>{errors.password}</div>}
       </div>
-      <button
+      <Button
         type="button"
-        className={styles.button}
+        variant="primary"
         onClick={handleVerifyEmail}
         disabled={status === 'loading'}
+        data-qa="auth_register_submit_email"
       >
         Завершить регистрацию
-      </button>
-      <button
+      </Button>
+      <Button
         type="button"
+        variant="tertiary"
         onClick={() => setRegisterStep('start')}
-        className={styles.toggleButton}
+        data-qa="auth_back"
       >
         Назад
-      </button>
+      </Button>
     </>
   )}
 
@@ -357,10 +433,13 @@ const handleVerifyEmail = async (e) => {
             name="phone"
             value={form.phone}
             onChange={handleChange}
-            className={styles.input}
+            className={`${styles.input} ${errors.phone ? styles.inputError : ''}`}
             autoFocus
+            inputMode="tel"
+            autoComplete="tel"
+            {...errorProps('phone')}
           />
-          {errors.phone && <div className={styles.error}>{errors.phone}</div>}
+          {errors.phone && <div id={errId('phone')} role="alert" className={styles.error}>{errors.phone}</div>}
         </div>
       )}
       {authMode === 'email' && (
@@ -371,28 +450,43 @@ const handleVerifyEmail = async (e) => {
             name="email"
             value={form.email}
             onChange={handleChange}
-            className={styles.input}
+            className={`${styles.input} ${errors.email ? styles.inputError : ''}`}
             autoFocus
+            autoComplete="email"
+            {...errorProps('email')}
           />
-          {errors.email && <div className={styles.error}>{errors.email}</div>}
+          {errors.email && <div id={errId('email')} role="alert" className={styles.error}>{errors.email}</div>}
         </div>
       )}
       <div className={styles.fieldGroup}>
         <label className={styles.label}>Пароль:</label>
-        <input
-          type="password"
-          name="password"
-          value={form.password}
-          onChange={handleChange}
-          className={styles.input}
-        />
-        {errors.password && <div className={styles.error}>{errors.password}</div>}
+        <div className={styles.inputWrap}>
+          <input
+            type={showPwdLogin ? 'text' : 'password'}
+            name="password"
+            value={form.password}
+            onChange={handleChange}
+            className={`${styles.input} ${errors.password ? styles.inputError : ''}`}
+            autoComplete="current-password"
+            {...errorProps('password')}
+          />
+          <button
+            type="button"
+            className={styles.eyeBtn}
+            aria-label={showPwdLogin ? 'Скрыть пароль' : 'Показать пароль'}
+            aria-pressed={showPwdLogin}
+            onClick={() => setShowPwdLogin(v => !v)}
+            data-qa="auth_pwd_toggle_login"
+          >{showPwdLogin ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}</button>
+        </div>
+        {errors.password && <div id={errId('password')} role="alert" className={styles.error}>{errors.password}</div>}
       </div>
       <Button
         type="button"
         variant="primary"
         onClick={handleLogin}
         disabled={status === 'loading'}
+        data-qa="auth_login_submit"
       >
         Войти
       </Button>
@@ -415,18 +509,23 @@ const handleVerifyEmail = async (e) => {
     }); // Очищаем значения формы (или нужные поля)
     setErrors({});
   }}
+  data-qa="auth_switch_mode"
+  className={styles.buttonBorder}
 >
   {isRegistering ? 'Уже есть аккаунт? Войти' : 'Нет аккаунта? Зарегистрироваться'}
 </Button>
 
 
 
+  
 </form>
+)}
 
   {!isResetting && (
-  <button
+    <div className={styles.formActionsRow}>
+  <Button
     type="button"
-    className={styles.forgotButton}
+    variant="tertiary"
     onClick={() => {
       setIsResetting(true);
       setResetStep('request');
@@ -440,59 +539,97 @@ const handleVerifyEmail = async (e) => {
       });
       setErrors({});
     }}
-
+    data-qa="auth_reset_open"
+    className={styles.buttonBorderPass}
   >
     Забыли пароль?
-  </button>
+  </Button>
+  </div>
 )}
 {isResetting && (
   <div className={styles.resetBlock}>
     {resetStep === 'request' && (
       <>
         <h3>Восстановление пароля</h3>
-        <input
-          type="tel"
-          name='resetPhone'
-          value={form.resetPhone}
-          onChange={handleChange}
-          placeholder="Телефон (+7...)"
-          className={styles.input}
-          disabled={!!form.resetEmail}
-        />
-        {errors.resetPhone && <div className={styles.error}>{errors.resetPhone}</div>}
-        <input
-          type="email"
-          name='resetEmail' 
-          value={form.resetEmail}
-          onChange={handleChange}
-          placeholder="Email"
-          className={styles.input}
-          disabled={!!form.resetPhone}
-        />
-        {errors.resetEmail && <div className={styles.error}>{errors.resetEmail}</div>}
+        <div className={styles.segmented} role="tablist" aria-label="Способ восстановления">
+          <button
+            type="button"
+            className={`${styles.segmentedBtn} ${resetMethod === 'phone' ? styles.active : ''}`}
+            aria-pressed={resetMethod === 'phone'}
+            onClick={() => { setResetMethod('phone'); setErrors({}); }}
+            data-qa="auth_reset_method_phone"
+          >Телефон</button>
+          <button
+            type="button"
+            className={`${styles.segmentedBtn} ${resetMethod === 'email' ? styles.active : ''}`}
+            aria-pressed={resetMethod === 'email'}
+            onClick={() => { setResetMethod('email'); setErrors({}); }}
+            data-qa="auth_reset_method_email"
+          >Email</button>
+        </div>
+
+        {resetMethod === 'phone' ? (
+          <>
+            <input
+              type="tel"
+              name='resetPhone'
+              value={form.resetPhone}
+              onChange={handleChange}
+              placeholder="Телефон (+7...)"
+              className={`${styles.input} ${errors.resetPhone ? styles.inputError : ''}`}
+              inputMode="tel"
+              autoComplete="tel"
+              {...errorProps('resetPhone')}
+              autoFocus
+            />
+            {errors.resetPhone && <div id={errId('resetPhone')} role="alert" className={styles.error}>{errors.resetPhone}</div>}
+          </>
+        ) : (
+          <>
+            <input
+              type="email"
+              name='resetEmail' 
+              value={form.resetEmail}
+              onChange={handleChange}
+              placeholder="Email"
+              className={`${styles.input} ${errors.resetEmail ? styles.inputError : ''}`}
+              autoComplete="email"
+              {...errorProps('resetEmail')}
+              autoFocus
+            />
+            {errors.resetEmail && <div id={errId('resetEmail')} role="alert" className={styles.error}>{errors.resetEmail}</div>}
+          </>
+        )}
 
         <Button
+          className={styles.buttonMarginTop}
           onClick={async () => {
-            const errors = {};
-            if (!form.resetPhone && !form.resetEmail) errors.resetPhone = 'Введите телефон или email';
-            if (form.resetPhone && !validatePhone(form.resetPhone)) errors.resetPhone = 'Некорректный номер';
-            if (form.resetEmail && !validateEmail(form.resetEmail)) errors.resetEmail = 'Некорректный email';
-            if (Object.keys(errors).length > 0) {
-              setErrors(errors);
+            const errs = {};
+            if (resetMethod === 'phone') {
+              if (!form.resetPhone) errs.resetPhone = 'Введите телефон';
+              else if (!validatePhone(form.resetPhone)) errs.resetPhone = 'Некорректный номер';
+            } else {
+              if (!form.resetEmail) errs.resetEmail = 'Введите email';
+              else if (!validateEmail(form.resetEmail)) errs.resetEmail = 'Некорректный email';
+            }
+            if (Object.keys(errs).length > 0) {
+              setErrors(errs);
               return;
             }
-            const res = await dispatch(sendResetCode({ phone: form.resetPhone, email: form.resetEmail }));
+            const payload = resetMethod === 'phone'
+              ? { phone: form.resetPhone, email: undefined }
+              : { phone: undefined, email: form.resetEmail };
+            const res = await dispatch(sendResetCode(payload));
             if (res.meta.requestStatus === 'fulfilled') setResetStep('verify');
-            else if (form.resetPhone)
-              setErrors({ resetPhone: res.payload || 'Ошибка отправки кода на телефон' });
-            else
-              setErrors({ resetEmail: res.payload || 'Ошибка отправки кода на Email' });
+            else if (resetMethod === 'phone') setErrors({ resetPhone: res.payload || 'Ошибка отправки кода на телефон' });
+            else setErrors({ resetEmail: res.payload || 'Ошибка отправки кода на Email' });
           }}
           variant="primary"
+          data-qa="auth_reset_request"
         >
           Получить код
         </Button>
-        <Button variant="tertiary" onClick={() => setIsResetting(false)}>Назад</Button>
+        <Button  className={styles.buttonBorder} variant="tertiary" onClick={() => setIsResetting(false)} data-qa="auth_back">Назад</Button>
         {errors.resetPhone && <div className={styles.error}>{errors.resetPhone}</div>}
         {errors.resetEmail && <div className={styles.error}>{errors.resetEmail}</div>}
       </>
@@ -506,38 +643,65 @@ const handleVerifyEmail = async (e) => {
           name='resetCode'
           value={form.resetCode}
           onChange={handleChange}
-          className={styles.input}
+          className={`${styles.input} ${errors.resetCode ? styles.inputError : ''}`}
           placeholder="Код из SMS/email"
+          inputMode="numeric"
+          autoComplete="one-time-code"
+          {...errorProps('resetCode')}
         />
-        {errors.resetCode && <div className={styles.error}>{errors.resetCode}</div>}
-        <Button variant="primary" onClick={() => setResetStep('change')}>
+        {errors.resetCode && <div id={errId('resetCode')} role="alert" className={styles.error}>{errors.resetCode}</div>}
+        <Button variant="primary" onClick={() => setResetStep('change')} data-qa="auth_reset_verify">
           Проверить код
         </Button>
-        <Button variant="tertiary" onClick={() => setResetStep('request')}>Назад</Button>
+        <Button variant="tertiary" onClick={() => setResetStep('request')} data-qa="auth_back">Назад</Button>
       </>
     )}
 
     {resetStep === 'change' && (
       <>
         <h3>Смена пароля</h3>
-        <input
-          type="password"
-          name='newPassword'
-          value={form.newPassword}
-          onChange={handleChange}
-          className={styles.input}
-          placeholder="Новый пароль"
-        />
-        {errors.newPassword && <div className={styles.error}>{errors.newPassword}</div>}
-        <input
-          type="password"
-          name='repeatPassword'
-          value={form.repeatPassword}
-          onChange={handleChange}
-          className={styles.input}
-          placeholder="Повторите пароль"
-        />
-        {errors.repeatPassword && <div className={styles.error}>{errors.repeatPassword}</div>}
+        <div className={styles.inputWrap}>
+          <input
+            type={showPwdNew ? 'text' : 'password'}
+            name='newPassword'
+            value={form.newPassword}
+            onChange={handleChange}
+            className={`${styles.input} ${errors.newPassword ? styles.inputError : ''}`}
+            placeholder="Новый пароль"
+            autoComplete="new-password"
+            {...errorProps('newPassword')}
+          />
+          <button
+            type="button"
+            className={styles.eyeBtn}
+            aria-label={showPwdNew ? 'Скрыть пароль' : 'Показать пароль'}
+            aria-pressed={showPwdNew}
+            onClick={() => setShowPwdNew(v => !v)}
+            data-qa="auth_pwd_toggle_new"
+          >{showPwdNew ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}</button>
+        </div>
+        {errors.newPassword && <div id={errId('newPassword')} role="alert" className={styles.error}>{errors.newPassword}</div>}
+        <div className={styles.inputWrap}>
+          <input
+            type={showPwdRepeat ? 'text' : 'password'}
+            name='repeatPassword'
+            value={form.repeatPassword}
+            onChange={handleChange}
+            className={`${styles.input} ${errors.repeatPassword ? styles.inputError : ''}`}
+            placeholder="Повторите пароль"
+            autoComplete="new-password"
+            {...errorProps('repeatPassword')}
+          />
+          <button
+            type="button"
+            className={styles.eyeBtn}
+            aria-label={showPwdRepeat ? 'Скрыть пароль' : 'Показать пароль'}
+            aria-pressed={showPwdRepeat}
+            onClick={() => setShowPwdRepeat(v => !v)}
+            data-qa="auth_pwd_toggle_repeat"
+          >{showPwdRepeat ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}</button>
+        </div>
+        {errors.repeatPassword && <div id={errId('repeatPassword')} role="alert" className={styles.error}>{errors.repeatPassword}</div>}
         <Button
           onClick={async () => {
             const errors = {};
@@ -576,10 +740,11 @@ const handleVerifyEmail = async (e) => {
             }
           }}
           variant="primary"
+          data-qa="auth_reset_change"
         >
           Сменить пароль и войти
         </Button>
-        <Button variant="tertiary" onClick={() => setResetStep('verify')}>Назад</Button>
+        <Button variant="tertiary" onClick={() => setResetStep('verify')} data-qa="auth_back">Назад</Button>
       </>
     )}
   </div>

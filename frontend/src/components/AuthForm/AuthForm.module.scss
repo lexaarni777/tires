@@ -2,12 +2,13 @@
 @import '../../styles/mixins.scss';     // Медиа-запросы
 
 .authForm {
-  max-width: 400px;                      // Ограничиваем ширину формы
-  margin: 0 auto;                        // Центрируем по горизонтали
+  width: 430px;                      // Ограничиваем ширину формы
+  margin: 16px auto;                        // Центрируем по горизонтали
   padding: 20px;                         // Внутренний отступ
   border: 1px solid $border-color;       // Граница с переменной
-  border-radius: 8px;                    // Скругляем углы
-  background-color: #fff;                // Белый фон
+  border-radius: $radius-12;             // Скругляем углы по токенам
+  background-color: $surface;            // Фон по токенам
+  box-shadow: $shadow-soft;              // Мягкая тень
 }
 
 .title {
@@ -35,16 +36,20 @@
 
 .input {
   width: 100%;                          // На всю ширину родителя
-  padding: 8px;                         // Внутренний отступ
+  min-height: 2.75rem;                  // Единая высота
+  padding: 0 $space-16;                 // Горизонтальный отступ
   border: 1px solid $border-color;      // Граница с переменной
-  border-radius: 4px;                   // Скруглённые углы
+  border-radius: $radius-12;            // Скруглённые углы
   font-size: 1em;                       // Размер шрифта
-  background-color: #fff;               // Белый фон
+  background-color: $surface;           // Фон по токенам
 
-  &:focus {
+  &:focus-visible {
     outline: none;                      // Убираем обводку
-    border-color: $primary;             // Синий бордер
-    box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.2); // Светлая подсветка
+    box-shadow: var(--shadow-focus);    // Фокус-кольцо
+  }
+
+  &::placeholder {
+    color: $text-muted;
   }
 }
 
@@ -58,7 +63,7 @@
   background-color: $primary;           // Синий фон
   color: #fff;                          // Белый текст
   border: none;                         // Без рамки
-  border-radius: 4px;                   // Скруглённые углы
+  border-radius: $radius-12;            // Скруглённые углы
   cursor: pointer;                      // Курсор — рука
   transition: background-color 0.3s;    // Плавное наведение
   font-size: 1em;                       // Размер текста
@@ -73,13 +78,30 @@
   }
 }
 
+.buttonBorder{
+  border: 1px solid $primary;
+  margin-top: 16px;
+}
+
+.buttonBorderPass{
+  border: 1px solid $primary;
+  margin-left: auto;
+  min-height: 2rem;
+}
+
+.buttonMarginTop{
+  margin-top: 16px;
+  margin-right: 16px;
+}
+
+
 .toggleButton {
   width: 100%;                          // На всю ширину
   padding: 10px;                        // Отступ
   background-color: $accent;            // Оранжевый фон
   color: #fff;                          // Белый текст
   border: none;                         // Без рамки
-  border-radius: 4px;                   // Скругление
+  border-radius: $radius-12;            // Скругление
   cursor: pointer;                      // Курсор
   transition: background-color 0.3s;    // Плавное наведение
   font-size: 1em;                       // Размер текста
@@ -100,7 +122,63 @@
   color: $danger;                      // Красный цвет ошибки
   text-align: center;                  // Центровка
   margin-bottom: 15px;                 // Отступ снизу
-  font-weight: bold;                   // Жирный текст
+  font-weight: 500;                    // Менее агрессивно
+}
+
+.inputError {
+  border-color: $danger;
+}
+
+.helpText {
+  font-size: 0.875rem;
+  color: $text-muted;
+  margin-top: 6px;
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  border-radius: $radius-12;
+  cursor: pointer;
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
+}
+
+.segmented {
+  display: inline-flex;
+  border: 1px solid $border-color;
+  border-radius: $radius-12;
+  overflow: hidden;
+  margin-bottom: $space-12;
+}
+
+.segmentedBtn {
+  padding: 8px 12px;
+  background: $surface;
+  color: $text-primary;
+  border: none;
+  cursor: pointer;
+}
+
+.active {
+  background: $accent;
+  color: $text-inverse;
 }
 
 // === Мобильная адаптация ===
@@ -120,10 +198,10 @@
 }
 
 .toggleEmailRow {
-  margin-bottom: 18px;
+  margin-bottom: 8px;
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: center;
 }
 
 .toggleEmailLabel {
@@ -133,4 +211,25 @@
   align-items: center;
   gap: 8px;
   user-select: none;
+}
+
+.resetBlock {
+  margin-top: $space-16;
+  padding: $space-16;
+  border: 1px solid $border-color;
+  border-radius: $radius-12;
+  background-color: $surface;
+  box-shadow: $shadow-soft;
+
+  h3 {
+    margin-top: 0;
+    margin-bottom: $space-12;
+  }
+}
+
+.formActionsRow {
+  margin-top: $space-16;
+  display: flex;
+  gap: $space-12;
+  flex-wrap: wrap;
 }
