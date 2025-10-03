@@ -53,6 +53,10 @@
   }
 }
 
+.inputMargin{
+  margin-bottom: 16px;
+}
+
 .select {
   @extend .input;                       // Наследуем стили от input
 }

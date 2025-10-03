@@ -399,7 +399,7 @@ const handleVerifyEmail = async (e) => {
           type="text"
           value={resetCode}
           onChange={e => setResetCode(e.target.value)}
-          className={styles.input}
+          className={`${styles.input} ${styles.inputMargin}`}
           placeholder="Код из SMS/email"
         />
         <button
@@ -419,14 +419,14 @@ const handleVerifyEmail = async (e) => {
           type="password"
           value={newPass1}
           onChange={e => setNewPass1(e.target.value)}
-          className={styles.input}
+          className={`${styles.input} ${styles.inputMargin}`}
           placeholder="Новый пароль"
         />
         <input
           type="password"
           value={newPass2}
           onChange={e => setNewPass2(e.target.value)}
-          className={styles.input}
+          className={`${styles.input} ${styles.inputMargin}`}
           placeholder="Повторите пароль"
         />
         <button
