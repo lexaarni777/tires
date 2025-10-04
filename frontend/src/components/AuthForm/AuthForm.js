@@ -643,7 +643,7 @@ const handleVerifyEmail = async (e) => {
           name='resetCode'
           value={form.resetCode}
           onChange={handleChange}
-          className={`${styles.input} ${errors.resetCode ? styles.inputError : ''}`}
+          className={`${styles.input} ${errors.resetCode ? styles.inputError : ''} ${styles.inputMargBot}`}
           placeholder="Код из SMS/email"
           inputMode="numeric"
           autoComplete="one-time-code"
