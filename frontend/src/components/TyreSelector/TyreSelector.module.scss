@@ -47,10 +47,25 @@
   }
 }
 .titleHead{
+  display: flex;
+  justify-content: center;
+}
+.titleHeadLeft{
   max-width: 660px;
   background: $surface; 
   border-radius: $radius-12;
   padding: 16px;
+}
+
+.titleHeadImg{
+  background-color: var(--c-surface);
+  border-radius: $radius-12;
+  padding: var(--sp-32);
+  margin: 0 var(--sp-32);
+  max-width: 660px;
+  img{
+    width: 100%;
+  }
 }
 .form {
   display: flex;
@@ -128,6 +143,17 @@
 
 .stockToggle {
   margin-bottom: 16px;
+}
+
+@media (max-width: 1200px) {
+.titleHead{
+  flex-direction: column-reverse;
+  .titleHeadImg{
+
+  margin: var(--sp-16) 0;
+  }
+
+}
 }
 
 @media (max-width: 760px) {

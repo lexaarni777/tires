@@ -189,6 +189,7 @@ const TyreSelector = () => {
     <div className={styles.wrapper}>
       <h2 className={styles.title}>Подбор шин</h2>
       <div className={styles.titleHead}>
+      <div className={styles.titleHeadLeft}>
         <div className={styles.tabs}>
           <button className={`${styles.tab} ${styles.active}`}>По параметрам</button>
           <button className={`${styles.tab} ${styles.disabled}`}>По автомобилю</button>
@@ -310,6 +311,10 @@ const TyreSelector = () => {
         </div>
 
 
+      </div>
+      <div className={styles.titleHeadImg}>
+         <img src='info.png' alt='Инфографика'/>
+      </div>
       </div>
       <div className={styles.results}>
         {Object.entries(groupedByBrandModel).map(([key, tyres]) => {

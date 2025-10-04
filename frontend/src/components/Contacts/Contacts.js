@@ -76,20 +76,6 @@ const Contacts = () => {
       <h2>Контакты</h2>
 
       <div className={styles.sectionStack}>
-        <div className={`${styles.contactsBlock} ${styles.socialBlock}`}>
-          <h3>Мы в социальных сетях</h3>
-          <p>Следите за новостями, акциями и обзорами.</p>
-          <ul className={styles.socialList}>
-            {socialLinks.map((link) => (
-              <li key={link.label}>
-                <a href={link.href} target="_blank" rel="noopener noreferrer">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-
         <div className={`${styles.contactsBlock} ${styles.locationsBlock}`}>
           <h3>Как нас найти</h3>
           <div className={styles.mapItems}>
@@ -160,6 +146,20 @@ const Contacts = () => {
           <p className={styles.note}>
             Перед визитом уточните наличие шин у менеджера.
           </p>
+        </div>
+
+         <div className={`${styles.contactsBlock} ${styles.socialBlock}`}>
+          <h3>Мы в социальных сетях</h3>
+          <p>Следите за новостями, акциями и обзорами.</p>
+          <ul className={styles.socialList}>
+            {socialLinks.map((link) => (
+              <li key={link.label}>
+                <a href={link.href} target="_blank" rel="noopener noreferrer">
+                  {link.label}
+                </a>
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
     </section>
