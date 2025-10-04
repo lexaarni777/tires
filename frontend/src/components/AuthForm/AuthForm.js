@@ -307,7 +307,14 @@ const handleVerifyEmail = async (e) => {
             aria-pressed={showPwdRegPhone}
             onClick={() => setShowPwdRegPhone(v => !v)}
             data-qa="auth_pwd_toggle_register_phone"
-          >{showPwdRegPhone ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}</button>
+          >          <button
+            type="button"
+            className={styles.eyeBtn}
+            aria-label={showPwdRegPhone ? 'Скрыть пароль' : 'Показать пароль'}
+            aria-pressed={showPwdRegPhone}
+            onClick={() => setShowPwdRegPhone(v => !v)}
+            data-qa="auth_pwd_toggle_register_phone"
+          >{showPwdRegPhone ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}</button></button>
         </div>
         {errors.password && <div id={errId('password')} role="alert" className={styles.error}>{errors.password}</div>}
       </div>
