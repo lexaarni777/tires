@@ -643,7 +643,7 @@ const handleVerifyEmail = async (e) => {
           name='resetCode'
           value={form.resetCode}
           onChange={handleChange}
-          className={`${styles.input} ${errors.resetCode ? styles.inputError : ''} ${styles.inputMargBot}`}
+          className={`${styles.input} ${errors.resetCode ? styles.inputError : ''}`}
           placeholder="Код из SMS/email"
           inputMode="numeric"
           autoComplete="one-time-code"
@@ -666,7 +666,7 @@ const handleVerifyEmail = async (e) => {
             name='newPassword'
             value={form.newPassword}
             onChange={handleChange}
-            className={`${styles.input} ${errors.newPassword ? styles.inputError : ''} ${styles.inputMargBot}`}
+            className={`${styles.input} ${errors.newPassword ? styles.inputError : ''}`}
             placeholder="Новый пароль"
             autoComplete="new-password"
             {...errorProps('newPassword')}
@@ -687,7 +687,7 @@ const handleVerifyEmail = async (e) => {
             name='repeatPassword'
             value={form.repeatPassword}
             onChange={handleChange}
-            className={`${styles.input} ${errors.repeatPassword ? styles.inputError : ''} ${styles.inputMargBot}`}
+            className={`${styles.input} ${errors.repeatPassword ? styles.inputError : ''}`}
             placeholder="Повторите пароль"
             autoComplete="new-password"
             {...errorProps('repeatPassword')}
