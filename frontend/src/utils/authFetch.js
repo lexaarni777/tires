@@ -14,6 +14,7 @@ export const fetchWithRefresh = async (url, options = {}, { dispatch, getState }
   // Если access token истёк — пробуем refresh
   if (response.status === 401) {
     // Запрашиваем новый токен
+    console.log('process.env.REACT_APP_API_URL',process.env.REACT_APP_API_URL)
     const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
