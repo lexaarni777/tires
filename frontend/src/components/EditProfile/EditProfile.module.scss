@@ -1,92 +1,158 @@
+@import '../../styles/_variables.scss';
+@import '../../styles/_mixins.scss';
+@import '../../styles/_typography.scss';
+
 .editProfile {
-  padding: 16px;
+  padding: var(--sp-16);
+  max-width: 1440px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--sp-16);
+  align-items: start;
+}
+
+@include respond(lg) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.colLeft,
+.colRight {
+  display: flex;
+  flex-direction: column;
 }
 
 .sectionTitle {
-  font-size: 24px;
-  font-weight: 500;
-  color: #333333;
-  margin-bottom: 16px;
+  @include type-heading(1.5rem, 600, 1.35);
+  margin-bottom: var(--sp-16);
 }
 
 .sectionSubtitle {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333333;
-  margin-bottom: 12px;
+  @include type-heading(1.25rem, 600, 1.35);
+  margin-bottom: var(--sp-12);
 }
 
 .successMsg {
-  background: #F9F9F9;
-  color: #333333;
-  padding: 12px;
-  border-radius: 4px;
-  margin-bottom: 16px;
+  background: token-alpha($success, 0.12);
+  color: $success;
+  padding: var(--sp-12);
+  border-radius: $radius-12;
+  margin-bottom: var(--sp-16);
 }
 
 .errorMsg {
-  background: #F9F9F9;
-  color: #D32F2F;
-  padding: 12px;
-  border-radius: 4px;
-  margin-bottom: 16px;
+  background: token-alpha($danger, 0.12);
+  color: $danger;
+  padding: var(--sp-12);
+  border-radius: $radius-12;
+  margin-bottom: var(--sp-16);
 }
 
-.profileForm, .emailBlock, .phoneBlock, .passwordBlock, .addressForm {
-  background: #F9F9F9;
-  padding: 16px;
-  border-radius: 4px;
-  margin-bottom: 24px;
+.profileForm, .emailBlock, .phoneBlock, .passwordBlock, .addressForm, .addressesBlock {
+  background: var(--c-surface);
+  padding: var(--sp-16);
+  border-radius: $radius-12;
+  border: 1px solid var(--c-line);
+  box-shadow: $shadow-soft;
+  margin-bottom: var(--sp-16);
 }
 
 .formLabel {
   display: block;
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: 0.9375rem;
+  margin-bottom: var(--sp-8);
+    span{
+      margin-bottom: var(--sp-16);
+      margin-right: var(--sp-16);
+      display: inline-block;
+    }
+  
+}
+
+.fieldHint {
+  font-size: 0.875rem;
+  color: $text-muted;
+  margin: -6px 0 var(--sp-8) 0;
 }
 
 .inputField {
   width: 100%;
-  max-width: 250px;
-  height: 50px;
-  padding: 0 12px;
-  font-size: 16px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 12px;
+  max-width: 360px;
+  min-height: 2.75rem;
+  padding: 0 var(--sp-16);
+  font-size: 1rem;
+  border: 1px solid var(--c-line);
+  border-radius: $radius-12;
+  background: var(--c-surface);
+  margin-bottom: var(--sp-12);
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
 }
 
-.button {
-  background: #F57C00;
-  color: #fff;
-  font-size: 16px;
-  font-weight: 500;
-  border: none;
-  border-radius: 4px;
-  width: 160px;
-  height: 44px;
-  cursor: pointer;
-}
+/* Кнопки теперь из общего UI/Button */
 
 .inlineGroup {
   display: flex;
-  gap: 12px;
+  gap: var(--sp-12);
   flex-wrap: wrap;
 }
 
-.addressesBlock {
-  padding: 16px;
-  background: #F9F9F9;
-  border-radius: 4px;
-}
+/* .addressesBlock входит в общий набор карточек выше */
 
 .addressList {
   list-style: none;
   padding: 0;
-  margin: 0 0 16px 0;
+  margin: 0 0 var(--sp-16) 0;
 }
 
 .addressItem {
-  font-size: 14px;
-  margin-bottom: 8px;
+  font-size: 0.9375rem;
+  margin-bottom: var(--sp-8);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.addressText {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.addressActions {
+  display: inline-flex;
+  gap: var(--sp-8);
+}
+
+.inputWrap {
+  position: relative;
+}
+
+.eyeBtn {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: $text-muted;
+  border-radius: $radius-12;
+  cursor: pointer;
+  &:focus-visible {
+    outline: none;
+    box-shadow: var(--shadow-focus);
+  }
 }
