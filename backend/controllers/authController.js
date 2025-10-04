@@ -203,6 +203,7 @@ res.json({
     id: userWithRoles.id,
     email: userWithRoles.email,
     phone: userWithRoles.phone,
+    name: userWithRoles.name,
     roles: userWithRoles.roles
   }
 });

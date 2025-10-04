@@ -16,6 +16,12 @@
   align-items: start;
 }
 
+
+.buttonBorder{
+  border: 1px solid $primary;
+  margin-top: 16px;
+}
+
 @include respond(lg) {
   .grid {
     grid-template-columns: 1fr;

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import classes from './EditProfile.module.scss';
+import styles from './EditProfile.module.scss';
 import Button from '../ui/Button';
 import Skeleton from '../ui/Skeleton';
 import EmptyState from '../ui/EmptyState';
@@ -200,29 +200,29 @@ useEffect(() => {
   const nameTitle = hasName ? 'Ваше имя' : 'Давайте познакомимся';
 
   return (
-    <div className={classes.editProfile}>
-      <h2 className={classes.sectionTitle}>Редактирование профиля</h2>
+    <div className={styles.editProfile}>
+      <h2 className={styles.sectionTitle}>Редактирование профиля</h2>
       {successMsg && (
-        <div className={classes.successMsg} role="status" aria-live="polite">{successMsg}</div>
+        <div className={styles.successMsg} role="status" aria-live="polite">{successMsg}</div>
       )}
       {error && (
-        <div className={classes.errorMsg} role="alert" aria-live="assertive">{error}</div>
+        <div className={styles.errorMsg} role="alert" aria-live="assertive">{error}</div>
       )}
 
-      <div className={classes.grid}>
-        <div className={classes.colLeft}>
-          <form onSubmit={handleSaveProfile} className={classes.profileForm}>
-            <h3 className={classes.sectionSubtitle}>{nameTitle}</h3>
+      <div className={styles.grid}>
+        <div className={styles.colLeft}>
+          <form onSubmit={handleSaveProfile} className={styles.profileForm}>
+            <h3 className={styles.sectionSubtitle}>{nameTitle}</h3>
             {!hasName && (
-              <div className={classes.fieldHint}>Имя нужно для обращения в заказах.</div>
+              <div className={styles.fieldHint}>Имя нужно для обращения в заказах.</div>
             )}
-            <label className={classes.formLabel}>
+            <label className={styles.formLabel}>
               <input
                 type="text"
                 name="name"
                 value={form.name}
                 onChange={handleFormChange}
-                className={classes.inputField}
+                className={styles.inputField}
                 placeholder="Ваше имя"
                 autoComplete="name"
                 ref={nameInputRef}
@@ -239,6 +239,7 @@ useEffect(() => {
                   variant="tertiary"
                   onClick={() => nameInputRef.current?.focus()}
                   data-qa="profile_edit_name"
+                  className={styles.buttonBorder}
                 >
                   Изменить
                 </Button>
@@ -246,21 +247,21 @@ useEffect(() => {
             )}
           </form>
 
-          <form onSubmit={handleChangePassword} className={classes.passwordBlock}>
-            <h3 className={classes.sectionSubtitle}>Смена пароля</h3>
-            <div className={classes.inputWrap}>
+          <form onSubmit={handleChangePassword} className={styles.passwordBlock}>
+            <h3 className={styles.sectionSubtitle}>Смена пароля</h3>
+            <div className={styles.inputWrap}>
               <input
                 type={showOldPwd ? 'text' : 'password'}
                 name="old"
                 value={passwords.old}
                 onChange={handlePasswordChange}
                 placeholder="Старый пароль"
-                className={classes.inputField}
+                className={styles.inputField}
                 autoComplete="current-password"
               />
               <button
                 type="button"
-                className={classes.eyeBtn}
+                className={styles.eyeBtn}
                 aria-label={showOldPwd ? 'Скрыть пароль' : 'Показать пароль'}
                 aria-pressed={showOldPwd}
                 onClick={() => setShowOldPwd(v => !v)}
@@ -268,19 +269,19 @@ useEffect(() => {
                 {showOldPwd ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}
               </button>
             </div>
-            <div className={classes.inputWrap}>
+            <div className={styles.inputWrap}>
               <input
                 type={showNewPwd ? 'text' : 'password'}
                 name="new"
                 value={passwords.new}
                 onChange={handlePasswordChange}
                 placeholder="Новый пароль"
-                className={classes.inputField}
+                className={styles.inputField}
                 autoComplete="new-password"
               />
               <button
                 type="button"
-                className={classes.eyeBtn}
+                className={styles.eyeBtn}
                 aria-label={showNewPwd ? 'Скрыть пароль' : 'Показать пароль'}
                 aria-pressed={showNewPwd}
                 onClick={() => setShowNewPwd(v => !v)}
@@ -288,19 +289,19 @@ useEffect(() => {
                 {showNewPwd ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}
               </button>
             </div>
-            <div className={classes.inputWrap}>
+            <div className={styles.inputWrap}>
               <input
                 type={showRepeatPwd ? 'text' : 'password'}
                 name="repeat"
                 value={passwords.repeat}
                 onChange={handlePasswordChange}
                 placeholder="Повторить новый пароль"
-                className={classes.inputField}
+                className={styles.inputField}
                 autoComplete="new-password"
               />
               <button
                 type="button"
-                className={classes.eyeBtn}
+                className={styles.eyeBtn}
                 aria-label={showRepeatPwd ? 'Скрыть пароль' : 'Показать пароль'}
                 aria-pressed={showRepeatPwd}
                 onClick={() => setShowRepeatPwd(v => !v)}
@@ -312,21 +313,27 @@ useEffect(() => {
           </form>
         </div>
 
-        <div className={classes.colRight}>
-          <div className={classes.emailBlock}>
-            <label className={classes.formLabel}>
-              <span>Email:</span>
-              <input type="email" name="email" value={form.email} disabled className={classes.inputField} />
-            </label>
-            <div className={classes.fieldHint}>Для смены email подтвердите новый адрес кодом.</div>
+        <div className={styles.colRight}>
+          <div className={styles.emailBlock}>
+            <h3 className={styles.sectionSubtitle}>{form.email ? 'Ваш email' : 'Добавьте email'}</h3>
+            {form.email ? (
+              <>
+                <label className={styles.formLabel}>
+                  <input type="email" name="email" value={form.email} disabled className={styles.inputField} />
+                </label>
+                <div className={styles.fieldHint}>Измените при необходимости — подтвердим кодом.</div>
+              </>
+            ) : (
+              <div className={styles.fieldHint}>Для чеков и уведомлений об отправке.</div>
+            )}
             {emailStep === 1 ? (
-              <div className={classes.inlineGroup}>
+              <div className={styles.inlineGroup}>
                 <input
                   type="email"
                   placeholder="Новый email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className={classes.inputField}
+                  className={styles.inputField}
                   autoComplete="email"
                 />
                 <Button variant="primary" onClick={handleRequestEmailCode} data-qa="request_email_change">
@@ -334,14 +341,14 @@ useEffect(() => {
                 </Button>
               </div>
             ) : (
-              <div className={classes.inlineGroup}>
-                <div className={classes.fieldHint}>Шаг 2/2: Мы отправили код на {newEmail || form.email}</div>
+              <div className={styles.inlineGroup}>
+                <div className={styles.fieldHint}>Шаг 2/2: Мы отправили код на {newEmail || form.email}</div>
                 <input
                   type="text"
                   placeholder="Код с email"
                   value={emailCode}
                   onChange={(e) => setEmailCode(e.target.value)}
-                  className={classes.inputField}
+                  className={styles.inputField}
                   inputMode="numeric"
                   autoComplete="one-time-code"
                 />
@@ -367,20 +374,26 @@ useEffect(() => {
             )}
           </div>
 
-          <div className={classes.phoneBlock}>
-            <label className={classes.formLabel}>
-               <span>Телефон:</span>
-              <input type="tel" name="phone" value={form.phone} disabled className={classes.inputField} />
-            </label>
-            <div className={classes.fieldHint}>Телефон в формате: +7..., без пробелов.</div>
+          <div className={styles.phoneBlock}>
+            <h3 className={styles.sectionSubtitle}>{form.phone ? 'Ваш телефон' : 'Добавьте телефон'}</h3>
+            {form.phone ? (
+              <>
+                <label className={styles.formLabel}>
+                  <input type="tel" name="phone" value={form.phone} disabled className={styles.inputField} />
+                </label>
+                <div className={styles.fieldHint}>Измените при необходимости — подтвердим кодом.</div>
+              </>
+            ) : (
+              <div className={styles.fieldHint}>Будем присылать статусы и коды подтверждения.</div>
+            )}
             {phoneStep === 1 ? (
-              <div className={classes.inlineGroup}>
+              <div className={styles.inlineGroup}>
                 <input
                   type="tel"
                   placeholder="Новый телефон"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
-                  className={classes.inputField}
+                  className={styles.inputField}
                   inputMode="tel"
                   autoComplete="tel"
                 />
@@ -389,14 +402,14 @@ useEffect(() => {
                 </Button>
               </div>
             ) : (
-              <div className={classes.inlineGroup}>
-                <div className={classes.fieldHint}>Шаг 2/2: Мы отправили код на {maskPhone(newPhone || form.phone)}</div>
+              <div className={styles.inlineGroup}>
+                <div className={styles.fieldHint}>Шаг 2/2: Мы отправили код на {maskPhone(newPhone || form.phone)}</div>
                 <input
                   type="text"
                   placeholder="Код из SMS"
                   value={phoneCode}
                   onChange={(e) => setPhoneCode(e.target.value)}
-                  className={classes.inputField}
+                  className={styles.inputField}
                   inputMode="numeric"
                   autoComplete="one-time-code"
                 />
@@ -422,12 +435,12 @@ useEffect(() => {
             )}
           </div>
 
-          <div className={classes.addressesBlock}>
-            <h3 className={classes.sectionSubtitle}>Ваши адреса доставки</h3>
+          <div className={styles.addressesBlock}>
+            <h3 className={styles.sectionSubtitle}>Ваши адреса доставки</h3>
             {status === 'loading' && (
-              <ul className={classes.addressList}>
+              <ul className={styles.addressList}>
                 {Array.from({ length: 3 }).map((_, i) => (
-                  <li key={i} className={classes.addressItem}>
+                  <li key={i} className={styles.addressItem}>
                     <Skeleton style={{ width: '70%', height: 16, borderRadius: 8 }} />
                   </li>
                 ))}
@@ -437,11 +450,11 @@ useEffect(() => {
               <EmptyState title="Адресов пока нет" description="Добавьте адрес доставки, чтобы ускорить оформление заказа." />
             )}
             {status !== 'loading' && addresses.length > 0 && (
-              <ul className={classes.addressList}>
+              <ul className={styles.addressList}>
                 {addresses.map((a) => (
-                  <li key={a.id} className={classes.addressItem}>
-                    <span className={classes.addressText}>{a.address}</span>
-                    <div className={classes.addressActions}>
+                  <li key={a.id} className={styles.addressItem}>
+                    <span className={styles.addressText}>{a.address}</span>
+                    <div className={styles.addressActions}>
                       <Button size="sm" variant="ghost" data-qa="address_set_default">По умолчанию</Button>
                       <Button size="sm" variant="ghost" data-qa="address_remove">Удалить</Button>
                     </div>
@@ -449,14 +462,14 @@ useEffect(() => {
                 ))}
               </ul>
             )}
-            <form onSubmit={handleAddAddress} className={classes.addressForm}>
+            <form onSubmit={handleAddAddress} className={styles.addressForm}>
               <input
                     type="text"
                     name="address"
                     value={newAddress.address}
                     onChange={(e) => setNewAddress({ address: e.target.value })}
                     placeholder="Введите полный адрес"
-                    className={classes.inputField}
+                    className={styles.inputField}
                 />
               <Button type="submit" variant="primary" data-qa="address_add">Добавить адрес</Button>
             </form>

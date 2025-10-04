@@ -12,7 +12,7 @@ import { FaInstagram, FaShoppingCart, FaTelegramPlane, FaVk } from 'react-icons/
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
-import classes from './Header.module.scss';
+import styles from './Header.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
 import { setCity } from '../../slices/citySlice';
 import Button from '../ui/Button';
@@ -90,11 +90,11 @@ const Header = () => {
   };
 
   const renderNavLink = (item) => (
-    <li key={item.path} className={classes.menuItem}>
+    <li key={item.path} className={styles.menuItem}>
       <NavLink
         to={item.path}
         className={({ isActive }) =>
-          `${classes.menuLink} ${isActive ? classes.menuLinkActive : ''}`
+          `${styles.menuLink} ${isActive ? styles.menuLinkActive : ''}`
         }
         end={item.path === '/'}
         data-qa={item.qa}
@@ -105,28 +105,28 @@ const Header = () => {
   );
 
   return (
-    <header className={classes.header} data-qa="header">
-      <div className={classes.utilityBar}>
-        <div className={classes.utilityGroup}>
-          <span className={classes.utilityText}>
+    <header className={styles.header} data-qa="header">
+      <div className={styles.utilityBar}>
+        <div className={styles.utilityGroup}>
+          <span className={styles.utilityText}>
             <FiTruck aria-hidden="true" />
-            <span className={classes.utilityTextSend}>Отгрузим сегодня при заказе до 18:00</span>
+            <span className={styles.utilityTextSend}>Отгрузим сегодня при заказе до 18:00</span>
           </span>
-         <span className={`${classes.utilityText} ${classes.utilityTextFerst}`}>
+         <span className={`${styles.utilityText} ${styles.utilityTextFerst}`}>
             <FiMapPin aria-hidden="true" />
-            <span className={classes.utilityText}>Доставляем по всей России</span>
+            <span className={styles.utilityText}>Доставляем по всей России</span>
           </span>
         </div>
-        <div className={classes.utilityGroup}>
+        <div className={styles.utilityGroup}>
           <a
-            className={classes.contactLink}
+            className={styles.contactLink}
             href="tel:+79999143009"
             data-qa="header_phone"
           >
             <FiPhone aria-hidden="true" />
             <span>+7 (999) 914-30-09</span>
           </a>
-          <div className={classes.social}>
+          <div className={styles.social}>
             <Button
               as="a"
               href="https://t.me/+79999143009"
@@ -137,7 +137,7 @@ const Header = () => {
               variant="tertiary"
               size="sm"
               icon={<FaTelegramPlane aria-hidden="true" />}
-              className={classes.socialBtn}
+              className={styles.socialBtn}
             />
             <Button
               as="a"
@@ -149,7 +149,7 @@ const Header = () => {
               variant="tertiary"
               size="sm"
               icon={<FaInstagram aria-hidden="true" />}
-              className={`${classes.socialBtn} ${classes.socialBtnIns}`}
+              className={`${styles.socialBtn} ${styles.socialBtnIns}`}
             />
             <Button
               as="a"
@@ -161,14 +161,14 @@ const Header = () => {
               variant="tertiary"
               size="sm"
               icon={<FaVk aria-hidden="true" />}
-              className={`${classes.socialBtn} ${classes.socialBtnVk}`}
+              className={`${styles.socialBtn} ${styles.socialBtnVk}`}
             />
           </div>
         </div>
       </div>
 
-      <div className={classes.brandRow}>
-        <div className={classes.brandBlock}>
+      <div className={styles.brandRow}>
+        <div className={styles.brandBlock}>
           <Button
             variant="ghost"
             size="sm"
@@ -176,20 +176,20 @@ const Header = () => {
             aria-expanded={isNavOpen}
             aria-controls="main-navigation"
             onClick={handleNavToggle}
-            className={classes.navToggle}
+            className={styles.navToggle}
             aria-label={isNavOpen ? 'Закрыть меню' : 'Открыть меню'}
             data-qa="nav_toggle"
           />
-          <NavLink to="/" className={classes.logo} data-qa="nav_logo">
-            <img className={classes.logoTitle} src="logo.png" alt="MSK Tires" />
+          <NavLink to="/" className={styles.logo} data-qa="nav_logo">
+            <img className={styles.logoTitle} src="logo.png" alt="MSK Tires" />
           </NavLink>
         </div>
 
-        <div className={classes.actions}>
-          <label htmlFor="city-select" className={classes.srOnly}>
+        <div className={styles.actions}>
+          <label htmlFor="city-select" className={styles.srOnly}>
             Выберите город
           </label>
-          <div className={classes.citySelectorDesc}>
+          <div className={styles.citySelectorDesc}>
             <FiMapPin aria-hidden="true" />
             <select
               id="city-select"
@@ -212,10 +212,10 @@ const Header = () => {
             data-qa="nav_cart"
             aria-label={`Корзина, товаров: ${cartQuantity}`}
             icon={<FaShoppingCart aria-hidden="true" />}
-            className={classes.iconButton}
+            className={styles.iconButton}
           >
-            <span className={classes.iconLabel}>Корзина</span>
-            {cartQuantity > 0 && <span className={classes.badge}>{formattedCartQuantity}</span>}
+            <span className={styles.iconLabel}>Корзина</span>
+            {cartQuantity > 0 && <span className={styles.badge}>{formattedCartQuantity}</span>}
           </Button>
           <Button
             type="button"
@@ -225,10 +225,10 @@ const Header = () => {
             data-qa="nav_account"
             aria-label={`Личный кабинет: ${userLabel}`}
             icon={<FiUser aria-hidden="true" />}
-            className={classes.iconButton}
+            className={styles.iconButton}
           >
-            <span className={classes.iconLabel}>{user ? 'Профиль' : 'Войти'}</span>
-            {user && <span className={classes.badgeDot} aria-hidden="true" />}
+            <span className={styles.iconLabel}>{user ? 'Профиль' : 'Войти'}</span>
+            {user && <span className={styles.badgeDot} aria-hidden="true" />}
           </Button>
 
         </div>
@@ -236,11 +236,11 @@ const Header = () => {
 
       <nav
         id="main-navigation"
-        className={`${classes.nav} ${isNavOpen ? classes.navOpen : ''}`}
+        className={`${styles.nav} ${isNavOpen ? styles.navOpen : ''}`}
         aria-label="Основное меню"
       >
-        <ul className={classes.menu}>
-            <div className={classes.citySelectorMob}>
+        <ul className={styles.menu}>
+            <div className={styles.citySelectorMob}>
             <FiMapPin aria-hidden="true" />
             <select
               id="city-select"
@@ -257,15 +257,15 @@ const Header = () => {
           </div>
           {navItems.map(renderNavLink)}
           <li
-            className={`${classes.menuItem} ${classes.menuItemWithChildren} ${
-              isServicesOpen ? classes.menuItemExpanded : ''
+            className={`${styles.menuItem} ${styles.menuItemWithChildren} ${
+              isServicesOpen ? styles.menuItemExpanded : ''
             }`}
             onMouseEnter={() => setIsServicesOpen(true)}
             onMouseLeave={handleServicesClose}
           >
             <button
               type="button"
-              className={classes.menuButton}
+              className={styles.menuButton}
               onClick={handleServicesToggle}
               aria-expanded={isServicesOpen}
               aria-haspopup="true"
@@ -274,13 +274,13 @@ const Header = () => {
               Услуги
               <FiChevronDown aria-hidden="true" />
             </button>
-            <ul className={`${classes.submenu} ${isServicesOpen ? classes.submenuOpen : ''}`}>
+            <ul className={`${styles.submenu} ${isServicesOpen ? styles.submenuOpen : ''}`}>
               {servicesItems.map((item) => (
-                <li key={item.path} className={classes.submenuItem}>
+                <li key={item.path} className={styles.submenuItem}>
                   <NavLink
                     to={item.path}
                     className={({ isActive }) =>
-                      `${classes.submenuLink} ${isActive ? classes.submenuLinkActive : ''}`
+                      `${styles.submenuLink} ${isActive ? styles.submenuLinkActive : ''}`
                     }
                     onClick={handleServicesClose}
                     data-qa={item.qa}
@@ -291,11 +291,11 @@ const Header = () => {
               ))}
             </ul>
           </li>
-          <li className={classes.menuItem}>
+          <li className={styles.menuItem}>
             <NavLink
               to="/contacts"
               className={({ isActive }) =>
-                `${classes.menuLink} ${isActive ? classes.menuLinkActive : ''}`
+                `${styles.menuLink} ${isActive ? styles.menuLinkActive : ''}`
               }
               data-qa="nav_contacts"
             >
