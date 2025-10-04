@@ -229,7 +229,7 @@ useEffect(() => {
               />
             </label>
             {nameDirty ? (
-              <Button variant="accent" data-qa="profile_update" disabled={!form.name.trim()}>
+              <Button type="submit" variant="accent" data-qa="profile_update" disabled={!form.name.trim()}>
                 {nameCta}
               </Button>
             ) : (
