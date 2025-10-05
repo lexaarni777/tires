@@ -16,6 +16,7 @@ import styles from './Header.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
 import { setCity } from '../../slices/citySlice';
 import Button from '../ui/Button';
+import SearchBar from '../Search/SearchBar';
 
 const navItems = [
   { label: 'Главная', path: '/', qa: 'nav_home' },
@@ -184,6 +185,10 @@ const Header = () => {
             <img className={styles.logoTitle} src="logo.png" alt="MSK Tires" />
           </NavLink>
         </div>
+        
+      <div className={styles.searchDesktop}>
+        <SearchBar />
+      </div>
 
         <div className={styles.actions}>
           <label htmlFor="city-select" className={styles.srOnly}>
@@ -232,6 +237,7 @@ const Header = () => {
           </Button>
 
         </div>
+          
       </div>
 
       <nav
@@ -304,6 +310,9 @@ const Header = () => {
           </li>
         </ul>
       </nav>
+      <div className={styles.searchMobile}>
+        <SearchBar />
+      </div>
     </header>
   );
 };

@@ -16,6 +16,7 @@ import EditProfile from './components/EditProfile/EditProfile';
 import TyreSelector from './components/TyreSelector/TyreSelector';
 import AdminOrders from './components/AdminOrders/AdminOrders';
 import Contacts from './components/Contacts/Contacts';
+import SearchResults from './components/Search/SearchResults';
 
 function App() {
 
@@ -48,6 +49,9 @@ function App() {
       
       {/* Маршрут для списка продуктов - доступен всем пользователям */}
       <Route path='/productlist' element={<ProductList/>}/>
+
+      {/* Поиск по каталогу */}
+      <Route path='/search' element={<SearchResults/>}/>
 
       {/* Маршрут для формы авторизации - доступен всем пользователям */}
       <Route path='/authform' element={<AuthForm/>}/>

@@ -72,6 +72,32 @@ exports.getProductsFromDB = async (filters = {}) => {
     where.push(`t.country = $${values.length}`);
   }
 
+  // Поиск по текстовому запросу q (подстрока по основным полям)
+  if (filters.q) {
+    const q = `%${String(filters.q).trim()}%`;
+    // Для каждого поля добавляем своё значение, чтобы корректно адресовать плейсхолдеры
+    const cols = [
+      'article', 'brand', 'model', 'size', 'name',
+      'speed_index'
+    ];
+    const parts = [];
+    for (const col of cols) {
+      values.push(q);
+      parts.push(`t.${col} ILIKE $${values.length}`);
+    }
+    // Для числовых полей приводим к тексту
+    values.push(q); // load_index::text
+    parts.push(`CAST(t.load_index AS TEXT) ILIKE $${values.length}`);
+    values.push(q); // diameter::text
+    parts.push(`CAST(t.diameter AS TEXT) ILIKE $${values.length}`);
+    values.push(q); // section_width::text
+    parts.push(`CAST(t.section_width AS TEXT) ILIKE $${values.length}`);
+    values.push(q); // profile::text
+    parts.push(`CAST(t.profile AS TEXT) ILIKE $${values.length}`);
+
+    where.push(`(${parts.join(' OR ')})`);
+  }
+
   if (where.length > 0) {
     query += " WHERE " + where.join(" AND ");
   }
@@ -85,6 +111,15 @@ exports.getProductsFromDB = async (filters = {}) => {
       t.country, t.description, t.studs, t.profile
     ORDER BY t.id ASC
   `;
+
+  // Лимит для подсказок (например, ?limit=10)
+  if (filters.limit) {
+    const limitNum = Number(filters.limit);
+    if (Number.isFinite(limitNum) && limitNum > 0) {
+      values.push(limitNum);
+      query += `\n  LIMIT $${values.length}`;
+    }
+  }
 
   const { rows } = await pool.query(query, values);
   return rows;
@@ -219,5 +254,4 @@ exports.getProductByIdFromDB = async (productId) => {
 
   return product;
 };
-
 

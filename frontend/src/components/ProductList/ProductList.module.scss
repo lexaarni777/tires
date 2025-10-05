@@ -194,7 +194,18 @@
   .resetButtonFiltersMob{
     display: inline;
   }
+
 }
+  .filtersCard{
+    padding: 16px;
+  }
+    .wrapper{
+    gap: 8px;
+    padding: 8px;
+  }
+  .list{
+    gap:8px;
+  } 
 
 .filtersHeaderDown {
   cursor: pointer;
@@ -210,4 +221,5 @@
   .list {
     grid-template-columns: 1fr;     // Одна колонка
   }
+
 }

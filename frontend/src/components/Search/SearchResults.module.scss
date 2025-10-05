@@ -1,0 +1,28 @@
+.wrapper {
+  padding: var(--sp-16);
+  max-width: 1440px;
+  margin: 0 auto;
+  min-width: 430px;
+}
+
+.title {
+  margin: 0 0 var(--sp-12);
+  font-size: 1.25rem;
+}
+
+.controls {
+  margin-bottom: var(--sp-12);
+}
+
+.inStockOnly {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-8);
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--sp-12);
+}
+

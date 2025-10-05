@@ -25,6 +25,12 @@
   max-height: 52px;
 }
 
+.searchDesktop{
+  flex-grow: 1;
+}
+.searchMobile{
+  display: none;
+}
 .utilityGroup {
   display: inline-flex;
   align-items: center;
@@ -460,6 +466,14 @@
   .submenuLink {
     padding: var(--sp-8) 0;
   }
+
+  .searchDesktop{
+    display: none;
+  }
+
+  .searchMobile{
+    display: block;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -511,6 +525,11 @@
   .menuItemWithChildren:hover .submenu {
     display: flex;
   }
+}
+
+@media (max-width: 1020px) {
+
+
 }
 
 @media (max-width: 920px) {
