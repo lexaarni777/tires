@@ -1,0 +1,239 @@
+// AI-Neumorphism + Minimal SaaS theme.
+// Add the `theme-ai` class to <body> or the main layout wrapper to enable this palette.
+
+:root {
+  // === Palette tokens ===
+  --c-primary-ai: #0078FF;
+  --c-accent-ai: #FF8748;
+  --c-bg-ai: #F6F8FA;
+  --c-surface-ai: #FFFFFF;
+  --c-line-ai: #E9EDF2;
+  --c-bg-grad: linear-gradient(135deg, #f7f9fc 0%, #eef2fb 55%, #f5faff 100%);
+  --c-surface-elevated: #FBFDFF;
+
+  // === Depth & effects ===
+  --shadow-inset: inset 0.125rem 0.125rem 0.375rem rgba(15, 23, 42, 0.08),
+    inset -0.125rem -0.125rem 0.375rem rgba(255, 255, 255, 0.9);
+  --shadow-raised: 0.25rem 0.25rem 0.625rem rgba(15, 23, 42, 0.12),
+    -0.25rem -0.25rem 0.625rem rgba(255, 255, 255, 0.85);
+  --shadow-glow: 0 0 1.25rem rgba(0, 120, 255, 0.25);
+
+  // === Radii ===
+  --radius-ai-md: 0.875rem;
+  --radius-ai-lg: 1rem;
+
+  // === Motion & accents ===
+  --transition-ai: 220ms cubic-bezier(0.23, 1, 0.32, 1);
+  --ai-glow-primary: 0 0 1.5rem rgba(0, 120, 255, 0.35);
+}
+
+body.theme-ai {
+  font-family: 'Inter', 'Manrope', 'Satoshi', sans-serif;
+  font-size: clamp(0.95rem, 0.2vw + 0.92rem, 1.05rem);
+  line-height: 1.55;
+  letter-spacing: 0.01em;
+  color: #0F1C2E;
+  background: var(--c-bg-grad);
+  text-rendering: optimizeLegibility;
+}
+
+.theme-ai {
+  color-scheme: light;
+  --c-primary: var(--c-primary-ai);
+  --c-primary-600: #0063D6;
+  --c-accent: var(--c-accent-ai);
+  --c-accent-600: #E26B36;
+  --c-bg: var(--c-bg-ai);
+  --c-surface: var(--c-surface-ai);
+  --c-line: var(--c-line-ai);
+  --c-text: #0F1C2E;
+  --c-text-muted: #5B6578;
+  --c-text-inverse: #FFFFFF;
+
+  // Enlarged spacing scale (+22% average)
+  --sp-4: 0.3rem;
+  --sp-6: 0.45rem;
+  --sp-8: 0.6rem;
+  --sp-12: 0.9rem;
+  --sp-16: 1.2rem;
+  --sp-24: 1.8rem;
+  --sp-32: 2.4rem;
+
+  // Updated radii (14–16px range)
+  --radius-8: var(--radius-ai-md);
+  --radius-12: 0.9375rem;
+  --radius-16: var(--radius-ai-lg);
+
+  // AI depth + focus feedback
+  --shadow-soft: var(--shadow-raised);
+  --shadow-focus: 0 0 0 0.1875rem color-mix(in srgb, var(--c-primary-ai) 45%, transparent);
+  --surface-border-weak: color-mix(in srgb, var(--c-line-ai) 82%, transparent 18%);
+  --surface-border-strong: color-mix(in srgb, var(--c-line-ai) 65%, rgba(15, 23, 42, 0.08) 35%);
+  --field-bg-ai: color-mix(in srgb, var(--c-surface-ai) 90%, #F1F5FF 10%);
+  --field-border-ai: color-mix(in srgb, var(--c-line-ai) 60%, rgba(0, 120, 255, 0.2) 40%);
+  --field-shadow-ai: var(--shadow-inset);
+  --card-padding-ai: clamp(1.2rem, 1vw + 1rem, 1.8rem);
+  --modal-padding-ai: clamp(1.5rem, 1.2vw + 1.2rem, 2.25rem);
+  --form-gap-ai: clamp(1rem, 0.5vw + 0.9rem, 1.4rem);
+  --alert-gap-ai: 0.6rem;
+}
+
+// === Surface primitives ===
+.theme-ai :where(.surface-ai) {
+  background: var(--c-surface-elevated);
+  border-radius: var(--radius-ai-lg);
+  border: 0.0625rem solid var(--surface-border-weak);
+  box-shadow: var(--shadow-raised);
+}
+
+// === Buttons ===
+.theme-ai :where(.btn, button[class*='Button_root'], a[class*='Button_root']) {
+  border-radius: var(--radius-ai-lg);
+  border: 0.0625rem solid var(--surface-border-weak);
+  background: var(--c-surface-elevated);
+  color: var(--c-text);
+  box-shadow: var(--shadow-inset);
+  transition:
+    background var(--transition-ai),
+    color var(--transition-ai),
+    border-color var(--transition-ai),
+    box-shadow var(--transition-ai),
+    transform 120ms ease;
+}
+
+.theme-ai :where(.btn, button[class*='Button_root'], a[class*='Button_root']):hover:not(:disabled):not([aria-disabled='true']) {
+  box-shadow: var(--shadow-inset), var(--shadow-glow);
+  transform: translateY(0.0625rem);
+}
+
+.theme-ai :where(.btn, button[class*='Button_root'], a[class*='Button_root']):focus-visible {
+  box-shadow: var(--shadow-glow), var(--shadow-inset);
+}
+
+.theme-ai :where(.btn--primary, button[class*='variantPrimary']) {
+  border: none;
+  background-image: linear-gradient(135deg, #2DA2FF 0%, #0060D4 100%);
+  color: var(--c-text-inverse);
+  box-shadow: var(--shadow-raised), var(--shadow-glow);
+}
+
+.theme-ai :where(.btn--primary, button[class*='variantPrimary']):hover:not(:disabled):not([aria-disabled='true']) {
+  box-shadow: var(--shadow-raised), var(--shadow-glow);
+  filter: brightness(1.02);
+}
+
+.theme-ai :where(.btn--accent, button[class*='variantAccent']) {
+  border: none;
+  background-image: linear-gradient(135deg, #FF9D62 0%, #FF7032 100%);
+  color: var(--c-text-inverse);
+  box-shadow: var(--shadow-raised), var(--shadow-glow);
+}
+
+.theme-ai :where(.btn--secondary, button[class*='variantSecondary']) {
+  background: var(--c-surface-ai);
+  color: var(--c-primary-ai);
+  border-color: color-mix(in srgb, var(--c-primary-ai) 25%, var(--c-line-ai) 75%);
+  box-shadow: var(--shadow-raised);
+}
+
+.theme-ai :where(.btn--tertiary, .btn--ghost, button[class*='variantTertiary'], button[class*='variantGhost']) {
+  background: transparent;
+  border-color: transparent;
+  color: var(--c-primary-ai);
+  box-shadow: none;
+}
+
+.theme-ai :where(.btn--danger, button[class*='variantDanger']) {
+  background: color-mix(in srgb, #D72638 85%, #FF4B5C 15%);
+  color: var(--c-text-inverse);
+  border: none;
+  box-shadow: var(--shadow-raised);
+}
+
+// === Card surfaces (ProductCard, TyreResultCard, etc.) ===
+.theme-ai :where(.card, [class*='Card_card'], [class*='ProductCard_card'], [class*='TyreResultCard_card']) {
+  background: var(--c-surface-elevated);
+  border-radius: var(--radius-ai-lg);
+  border: 0.0625rem solid var(--surface-border-weak);
+  box-shadow: var(--shadow-raised);
+  padding: var(--card-padding-ai);
+  transition: box-shadow var(--transition-ai), transform var(--transition-ai);
+}
+
+.theme-ai :where(.card, [class*='Card_card'], [class*='ProductCard_card'], [class*='TyreResultCard_card']):hover {
+  box-shadow: var(--shadow-raised), var(--shadow-glow);
+  transform: translateY(-0.0625rem);
+}
+
+// === Modal ===
+.theme-ai :where(.modal, [class*='Modal'], dialog, [role='dialog']) {
+  background: var(--c-surface-elevated);
+  border-radius: var(--radius-ai-lg);
+  border: 0.0625rem solid var(--surface-border-strong);
+  box-shadow: var(--shadow-raised), var(--shadow-glow);
+  padding: var(--modal-padding-ai);
+  backdrop-filter: blur(1.25rem);
+}
+
+.theme-ai :where(.modalBackdrop, [class*='Backdrop']) {
+  background: color-mix(in srgb, rgba(15, 23, 42, 0.65) 55%, rgba(246, 248, 250, 0.3) 45%);
+  backdrop-filter: blur(1.25rem);
+}
+
+// === Forms ===
+.theme-ai :where(form, [class*='Form']) {
+  gap: var(--form-gap-ai);
+  color: var(--c-text);
+}
+
+.theme-ai :where(input:not([type='checkbox']):not([type='radio']), select, textarea) {
+  background: var(--field-bg-ai);
+  border: 0.0625rem solid var(--field-border-ai);
+  border-radius: var(--radius-ai-md);
+  box-shadow: var(--field-shadow-ai);
+  transition:
+    border-color var(--transition-ai),
+    box-shadow var(--transition-ai),
+    background var(--transition-ai),
+    transform 120ms ease;
+}
+
+.theme-ai :where(input:not([type='checkbox']):not([type='radio']), select, textarea):focus-visible {
+  border-color: color-mix(in srgb, var(--c-primary-ai) 65%, var(--field-border-ai) 35%);
+  box-shadow: var(--field-shadow-ai), var(--shadow-glow);
+  transform: translateY(-0.03125rem);
+}
+
+.theme-ai :where(label) {
+  color: color-mix(in srgb, var(--c-text) 78%, var(--c-text-muted) 22%);
+}
+
+// === Alerts ===
+.theme-ai :where(.alert, [class*='Alert'], [role='alert']) {
+  border-radius: var(--radius-ai-md);
+  padding: clamp(0.9rem, 0.6vw + 0.8rem, 1.2rem);
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--alert-gap-ai);
+  background: color-mix(in srgb, var(--c-surface-elevated) 90%, var(--c-bg-ai) 10%);
+  border: 0.0625rem solid var(--surface-border-weak);
+  box-shadow: var(--shadow-raised);
+}
+
+.theme-ai :where(.alert[data-variant='success'], [class*='AlertSuccess']) {
+  color: #0F5132;
+  border-left: 0.1875rem solid #18A957;
+  background: color-mix(in srgb, #18A957 15%, var(--c-surface-elevated) 85%);
+}
+
+.theme-ai :where(.alert[data-variant='warning'], [class*='AlertWarning']) {
+  color: #6B3D00;
+  border-left: 0.1875rem solid #FFB648;
+  background: color-mix(in srgb, #FFB648 18%, var(--c-surface-elevated) 82%);
+}
+
+.theme-ai :where(.alert[data-variant='danger'], [class*='AlertDanger']) {
+  color: #611A1A;
+  border-left: 0.1875rem solid #D72638;
+  background: color-mix(in srgb, #FEE9EC 85%, #FFD6DB 15%);
+}

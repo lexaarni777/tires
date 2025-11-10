@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
 import styles from './Orders.module.scss';
@@ -22,6 +22,16 @@ const Orders = () => {
       dispatch(fetchOrders());
     }
   }, [auth.token, dispatch]);
+
+  const radiusFromOrder = (order) => {
+    // Try size/diameter fields if present; fallback to parse name e.g., "R16"
+    for (const it of order.items || []) {
+      if (it.diameter) return `R${String(it.diameter).replace(/[^0-9]/g,'')}`;
+      if (it.size && /R\d{2}/i.test(it.size)) return it.size.match(/R\d{2}/i)[0].toUpperCase();
+      if (it.name && /R\d{2}/i.test(it.name)) return it.name.match(/R\d{2}/i)[0].toUpperCase();
+    }
+    return null;
+  };
 
 
 
@@ -89,6 +99,20 @@ const Orders = () => {
                 Отменить заказ
               </Button>
           )}
+            {/* Кнопка записи доступна, если самовывоз и к заказу нет записи */}
+            {order.delivery_method === 'pickup' && !order.booking_id && (
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => {
+                  const r = radiusFromOrder(order);
+                  navigate(r ? `/booking?radius=${encodeURIComponent(r)}` : '/booking');
+                }}
+                style={{ marginLeft: 8 }}
+              >
+                Записаться на шиномонтаж
+              </Button>
+            )}
           </div>
 
           <div className={styles.orders__statusRow}>
@@ -104,6 +128,9 @@ const Orders = () => {
             )}
             {order.delivery_method === 'delivery' && (
               <p><strong>Доставка:</strong> {order.address}</p>
+            )}
+            {order.booking_id && (
+              <p><strong>Шиномонтаж:</strong> записаны №{order.booking_id} — <button className={styles.linkButton} onClick={()=>navigate(`/account/bookings#${order.booking_id}`)}>перейти</button></p>
             )}
         </div>
 

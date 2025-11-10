@@ -5,6 +5,7 @@ import { fetchProfile, fetchAddresses} from '../../slices/profileSlice';
 import { useNavigate, NavLink } from 'react-router-dom';
 import styles from './Cart.module.scss';
 import Button from '../ui/Button';
+import BookingWizard from '../Booking/BookingWizard';
 import EmptyState from '../ui/EmptyState';
 import Skeleton from '../ui/Skeleton';
 import { getThumbnailPath } from '../../utils/thumb';
@@ -31,6 +32,10 @@ const Cart = () => {
   const [comment, setComment] = useState('');
   const [addressList, setAddressList] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState('');
+  const selectedCity = useSelector((state) => state.city?.selectedCity);
+  const [showBooking, setShowBooking] = useState(false);
+  const [prefill, setPrefill] = useState({ radius: null });
+  const [createdBookingId, setCreatedBookingId] = useState(null);
 
   useEffect(() => {
     if (auth.token) {
@@ -141,6 +146,7 @@ const Cart = () => {
       address: deliveryMethod === 'delivery' ? address : undefined,
       phone: cleanedPhone,
       comment,
+      booking_id: createdBookingId || undefined,
     };
 
 
@@ -184,6 +190,17 @@ const Cart = () => {
   const selectedItems = cartItems.filter((item) => selectedIds.includes(item.cart_id));
   const totalAmount = selectedItems.reduce((sum, it) => sum + (Number(it.price) * Number(it.quantity || 1)), 0);
   const totalQty = selectedItems.reduce((sum, it) => sum + Number(it.quantity || 0), 0);
+
+  const isTireServiceAvailable = deliveryMethod === 'pickup' && selectedCity === 'Москва';
+
+  const deriveRadiusFromSelected = () => {
+    for (const it of selectedItems) {
+      if (it.diameter) return `R${String(it.diameter).replace(/[^0-9]/g,'')}`;
+      if (it.size && /R\d{2}/i.test(it.size)) return it.size.match(/R\d{2}/i)[0].toUpperCase();
+      if (it.product_name && /R\d{2}/i.test(it.product_name)) return it.product_name.match(/R\d{2}/i)[0].toUpperCase();
+    }
+    return null;
+  };
 
   if (cartStatus === 'loading') {
     return (
@@ -240,8 +257,8 @@ const Cart = () => {
                       {console.log('item.product_image', item.product_image)}
                       {item.product_image && (
                         <img
-                          src={getThumbnailPath(item.product_image)}
-                          alt={item.name}
+                          src={`${API_URL}${getThumbnailPath(item.product_image)}`}
+                          alt={item.product_name || 'Товар'}
                           className={styles.productImage}
                           onClick={() => navigate(`/productdetailed/${item.product_id}`)}  
                         />
@@ -464,6 +481,27 @@ const Cart = () => {
                 <span>Товаров: {totalQty}</span>
                 <strong>Итого: {new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(totalAmount)}</strong>
               </div>
+              {/* CTA: запись на шиномонтаж при самовывозе в Москве */}
+              <div className={styles.formRow}>
+                <Button
+                  type="button"
+                  variant="secondary"
+                  disabled={!isTireServiceAvailable}
+                  onClick={() => {
+                    const r = deriveRadiusFromSelected();
+                    setPrefill({ radius: r });
+                    setShowBooking(true);
+                  }}
+                >
+                  Записаться на шиномонтаж
+                </Button>
+                {!isTireServiceAvailable && (
+                  <span style={{ marginLeft: 8, color: '#6b7280' }}>Доступно только при самовывозе в Москве</span>
+                )}
+                {createdBookingId && (
+                  <span style={{ marginLeft: 8, color: '#065f46' }}>Запись создана: №{createdBookingId}. Изменить — в Мои записи.</span>
+                )}
+              </div>
               <div className={styles.formActions}>
                 <Button
                   type="button"
@@ -477,6 +515,18 @@ const Cart = () => {
                 </Button>
               </div>
             </form>
+            {showBooking && (
+              <div className={styles.modalOverlay} style={{ zIndex: 50 }}>
+                <div className={`${styles.modalContent} ${styles.bookingModalContent}`}>
+                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
+                    <h3>Запись на шиномонтаж</h3>
+                    <Button type="button" variant="tertiary" onClick={() => setShowBooking(false)}>Закрыть</Button>
+                  </div>
+                  <BookingWizard prefillRadius={prefill.radius} returnTo='/cart'
+                    onBooked={(resp)=>{ setCreatedBookingId(resp.booking_id); setShowBooking(false); }} />
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}

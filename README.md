@@ -49,3 +49,16 @@
 	•	Backend: npm run dev (nodemon) / npm start, порт 5001, .env (DATABASE_URL, JWT_SECRET, CLIENT_URL и т.п.).
 	•	CORS: origin = CLIENT_URL, credentials.
 	•	Статика картинок по /uploads/*.
+
+🛠️ Онлайн‑запись на шиномонтаж
+	•	Backend маршруты: `/api/tyre-booking/*` (services, prices, availability, quote, book, admin list/update).
+	•	Схема и сиды цен: `backend/sql/tyre_booking.sql` (радиусы R13–R24, ваши тарифы из прайса).
+	•	Рабочие часы по умолчанию: 10:00–19:00, интервал 30 мин, буфер 0, вместимость 1.
+	•	Frontend: страница мастера записи — `/booking`.
+
+Установка схемы и цен
+1) Выполните SQL (однократно):
+```
+psql "$DATABASE_URL" -f backend/sql/tyre_booking.sql
+```
+2) Перезапустите backend. Проверка: `GET /api/tyre-booking/services`.

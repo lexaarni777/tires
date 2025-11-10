@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, loginUser, sendSmsCode, sendResetCode, resetPassword, sendEmailCode, verifyEmail  } from '../../slices/authSlice';
 import styles from './AuthForm.module.scss';
 import Button from '../ui/Button';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { mergeLocalCartWithServer, clearGuestCart } from '../../slices/cartSlice';
 import { validatePhone, validateEmail } from '../../utils/validators';
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
@@ -12,6 +12,7 @@ import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 const AuthForm = () => {
     const user = useSelector((state) => state.auth.user);
     const navigate = useNavigate();
+    const location = useLocation();
    
   
     const [isRegistering, setIsRegistering] = useState(false);
@@ -63,15 +64,29 @@ const AuthForm = () => {
 
     const auth = useSelector((state) => state.auth);
     const previousUserRef = useRef(user);
+    const returnToRef = useRef(null);
+
+    // Prefill phone from query (?phone=) or state and capture return URL
+    useEffect(() => {
+      const params = new URLSearchParams(location.search);
+      const phoneFromQuery = params.get('phone');
+      const phoneFromState = location.state && location.state.prefillPhone;
+      const prefill = phoneFromQuery || phoneFromState;
+      if (prefill) {
+        setForm(prev => ({ ...prev, phone: prefill }));
+      }
+      const ret = params.get('return') || (location.state && location.state.returnUrl) || null;
+      if (ret) returnToRef.current = ret;
+    }, [location.search, location.state]);
 
     useEffect(() => {
-    // Только при смене пользователя перенаправляем в корзину, если нет гостевой корзины
+      // Только при смене пользователя перенаправляем: если нет гостевой корзины — по returnTo или в корзину
       if (
         user &&
         previousUserRef.current !== user &&
         !localStorage.getItem('guestCart')
       ) {
-        navigate('/cart');
+        navigate(returnToRef.current || '/cart');
       }
       previousUserRef.current = user;
     }, [user, navigate]);
@@ -86,12 +101,12 @@ const AuthForm = () => {
     const handleMerge = () => {
         dispatch(mergeLocalCartWithServer());
         setShowMergeModal(false);
-        navigate('/cart');
+        navigate(returnToRef.current || '/cart');
     };
     const handleClear = () => {
         dispatch(clearGuestCart());
         setShowMergeModal(false);
-        navigate('/cart');
+        navigate(returnToRef.current || '/cart');
     };
 
 

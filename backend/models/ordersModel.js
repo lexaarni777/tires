@@ -16,12 +16,13 @@ exports.createOrderInDB = async (
   pickupWarehouse,
   address,
   comment,
-  paymentMethod
+  paymentMethod,
+  bookingId
 ) => {
   const query = `
     INSERT INTO orders 
-    (user_id, phone, delivery_method, pickup_warehouse, address, comment, payment_method, status, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, 'В обработке', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+    (user_id, phone, delivery_method, pickup_warehouse, address, comment, payment_method, booking_id, status, created_at, updated_at)
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'В обработке', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
     RETURNING id;
   `;
   const { rows } = await pool.query(query, [
@@ -31,7 +32,8 @@ exports.createOrderInDB = async (
     pickupWarehouse,
     address,
     comment,
-    paymentMethod
+    paymentMethod,
+    bookingId || null
   ]);
   return rows[0];
 };
@@ -69,6 +71,7 @@ exports.getUserOrders = async (userId) => {
       o.pickup_warehouse,
       o.address,
       o.phone,
+      o.booking_id,
       SUM(oi.quantity * oi.price) AS total_amount,
       json_agg(
         json_build_object(
@@ -100,7 +103,7 @@ exports.getUserOrders = async (userId) => {
     WHERE o.user_id = $1
     GROUP BY 
       o.id, o.status, o.created_at, 
-      o.delivery_method, o.pickup_warehouse, o.address, o.phone
+      o.delivery_method, o.pickup_warehouse, o.address, o.phone, o.booking_id
     ORDER BY o.created_at DESC;
   `;
 

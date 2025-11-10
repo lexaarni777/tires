@@ -38,7 +38,13 @@ const Account = () => {
                 <NavLink to="/addproduct">Добавить продукт</NavLink>
                 <NavLink to="/usermanagement">Менеджер пользователей</NavLink>
                 <NavLink to="/orders">Мои заказы</NavLink>
-                {roles.includes('admin') && <NavLink to="/admin/orders">Админ</NavLink>}
+                <NavLink to="/account/bookings">Записи шиномонтажа</NavLink>
+                {roles.includes('admin') && (
+                  <>
+                    <NavLink to="/admin/orders">Админ: заказы</NavLink>
+                    <NavLink to="/admin/tyre-booking">Админ: шиномонтаж</NavLink>
+                  </>
+                )}
                 {/* Кнопка для выхода из аккаунта */}
                 <button className={styles.button} onClick={() => dispatch(logout())}>Выйти</button>
             </div>

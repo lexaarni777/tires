@@ -1,13 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  FiChevronDown,
-  FiMapPin,
-  FiMenu,
-  FiPhone,
-  FiTruck,
-  FiUser,
-  FiX,
-} from 'react-icons/fi';
+import { FiMapPin, FiMenu, FiPhone, FiTruck, FiUser, FiX } from 'react-icons/fi';
 import { FaInstagram, FaShoppingCart, FaTelegramPlane, FaVk } from 'react-icons/fa';
 import { NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,15 +16,8 @@ const navItems = [
   { label: 'Диски', path: '/wheels', qa: 'nav_wheels' },
 ];
 
-const servicesItems = [
-  { label: 'Доставка', path: '/services/delivery', qa: 'nav_services_delivery' },
-  { label: 'Ремонт дисков', path: '/services/wheel-repair', qa: 'nav_services_repair' },
-  { label: 'Шиномонтаж', path: '/services/tire-fitting', qa: 'nav_services_tire-fitting' },
-];
-
 const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const [isServicesOpen, setIsServicesOpen] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
@@ -59,19 +44,10 @@ const Header = () => {
 
   useEffect(() => {
     setIsNavOpen(false);
-    setIsServicesOpen(false);
   }, [location.pathname]);
 
   const handleNavToggle = () => {
     setIsNavOpen((prev) => !prev);
-  };
-
-  const handleServicesToggle = () => {
-    setIsServicesOpen((prev) => !prev);
-  };
-
-  const handleServicesClose = () => {
-    setIsServicesOpen(false);
   };
 
   const handleCityChange = (event) => {
@@ -104,6 +80,8 @@ const Header = () => {
       </NavLink>
     </li>
   );
+
+  const isTireServiceAvailable = currentCity === 'Москва';
 
   return (
     <header className={styles.header} data-qa="header">
@@ -262,40 +240,22 @@ const Header = () => {
             </select>
           </div>
           {navItems.map(renderNavLink)}
-          <li
-            className={`${styles.menuItem} ${styles.menuItemWithChildren} ${
-              isServicesOpen ? styles.menuItemExpanded : ''
-            }`}
-            onMouseEnter={() => setIsServicesOpen(true)}
-            onMouseLeave={handleServicesClose}
-          >
-            <button
-              type="button"
-              className={styles.menuButton}
-              onClick={handleServicesToggle}
-              aria-expanded={isServicesOpen}
-              aria-haspopup="true"
-              data-qa="nav_services"
-            >
-              Услуги
-              <FiChevronDown aria-hidden="true" />
-            </button>
-            <ul className={`${styles.submenu} ${isServicesOpen ? styles.submenuOpen : ''}`}>
-              {servicesItems.map((item) => (
-                <li key={item.path} className={styles.submenuItem}>
-                  <NavLink
-                    to={item.path}
-                    className={({ isActive }) =>
-                      `${styles.submenuLink} ${isActive ? styles.submenuLinkActive : ''}`
-                    }
-                    onClick={handleServicesClose}
-                    data-qa={item.qa}
-                  >
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
+          <li className={styles.menuItem}>
+            {isTireServiceAvailable ? (
+              <NavLink
+                to="/booking"
+                className={({ isActive }) =>
+                  `${styles.menuLink} ${isActive ? styles.menuLinkActive : ''}`
+                }
+                data-qa="nav_tire_service"
+              >
+                Шиномонтаж
+              </NavLink>
+            ) : (
+              <span className={styles.menuLinkDisabled} title="Доступно только в Москве">
+                Шиномонтаж
+              </span>
+            )}
           </li>
           <li className={styles.menuItem}>
             <NavLink

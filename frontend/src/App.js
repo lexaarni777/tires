@@ -17,6 +17,9 @@ import TyreSelector from './components/TyreSelector/TyreSelector';
 import AdminOrders from './components/AdminOrders/AdminOrders';
 import Contacts from './components/Contacts/Contacts';
 import SearchResults from './components/Search/SearchResults';
+import BookingWizard from './components/Booking/BookingWizard';
+import AdminTyreBooking from './components/AdminTyreBooking/AdminTyreBooking';
+import UserTyreBookings from './components/UserTyreBookings/UserTyreBookings';
 
 function App() {
 
@@ -88,6 +91,20 @@ function App() {
       {/* Контакты */}
       <Route path='/contacts' element={
           <Contacts />
+      }/>
+      {/* Онлайн-запись на шиномонтаж */}
+      <Route path='/booking' element={<BookingWizard/>} />
+      {/* Мои записи шиномонтажа */}
+      <Route path='/account/bookings' element={
+        <PrivateRoute rolesRequired={['buyer','admin']}>
+          <UserTyreBookings />
+        </PrivateRoute>
+      }/>
+      {/* Админ: шиномонтаж */}
+      <Route path='/admin/tyre-booking' element={
+        <PrivateRoute rolesRequired={['admin']}>
+          <AdminTyreBooking />
+        </PrivateRoute>
       }/>
       <Route path='/account/edit' element={
       <PrivateRoute rolesRequired={['buyer', 'admin']}>

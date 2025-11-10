@@ -1,0 +1,10 @@
+.wrapper { padding: 16px; }
+.actions { display: flex; gap: 8px; margin-bottom: 12px; }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
+.slotGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 8px; margin-top: 8px; }
+.slotBtn { padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; cursor: pointer; }
+.empty { padding: 16px; color: #555; }
+.notice { margin: 8px 0; padding: 8px 12px; border-radius: 6px; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.noticeError { margin: 8px 0; padding: 8px 12px; border-radius: 6px; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+.highlight { background: #fff7ed; }

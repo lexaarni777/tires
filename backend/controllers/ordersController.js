@@ -20,6 +20,7 @@ exports.createOrder = async (req, res) => {
     comment,
     paymentMethod
   } = req.body;
+  const { booking_id } = req.body; // опционально
 
   if (!items || !Array.isArray(items) || items.length === 0) {
     return res.status(400).json({ message: 'Нет товаров для оформления заказа.' });
@@ -38,7 +39,8 @@ if (!phoneRegex.test(phone)) {
       pickupWarehouse,
       address,
       comment,
-      paymentMethod
+      paymentMethod,
+      booking_id || null
     );
 
     // Добавляем товары заказа
@@ -60,6 +62,7 @@ if (!phoneRegex.test(phone)) {
     res.status(201).json({
       message: 'Заказ успешно создан!',
       orderId: order.id,
+      booking_id: booking_id || null,
     });
   } catch (err) {
     console.error('Ошибка создания заказа:', err);
