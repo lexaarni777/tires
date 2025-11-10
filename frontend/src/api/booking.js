@@ -17,7 +17,7 @@ export async function getAvailability(date) {
 }
 
 export async function quote(data) {
-  const resp = await fetch(`${process.env.REACT_APP_API_URL}/tyre-booking/quote`, {
+  const resp = await fetch(`${process.env.REACT_APP_API_URL}/api/tyre-booking/quote`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
