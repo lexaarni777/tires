@@ -1,23 +1,51 @@
+const API_URL = process.env.REACT_APP_API_URL;
+
+// Кэшируем успешные ответы, чтобы повторные 304 (без тела) могли вернуть данные
+// из памяти и не ломали мастер бронирования на продакшене.
+const responseCache = new Map();
+
+const noCacheOptions = {
+  cache: 'no-store',
+  headers: {
+    'Cache-Control': 'no-cache, no-store, max-age=0',
+    Pragma: 'no-cache',
+  },
+};
+
+async function fetchJson(url, errorMessage) {
+  const resp = await fetch(url, noCacheOptions);
+  if (resp.status === 304) {
+    if (responseCache.has(url)) {
+      return responseCache.get(url);
+    }
+    throw new Error(errorMessage);
+  }
+  if (!resp.ok) throw new Error(errorMessage);
+  const data = await resp.json();
+  responseCache.set(url, data);
+  return data;
+}
+
 export async function getServices() {
-  const resp = await fetch(`${process.env.REACT_APP_API_URL}/tyre-booking/services`);
-  if (!resp.ok) throw new Error('Не удалось получить услуги');
-  return resp.json();
+  return fetchJson(`${API_URL}/tyre-booking/services`, 'Не удалось получить услуги');
 }
 
 export async function getPrices(radius) {
-  const resp = await fetch(`${process.env.REACT_APP_API_URL}/tyre-booking/prices?radius=${encodeURIComponent(radius)}`);
-  if (!resp.ok) throw new Error('Не удалось получить цены');
-  return resp.json();
+  return fetchJson(
+    `${API_URL}/tyre-booking/prices?radius=${encodeURIComponent(radius)}`,
+    'Не удалось получить цены'
+  );
 }
 
 export async function getAvailability(date) {
-  const resp = await fetch(`${process.env.REACT_APP_API_URL}/tyre-booking/availability?date=${encodeURIComponent(date)}`);
-  if (!resp.ok) throw new Error('Не удалось получить слоты');
-  return resp.json();
+  return fetchJson(
+    `${API_URL}/tyre-booking/availability?date=${encodeURIComponent(date)}`,
+    'Не удалось получить слоты'
+  );
 }
 
 export async function quote(data) {
-  const resp = await fetch(`${process.env.REACT_APP_API_URL}/tyre-booking/quote`, {
+  const resp = await fetch(`${API_URL}/tyre-booking/quote`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data)
@@ -27,7 +55,7 @@ export async function quote(data) {
 }
 
 export async function book(data, token) {
-  const resp = await fetch(`${process.env.REACT_APP_API_URL}/tyre-booking/book`, {
+  const resp = await fetch(`${API_URL}/tyre-booking/book`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -41,4 +69,3 @@ export async function book(data, token) {
   }
   return resp.json();
 }
-
