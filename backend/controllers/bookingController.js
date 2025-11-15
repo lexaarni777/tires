@@ -131,7 +131,7 @@ exports.getAvailability = async (req, res) => {
 };
 
 exports.quote = async (req, res) => {
-  console.log('booking Controller /quote', res.body)
+  console.log('booking Controller /quote', req.body)
   logCtrl('quote request', { radius: req.body?.radius, addons: req.body?.addons?.length || 0 });
   try {
     const { radius, base, addons } = req.body;
