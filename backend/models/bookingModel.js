@@ -94,6 +94,7 @@ exports.adminDeleteService = async (id) => {
 };
 
 exports.getPricesByRadius = async (radius) => {
+  console.log('getPricesByRadius', radius);
   const { rows } = await pool.query(
     `SELECT service_id, price FROM booking_prices WHERE radius = $1`,
     [radius]
