@@ -141,6 +141,7 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
   useEffect(() => {
     // quote whenever selection changes
     const data = { radius: radiusForApi(radius), base, addons };
+    console.log('BookingWizard: quoting with', data);
     if (!radius) return;
     quote(data)
       .then(({ items, total }) => { setItems(items); setTotal(total); })
