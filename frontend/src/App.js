@@ -20,8 +20,10 @@ import SearchResults from './components/Search/SearchResults';
 import BookingWizard from './components/Booking/BookingWizard';
 import AdminTyreBooking from './components/AdminTyreBooking/AdminTyreBooking';
 import UserTyreBookings from './components/UserTyreBookings/UserTyreBookings';
+import useYandexMetrika from './hooks/useYandexMetrika';
 
 function App() {
+  useYandexMetrika();
 
   let routes = (
     <Routes>
