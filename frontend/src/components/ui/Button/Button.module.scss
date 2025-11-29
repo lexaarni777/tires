@@ -7,9 +7,18 @@
 .variantPrimary {
   @extend %btn-primary;
 }
-
+.variantDefault{
+  @extend %btn-default;
+}
+.variantPrimary-low {
+  @extend %btn-primary-low;
+}
 .variantAccent {
   @extend %btn-accent;
+}
+
+.variantAccent-low {
+  @extend %btn-accent-low;
 }
 
 .variantSecondary {
@@ -46,6 +55,19 @@
 
 .iconOnly {
   @extend %btn-icon;
+}
+.neoRaised {
+  @extend %btn-neo-raised;
+}
+
+.neoSunken {
+  @extend %btn-neo-sunken;
+}
+
+
+
+.neoFlat {
+  @extend %btn-neo-flat;
 }
 
 .withIcon {

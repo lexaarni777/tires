@@ -189,26 +189,27 @@ const Header = () => {
           </div>
           <Button
             type="button"
-            variant="secondary"
             size="sm"
             onClick={handleCartClick}
             data-qa="nav_cart"
             aria-label={`Корзина, товаров: ${cartQuantity}`}
             icon={<FaShoppingCart aria-hidden="true" />}
             className={styles.iconButton}
+            depth="raised"
+
           >
             <span className={styles.iconLabel}>Корзина</span>
             {cartQuantity > 0 && <span className={styles.badge}>{formattedCartQuantity}</span>}
           </Button>
           <Button
             type="button"
-            variant="secondary"
             size="sm"
             onClick={handleAccountClick}
             data-qa="nav_account"
             aria-label={`Личный кабинет: ${userLabel}`}
             icon={<FiUser aria-hidden="true" />}
             className={styles.iconButton}
+            depth="raised"
           >
             <span className={styles.iconLabel}>{user ? 'Профиль' : 'Войти'}</span>
             {user && <span className={styles.badgeDot} aria-hidden="true" />}

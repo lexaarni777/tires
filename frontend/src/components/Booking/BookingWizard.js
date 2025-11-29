@@ -6,6 +6,7 @@ import styles from './BookingWizard.module.scss';
 import { sendSmsCode, registerUser } from '../../slices/authSlice';
 import { validatePhone } from '../../utils/validators';
 import store from '../../slices/store';
+import Button from '../ui/Button';
 import Radio from '../ui/Radio';
 import RadioTile from './RadioTile';
 
@@ -197,6 +198,9 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
 
   const radiusLabel = radiusLabelByValue[radius] || radius;
   const quickDates = useQuickDates();
+  const hasSelectedBase = Boolean(selectedBase);
+  const hasAddonSelection = addonDetails.length > 0;
+  const showSummary = hasSelectedBase || hasAddonSelection;
 
   const handleBook = async () => {
     if (!selectedSlot) return alert('Выберите время');
@@ -323,9 +327,9 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
                   <p className={styles.subsectionTitle}>Базовый комплекс</p>
                   <div className={styles.subsectionActions}>
                     {base.service_id && (
-                      <button type="button" className={styles.clearBase} onClick={() => setBase({ service_id: null, quantity: 1 })}>
+                      <Button type="button" variant="tertiary" className={styles.clearBase} onClick={() => setBase({ service_id: null, quantity: 1 })}>
                         Очистить выбор
-                      </button>
+                      </Button>
                     )}
           
                   </div>
@@ -368,23 +372,27 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
                     <div className={styles.addonMeta}>
                       {priceOf(a.id) ? <small className={styles.priceTag}>{priceOf(a.id)} ₽/шт</small> : null}
                       <div className={styles.addonCounter}>
-                        <button
+                        <Button
                           type="button"
+                          variant="secondary"
+                          size="sm"
                           className={styles.counterBtn}
                           onClick={() => setAddonQty(a.id, addonQuantity(a.id) - 1)}
                           disabled={addonQuantity(a.id) <= 0}
                         >
                           −
-                        </button>
+                        </Button>
                         <div className={styles.counterValue}>{addonQuantity(a.id)}</div>
-                        <button
+                        <Button
                           type="button"
+                          variant="secondary"
+                          size="sm"
                           className={styles.counterBtn}
                           onClick={() => setAddonQty(a.id, addonQuantity(a.id) + 1)}
                           disabled={addonQuantity(a.id) >= a.qty_max}
                         >
                           +
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   </div>
@@ -392,50 +400,52 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
               </div>
             </div>
 
-            <div className={styles.summary}>
-              <h5 className={styles.summaryTitle}>Ваш чек лист:</h5>
-              <div className={styles.summaryList}>
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Радиус</span>
-                  <span className={styles.summaryValue}>{radiusLabel}</span>
-                </div>
-                {selectedBase ? (
+            {showSummary && (
+              <div className={styles.summary}>
+                <h5 className={styles.summaryTitle}>Ваш чек лист:</h5>
+                <div className={styles.summaryList}>
                   <div className={styles.summaryItem}>
-                    <span className={styles.summaryLabel}>Базовый комплекс</span>
-                    <span className={styles.summaryValueSecondary}>
-                      {selectedBase.name}
-                      {priceOf(selectedBase.id) ? ` - ${priceOf(selectedBase.id)} ₽` : ''}
-                    </span>
+                    <span className={styles.summaryLabel}>Радиус</span>
+                    <span className={styles.summaryValue}>{radiusLabel}</span>
                   </div>
-                ) : (
-                  <div className={styles.summaryItemMuted}>Базовый комплекс не выбран</div>
-                )}
-                <div className={styles.summaryItem}>
-                  <span className={styles.summaryLabel}>Доп. услуги</span>
-                  {addonDetails.length ? (
-                    <div className={styles.summaryExtras}>
-                      {addonDetails.map((detail) => (
-                        <div key={detail.id} className={styles.summaryExtraRow}>
-                          <span className={styles.summaryValueSecondary}>{detail.name}</span>
-                          <span className={styles.summaryQty}>× {detail.quantity}</span>
-                          {priceOf(detail.id) ? (
-                            <span className={styles.summaryValueSecondary}>
-                              - {priceOf(detail.id) * detail.quantity} ₽
-                            </span>
-                          ) : null}
-                        </div>
-                      ))}
+                  {selectedBase ? (
+                    <div className={styles.summaryItem}>
+                      <span className={styles.summaryLabel}>Базовый комплекс</span>
+                      <span className={styles.summaryValueSecondary}>
+                        {selectedBase.name}
+                        {priceOf(selectedBase.id) ? ` - ${priceOf(selectedBase.id)} ₽` : ''}
+                      </span>
                     </div>
                   ) : (
-                    <span className={styles.summaryValueSecondary}>не выбраны</span>
+                    <div className={styles.summaryItemMuted}>Базовый комплекс не выбран</div>
                   )}
-                </div>
-                <div className={`${styles.summaryItem} ${styles.summaryTotal}`}>
-                  <span className={styles.summaryLabel}>Итого</span>
-                  <span className={styles.summaryValue}>{total} ₽</span>
+                  <div className={styles.summaryItem}>
+                    <span className={styles.summaryLabel}>Доп. услуги</span>
+                    {addonDetails.length ? (
+                      <div className={styles.summaryExtras}>
+                        {addonDetails.map((detail) => (
+                          <div key={detail.id} className={styles.summaryExtraRow}>
+                            <span className={styles.summaryValueSecondary}>{detail.name}</span>
+                            <span className={styles.summaryQty}>× {detail.quantity}</span>
+                            {priceOf(detail.id) ? (
+                              <span className={styles.summaryValueSecondary}>
+                                - {priceOf(detail.id) * detail.quantity} ₽
+                              </span>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <span className={styles.summaryValueSecondary}>не выбраны</span>
+                    )}
+                  </div>
+                  <div className={`${styles.summaryItem} ${styles.summaryTotal}`}>
+                    <span className={styles.summaryLabel}>Итого</span>
+                    <span className={styles.summaryValue}>{total} ₽</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -469,33 +479,36 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
             />
             <div className={styles.quickDates}>
               {quickDates.map((day) => (
-                <button
+                <Button
                   type="button"
+                  variant="secondary"
+                  size="sm"
                   key={day.value}
                   className={`${styles.quickDateBtn} ${date === day.value ? styles.quickDateBtnActive : ''}`}
                   onClick={() => setDate(day.value)}
                 >
                   {day.label}
-                </button>
+                </Button>
               ))}
             </div>
             <div className={styles.slots}>
               {slots.map(s => (
-                <button
+                <Button
                   key={s}
                   type="button"
+                  variant="secondary"
                   className={`${styles.slot} ${selectedSlot === s ? styles.slotActive : ''}`}
                   onClick={() => setSelectedSlot(s)}
                   aria-pressed={selectedSlot === s}
                 >
                   {new Date(s).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </button>
+                </Button>
               ))}
               {slots.length === 0 && <div className={styles.emptyState}>Нет свободных слотов</div>}
             </div>
             {selectedSlot && (
               <div className={styles.dateSummary}>
-                <span className={styles.dateSummaryHighlight}>Вы бабрали запись на:</span>
+                <span className={styles.dateSummaryHighlight}>Вы выбрали запись на:</span>
                 <span className={styles.dateSummaryText}>
                   {new Date(selectedSlot).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'long' })}
                   {' в '}

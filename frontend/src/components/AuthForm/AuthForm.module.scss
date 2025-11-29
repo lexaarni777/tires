@@ -34,86 +34,18 @@
   color: $text-primary;                 // Основной цвет
 }
 
-.input {
-  width: 100%;                          // На всю ширину родителя
-  min-height: 2.75rem;                  // Единая высота
-  padding: 0 $space-16;                 // Горизонтальный отступ
-  border: 1px solid $border-color;      // Граница с переменной
-  border-radius: $radius-12;            // Скруглённые углы
-  font-size: 1em;                       // Размер шрифта
-  background-color: $surface;           // Фон по токенам
-
-  &:focus-visible {
-    outline: none;                      // Убираем обводку
-    box-shadow: var(--shadow-focus);    // Фокус-кольцо
-  }
-
-  &::placeholder {
-    color: $text-muted;
-  }
-}
-
-.inputMargBot{
-  margin-bottom: 16px;
-}
-
-.select {
-  @extend .input;                       // Наследуем стили от input
-}
-
-.button {
-  width: 100%;                          // На всю ширину
-  padding: 10px;                        // Внутренний отступ
-  background-color: $primary;           // Синий фон
-  color: #fff;                          // Белый текст
-  border: none;                         // Без рамки
-  border-radius: $radius-12;            // Скруглённые углы
-  cursor: pointer;                      // Курсор — рука
-  transition: background-color 0.3s;    // Плавное наведение
-  font-size: 1em;                       // Размер текста
-
-  &:hover {
-    background-color: tone($primary, 8, 'darken'); // Темнее при наведении
-  }
-
-  &:disabled {
-    background-color: tone($primary, 30, 'lighten'); // Осветление при загрузке
-    cursor: not-allowed;                      // Курсор запрета
-  }
-}
-
 .buttonBorder{
-  border: 1px solid $primary;
   margin-top: 16px;
 }
 
 .buttonBorderPass{
-  border: 1px solid $primary;
   margin-left: auto;
   min-height: 2rem;
 }
 
 .buttonMarginTop{
   margin-top: 16px;
-  margin-right: 16px;
-}
-
-
-.toggleButton {
-  width: 100%;                          // На всю ширину
-  padding: 10px;                        // Отступ
-  background-color: $accent;            // Оранжевый фон
-  color: #fff;                          // Белый текст
-  border: none;                         // Без рамки
-  border-radius: $radius-12;            // Скругление
-  cursor: pointer;                      // Курсор
-  transition: background-color 0.3s;    // Плавное наведение
-  font-size: 1em;                       // Размер текста
-  margin-top: 10px;                     // Отступ сверху
-
-  &:hover {
-    background-color: tone($accent, 8, 'darken'); // Темнее при наведении
-  }
+  align-self: flex-start;
 }
 
 .loading {
@@ -129,28 +61,15 @@
   font-weight: 500;                    // Менее агрессивно
 }
 
-.inputError {
-  border-color: $danger;
-}
-
 .helpText {
   font-size: 0.875rem;
   color: $text-muted;
   margin-top: 6px;
 }
 
-.inputWrap {
-  position: relative;
-  margin-bottom: 16px;
-}
-
 .eyeBtn {
-  position: absolute;
-  right: 8px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
+  width: 100%;
+  height: 100%;
   display: inline-flex;
   align-items: center;
   justify-content: center;

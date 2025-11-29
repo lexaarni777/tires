@@ -1,6 +1,8 @@
 @import '../../styles/_mixins.scss';
 
 .wrapper {
+  max-width: 1440px;
+  margin: 0 auto;
   padding: clamp(1.25rem, 2vw, 2.5rem);
   display: flex;
   flex-direction: column;

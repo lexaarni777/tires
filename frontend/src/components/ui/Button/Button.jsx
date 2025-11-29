@@ -7,19 +7,21 @@ const Button = forwardRef(
   (
     {
       as: Component = 'button',
-      variant = 'primary',
+      variant = 'default', // 'primary' | 'secondary' | 'tertiary' | 'danger'
       size = 'md',
       fullWidth = false,
       icon,
       iconPosition = 'left',
-      loading = false,
+      loading = false, 
       disabled = false,
       className,
       children,
+      depth = 'flat', // 'flat' | 'raised' | 'sunken'
       ...rest
     },
     ref
   ) => {
+    console.log('...rest:', rest);
     const variantClass = styles[`variant${capitalize(variant)}`];
     const sizeClass = size !== 'md' ? styles[`size${capitalize(size)}`] : null;
     const fullWidthClass = fullWidth ? styles.fullWidth : null;
@@ -28,7 +30,8 @@ const Button = forwardRef(
     const iconOnlyClass = iconOnly ? styles.iconOnly : null;
     const withIconClass = hasIcon && !iconOnly ? styles.withIcon : null;
     const loadingClass = loading ? styles.loading : null;
-
+    const depthClass = depth === 'raised' ? styles.neoRaised : depth === 'sunken' ? styles.neoSunken : depth === 'sunkeninp' ? styles.neoSunkenInp : styles.neoFlat  ;
+    console.log('variantClass', variantClass);
     const classes = [
       styles.root,
       variantClass,
@@ -37,6 +40,7 @@ const Button = forwardRef(
       iconOnlyClass,
       withIconClass,
       loadingClass,
+      depthClass,
       className,
     ]
       .filter(Boolean)
@@ -49,6 +53,7 @@ const Button = forwardRef(
       ref,
       ...rest,
     };
+
 
     if (isButtonElement) {
       componentProps.type = rest.type || 'button';

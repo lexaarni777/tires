@@ -235,21 +235,21 @@
   gap: var(--sp-8);
   padding: var(--sp-8) var(--sp-12);
   min-height: 2.75rem;
-  border-radius: var(--radius-12);
-  border: 1px solid var(--c-line);
-  background-color: var(--c-surface);
-  color: var(--c-text);
+  //border-radius: var(--radius-12);
+  //border: 1px solid var(--c-line);
+  //background-color: var(--c-surface);
+  //color: var(--c-text);
   font-weight: 600;
   cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
+  //transition: border-color 0.2s ease, color 0.2s ease, background-color 0.2s ease;
 
   svg {
     font-size: 1.25rem;
   }
 
   &:hover {
-    border-color: var(--c-primary);
-    color: var(--c-primary);
+    //border-color: var(--c-primary);
+    //color: var(--c-primary);
   }
 }
 

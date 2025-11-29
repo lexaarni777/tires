@@ -3,7 +3,7 @@ import styles from './Account.module.scss'; // Импортируем стили
 import { useDispatch, useSelector } from 'react-redux'; // Импортируем хуки для работы с Redux
 import { NavLink, useNavigate} from 'react-router-dom'; // Импортируем NavLink для навигации между страницами
 import { logout } from '../../slices/authSlice'; // Импортируем действие для выхода из аккаунта
-import { clearCart } from '../../slices/cartSlice'; // Импортируем действие для очистки корзины
+import Button from '../ui/Button';
 
 const Account = () => {
     // Получаем данные пользователя из состояния Redux
@@ -30,23 +30,74 @@ const Account = () => {
             </div>
             {/* Действия пользователя */}
             <div className={styles.actions}>
-                <button 
-                    className={styles.button}
+                <Button
+                    type="button"
+                    variant="primary"
+                    className={styles.actionButton}
                     onClick={() => navigate('/account/edit')}
-                >Редактировать профиль</button>
-                {/* Ссылки на другие страницы */}
-                <NavLink to="/addproduct">Добавить продукт</NavLink>
-                <NavLink to="/usermanagement">Менеджер пользователей</NavLink>
-                <NavLink to="/orders">Мои заказы</NavLink>
-                <NavLink to="/account/bookings">Записи шиномонтажа</NavLink>
+                >
+                    Редактировать профиль
+                </Button>
+                <Button
+                    as={NavLink}
+                    to="/addproduct"
+                    variant="secondary"
+                    className={styles.actionButton}
+                >
+                    Добавить продукт
+                </Button>
+                <Button
+                    as={NavLink}
+                    to="/usermanagement"
+                    variant="secondary"
+                    className={styles.actionButton}
+                >
+                    Менеджер пользователей
+                </Button>
+                <Button
+                    as={NavLink}
+                    to="/orders"
+                    variant="secondary"
+                    className={styles.actionButton}
+                >
+                    Мои заказы
+                </Button>
+                <Button
+                    as={NavLink}
+                    to="/account/bookings"
+                    variant="secondary"
+                    className={styles.actionButton}
+                >
+                    Записи шиномонтажа
+                </Button>
                 {roles.includes('admin') && (
                   <>
-                    <NavLink to="/admin/orders">Админ: заказы</NavLink>
-                    <NavLink to="/admin/tyre-booking">Админ: шиномонтаж</NavLink>
+                    <Button
+                      as={NavLink}
+                      to="/admin/orders"
+                      variant="secondary"
+                      className={styles.actionButton}
+                    >
+                      Админ: заказы
+                    </Button>
+                    <Button
+                      as={NavLink}
+                      to="/admin/tyre-booking"
+                      variant="secondary"
+                      className={styles.actionButton}
+                    >
+                      Админ: шиномонтаж
+                    </Button>
                   </>
                 )}
-                {/* Кнопка для выхода из аккаунта */}
-                <button className={styles.button} onClick={() => dispatch(logout())}>Выйти</button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  className={styles.actionButton}
+                  onClick={() => dispatch(logout())}
+                >
+                  Выйти
+                </Button>
             </div>
         </div>
     );

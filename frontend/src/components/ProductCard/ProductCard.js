@@ -345,6 +345,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                   className={styles.qtyBtn}
                   data-qa="qty_dec"
                   disabled={cartItem.quantity === 1}
+                  depth="raised"
                 />
                 {/* Кнопка "+" — вызывает handleIncrement; дизейблится если достигнут максимум по складу */}
                 <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
@@ -361,7 +362,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
                 />
                 {/* Кнопка "-" — вызывает handleDecrement */}
               </div>
-              <Button variant="accent" className={styles.goToCartPC} onClick={handleGoToCart} data-qa="go_to_cart">
+              <Button variant="accent-low" className={styles.goToCartPC} onClick={handleGoToCart} data-qa="go_to_cart" depth="raised">
                 Перейти в корзину
               </Button>
               {/* Кнопка "Перейти в корзину" — вызывает handleGoToCart */}
@@ -371,10 +372,11 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
             <>
             
               <Button
-                variant="accent"
+                variant="accent-low"
                 onClick={handleAddToCart}
                 disabled={!selectedStockId || (selectedStock?.stock || 0 ) < 1}
                 data-qa="add_to_cart"
+                depth="raised"
               >
                 Добавить в корзину
               </Button>
@@ -387,7 +389,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
           {auth.roles && auth.roles.indexOf("admin") !== -1 && (
             // Проверяем, что пользователь — админ (есть роль "admin")
             <div className={styles.adminControls}>
-              <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); onEdit(product); }}>Редактировать</Button>
+              <Button size="sm" variant="secondary" onClick={(e) => { e.stopPropagation(); onEdit(product); } } depth="raised" >Редактировать</Button>
               {/* Кнопка "Редактировать" — вызывает onEdit с объектом product */}
               <Button size="sm" variant="danger" onClick={(e) => { e.stopPropagation(); onDelete(product.id); }}>Удалить</Button>
               {/* Кнопка "Удалить" — вызывает onDelete с ID товара */}

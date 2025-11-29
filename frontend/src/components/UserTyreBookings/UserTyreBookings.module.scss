@@ -1,10 +1,381 @@
-.wrapper { padding: 16px; }
-.actions { display: flex; gap: 8px; margin-bottom: 12px; }
-.table { width: 100%; border-collapse: collapse; }
-.table th, .table td { padding: 8px; border-bottom: 1px solid #eee; text-align: left; }
-.slotGrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px,1fr)); gap: 8px; margin-top: 8px; }
-.slotBtn { padding: 8px; border: 1px solid #e5e7eb; border-radius: 6px; background: #fff; cursor: pointer; }
-.empty { padding: 16px; color: #555; }
-.notice { margin: 8px 0; padding: 8px 12px; border-radius: 6px; background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
-.noticeError { margin: 8px 0; padding: 8px 12px; border-radius: 6px; background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
-.highlight { background: #fff7ed; }
+@import '../../styles/_mixins.scss';
+
+.wrapper {
+  padding: clamp(1.25rem, 2vw, 2.75rem);
+  border-radius: var(--radius-ai-lg, 1rem);
+  background: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--c-bg, #f4f6f8) 85%, #ffffff 15%),
+    color-mix(in srgb, var(--c-bg, #f4f6f8) 60%, #ffffff 40%)
+  );
+  box-shadow: var(--shadow-raised, 0.35rem 0.35rem 1rem rgba(15, 23, 42, 0.15), -0.35rem -0.35rem 1rem rgba(255, 255, 255, 0.9));
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-16, 1rem);
+}
+
+.headerRow {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-12, 0.75rem);
+}
+
+.title {
+  margin: 0;
+  font-size: clamp(1.25rem, 2vw, 1.75rem);
+  font-weight: 700;
+  color: var(--c-text, #111826);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-10, 0.65rem);
+}
+
+.actionButton {
+  min-height: 2.6rem;
+  max-height: 2.6rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: var(--radius-ai-md, 0.875rem);
+  padding: 0.65rem 1.2rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+  background: color-mix(in srgb, var(--c-surface, #fff) 92%, var(--c-bg, #eff4fb) 8%);
+  color: var(--c-primary, #0057b8);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12), -0.2rem -0.2rem 0.6rem rgba(255, 255, 255, 0.9));
+  cursor: pointer;
+  transition: box-shadow var(--transition-ai, 220ms ease), transform 120ms ease;
+}
+
+.actionButton:hover {
+  box-shadow: inset 0.1rem 0.1rem 0.3rem rgba(15, 23, 42, 0.12), inset -0.1rem -0.1rem 0.3rem rgba(255, 255, 255, 0.8);
+}
+
+.actionButton:active {
+  transform: translateY(1px);
+}
+
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+.tableWrapper {
+  border-radius: var(--radius-ai-lg, 1rem);
+  background: color-mix(in srgb, var(--c-surface, #fff) 96%, var(--c-bg, #f4f6f8) 4%);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.8rem rgba(15, 23, 42, 0.12));
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  min-width: 720px;
+}
+
+.table th {
+  text-align: left;
+  font-size: 0.85rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--c-text-muted, #5b6578);
+  padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--c-bg, #f4f6f8) 70%, var(--c-surface, #fff) 30%);
+}
+
+.table td {
+  padding: 1rem;
+  border-top: 1px solid rgba(233, 237, 242, 0.8);
+  color: var(--c-text, #111826);
+  font-size: 0.95rem;
+}
+
+.tableActions {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.rescheduleRow {
+  background: transparent;
+}
+
+.reschedulePanel {
+  margin-top: 0.5rem;
+  padding: 1rem;
+  border-radius: var(--radius-ai-lg, 1rem);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: color-mix(in srgb, var(--c-bg, #f6f8fa) 92%, #fff 8%);
+  box-shadow: inset 0.08rem 0.08rem 0.25rem rgba(15, 23, 42, 0.08), inset -0.08rem -0.08rem 0.25rem rgba(255, 255, 255, 0.75);
+}
+
+.rescheduleHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  font-weight: 600;
+  color: var(--c-text, #111826);
+}
+
+.rescheduleContent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-12, 0.75rem);
+}
+
+.table tr:first-of-type td {
+  border-top: none;
+}
+
+.tableRow {
+  transition: box-shadow var(--transition-ai, 220ms ease), transform 120ms ease;
+}
+
+.tableRow:hover {
+  box-shadow: inset 0.05rem 0.05rem 0.25rem rgba(15, 23, 42, 0.08), inset -0.05rem -0.05rem 0.25rem rgba(255, 255, 255, 0.7);
+}
+
+.highlight {
+  background: color-mix(in srgb, var(--c-accent, #ff8748) 10%, var(--c-surface, #fff) 90%);
+  box-shadow: inset 0.1rem 0.1rem 0.3rem rgba(15, 23, 42, 0.08);
+}
+
+.notice,
+.noticeError {
+  margin: 0;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-ai-md, 0.875rem);
+  border: 1px solid transparent;
+  box-shadow: var(--shadow-raised, 0.2rem 0.2rem 0.6rem rgba(15, 23, 42, 0.12));
+}
+
+.notice {
+  background: color-mix(in srgb, #ecfdf5 85%, #ffffff 15%);
+  border-color: #a7f3d0;
+  color: #065f46;
+}
+
+.noticeError {
+  background: color-mix(in srgb, #fef2f2 85%, #ffffff 15%);
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.empty {
+  padding: 1.5rem;
+  border-radius: var(--radius-ai-lg, 1rem);
+  border: 1px dashed rgba(15, 23, 42, 0.2);
+  background: color-mix(in srgb, var(--c-bg, #f4f6f8) 92%, #ffffff 8%);
+  text-align: center;
+  color: var(--c-text-muted, #5b6578);
+  box-shadow: var(--shadow-inset, inset 0.1rem 0.1rem 0.35rem rgba(15, 23, 42, 0.08));
+}
+
+.empty button {
+  margin-top: 0.75rem;
+  @extend .actionButton;
+}
+
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.statusConfirmed {
+  background: color-mix(in srgb, #d1fae5 80%, #ffffff 20%);
+  color: #065f46;
+}
+
+.statusCancelled {
+  background: color-mix(in srgb, #fee2e2 80%, #ffffff 20%);
+  color: #991b1b;
+}
+
+.slotGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr));
+  gap: var(--sp-8, 0.5rem);
+  margin-top: 0.75rem;
+}
+
+.slotBtn {
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-ai-md, 0.875rem);
+  border: 1px solid rgba(233, 237, 242, 0.8);
+  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f4f6f8) 5%);
+  box-shadow: var(--shadow-raised, 0.2rem 0.2rem 0.5rem rgba(15, 23, 42, 0.12));
+  cursor: pointer;
+  font-weight: 600;
+  transition: box-shadow var(--transition-ai, 220ms ease), transform 120ms ease;
+}
+
+.slotBtn:hover {
+  box-shadow: inset 0.08rem 0.08rem 0.28rem rgba(15, 23, 42, 0.12), inset -0.08rem -0.08rem 0.28rem rgba(255, 255, 255, 0.85);
+}
+
+.slotBtn:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-glow, 0 0 1.25rem rgba(0, 120, 255, 0.3));
+}
+
+.noSlots {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--c-text-muted, #5b6578);
+  font-size: 0.85rem;
+}
+
+.dateInput {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--radius-ai-md, 0.875rem);
+  border: 1px solid rgba(233, 237, 242, 0.8);
+  background: color-mix(in srgb, var(--c-surface, #fff) 95%, #eef2ff 5%);
+  box-shadow: inset 0.08rem 0.08rem 0.25rem rgba(15, 23, 42, 0.08);
+}
+
+.mobileList {
+  display: none;
+  flex-direction: column;
+  gap: var(--sp-12, 0.75rem);
+}
+
+.bookingCard {
+  border-radius: var(--radius-ai-lg, 1rem);
+  padding: 1rem;
+  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f4f6f8) 5%);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.8rem rgba(15, 23, 42, 0.12));
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.bookingCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bookingMeta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--c-text, #111826);
+}
+
+.cardActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.quickDates {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-8, 0.5rem);
+}
+
+.quickDateBtn {
+  width: 7rem;
+  border-radius: var(--radius-ai-md, 0.75rem);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f6f8fa) 5%);
+  padding: 0.75rem;
+  font-weight: 500;
+  font-size: 0.85rem;
+  cursor: pointer;
+  box-shadow: 0.12rem 0.12rem 0.3rem rgba(15, 23, 42, 0.1), inset -0.12rem -0.12rem 0.3rem rgba(255, 255, 255, 0.8);
+  transition: transform 120ms ease, box-shadow var(--transition-ai, 220ms ease);
+}
+
+.quickDateBtn:hover {
+  box-shadow: inset 0.14rem 0.14rem 0.35rem rgba(15, 23, 42, 0.15), inset -0.14rem -0.14rem 0.35rem rgba(255, 255, 255, 0.85);
+  font-weight: 600;
+}
+
+.quickDateBtnActive {
+  font-weight: 600;
+  color: var(--c-primary, #0057b8);
+  border-color: color-mix(in srgb, var(--c-primary, #0057b8) 40%, transparent 60%);
+  box-shadow: inset 0.14rem 0.14rem 0.35rem rgba(15, 23, 42, 0.15), inset -0.14rem -0.14rem 0.35rem rgba(255, 255, 255, 0.85);
+}
+
+.slotSelected {
+  border-color: color-mix(in srgb, var(--c-primary, #0057b8) 40%, transparent 60%);
+  box-shadow: inset 0.08rem 0.08rem 0.25rem rgba(15, 23, 42, 0.12), inset -0.08rem -0.08rem 0.25rem rgba(255, 255, 255, 0.85);
+  color: var(--c-primary, #0057b8);
+}
+
+.rescheduleActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--sp-8, 0.5rem);
+}
+
+.dateSummary {
+  margin-top: var(--sp-12, 0.75rem);
+  padding: var(--sp-10, 0.65rem) var(--sp-14, 0.9rem);
+  border-radius: var(--radius-ai-md, 0.875rem);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: var(--c-bg, #f6f8fa);
+  box-shadow: inset 0.12rem 0.12rem 0.35rem rgba(15, 23, 42, 0.08), inset -0.12rem -0.12rem 0.35rem rgba(255, 255, 255, 0.65);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-6, 0.4rem);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: color-mix(in srgb, var(--c-text, #111826) 70%, var(--c-text-muted, #5b6578) 30%);
+}
+
+.dateSummaryHighlight {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--c-primary, #0057b8);
+  text-transform: uppercase;
+}
+
+.dateSummaryText {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--c-text, #111826);
+  text-transform: none;
+  letter-spacing: 0.01em;
+}
+
+@include respond(md) {
+  .tableWrapper {
+    display: none;
+  }
+
+  .mobileList {
+    display: flex;
+  }
+}
+
+@include respond(sm) {
+  .actions {
+    width: 100%;
+    justify-content: center;
+  }
+}

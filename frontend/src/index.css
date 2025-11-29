@@ -54,12 +54,12 @@ a {
   color: inherit;
 }
 
-:focus-visible {
+/* :focus-visible {
   outline: none;
   box-shadow: var(--shadow-focus);
   border-radius: var(--radius-8);
 }
-
+ */
 code {
   font-family: 'Roboto Mono', source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
 }

@@ -69,12 +69,14 @@ const Orders = () => {
         <div key={order.order_id} className={styles.orders__card}>
 
           <div className={styles.orders__top}>
-          <button
+          <Button
+            type="button"
+            variant="tertiary"
             className={styles.orders__toggle}
             onClick={() => setOpenOrderId(openOrderId === order.order_id ? null : order.order_id)}
           >
             № {order.order_id}
-          </button>
+          </Button>
             <span className={styles.orders__date}>
               {new Date(order.created_at).toLocaleString()}
             </span>
@@ -108,7 +110,6 @@ const Orders = () => {
                   const r = radiusFromOrder(order);
                   navigate(r ? `/booking?radius=${encodeURIComponent(r)}` : '/booking');
                 }}
-                style={{ marginLeft: 8 }}
               >
                 Записаться на шиномонтаж
               </Button>
@@ -130,7 +131,17 @@ const Orders = () => {
               <p><strong>Доставка:</strong> {order.address}</p>
             )}
             {order.booking_id && (
-              <p><strong>Шиномонтаж:</strong> записаны №{order.booking_id} — <button className={styles.linkButton} onClick={()=>navigate(`/account/bookings#${order.booking_id}`)}>перейти</button></p>
+              <p>
+                <strong>Шиномонтаж:</strong> записаны №{order.booking_id} —{' '}
+                <Button
+                  type="button"
+                  variant="tertiary"
+                  className={styles.linkButton}
+                  onClick={() => navigate(`/account/bookings#${order.booking_id}`)}
+                >
+                  перейти
+                </Button>
+              </p>
             )}
         </div>
 

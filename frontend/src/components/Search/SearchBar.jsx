@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SearchBar.module.scss';
 import { getThumbnailPath } from '../../utils/thumb';
+import Input from '../ui/Input';
 
 const DEBOUNCE_MS = 300;
 
@@ -137,7 +138,7 @@ const SearchBar = () => {
 
   return (
     <div className={styles.wrap} ref={wrapRef}>
-      <input
+      <Input
         type="search"
         placeholder="Поиск по каталогу..."
         value={term}
@@ -148,6 +149,8 @@ const SearchBar = () => {
         aria-controls="search-suggest"
         aria-autocomplete="list"
         className={styles.input}
+        fullWidth
+        depth="sunkeninp"
       />
       {open && (
         <div className={styles.dropdown} role="listbox" id="search-suggest">
