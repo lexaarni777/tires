@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../../slices/productSlice";
@@ -9,6 +9,8 @@ import Button from "../ui/Button";
 import { deleteProduct } from "../../slices/productSlice";
 import { warehouseList } from "../../constants/warehouseList";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+const DEFAULT_TITLE = 'MSKTires';
+const DEFAULT_DESCRIPTION = 'MSKTires — каталог шин и дисков';
 
 
 
@@ -33,6 +35,7 @@ const ProductDetailed = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const auth = useSelector((state) => state.auth);
   const selectedCity = useSelector(state => state.city.selectedCity);
+  // Список складов, которые относятся к выбранному пользователем городу.
   const cityWarehouses = warehouseList
   .filter(w => w.city === selectedCity)
   .map(w => w.location);
@@ -48,6 +51,12 @@ const ProductDetailed = () => {
   const filteredProductStock = productStock.filter(s => cityWarehouses.includes(s.location));
   // Склад выбранный пользователем (по умолчанию — первый)
   const [selectedStockId, setSelectedStockId] = useState(filteredProductStock[0]?.id || null);
+  const selectedStock = filteredProductStock.find((s) => s.id === selectedStockId);
+  const hasCityStock = filteredProductStock.length > 0;
+  const alternativeWarehouses = useMemo(
+    () => productStock.filter(s => !cityWarehouses.includes(s.location)),
+    [productStock, cityWarehouses]
+  );
 
   // cartItem: позиция товара в корзине по productId и складу
   const cartItem = cartItems.find(
@@ -179,6 +188,92 @@ const handleAddToCart = (e) => {
     ? `${API_URL}${galleryImages[activeIndex].image_path}`
     : getFeaturedImage();
 
+  // Подсчитываем общий остаток по выбранному городу и минимальную цену среди складов.
+  const totalCityStock = filteredProductStock.reduce((sum, s) => sum + (s.stock || 0), 0);
+  const minPrice = useMemo(() => {
+    const prices = filteredProductStock.map(s => s.price_retail).filter(p => p != null);
+    return prices.length ? Math.min(...prices) : null;
+  }, [filteredProductStock]);
+
+  const canonicalUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+  // Универсальный хелпер: создаёт/обновляет тег meta/link в <head>.
+  const updateMetaTag = (selector, attr, value) => {
+    if (typeof document === 'undefined') return;
+    if (!value) return;
+    let tag = document.head.querySelector(selector);
+    if (!tag) {
+      tag = document.createElement(selector.startsWith('meta') ? 'meta' : 'link');
+      if (selector.includes('[name="')) {
+        const name = selector.match(/name="(.+?)"/)?.[1];
+        if (name) tag.setAttribute('name', name);
+      }
+      if (selector.includes('[property="')) {
+        const property = selector.match(/property="(.+?)"/)?.[1];
+        if (property) tag.setAttribute('property', property);
+      }
+      if (selector.includes('[rel="canonical"')) {
+        tag.setAttribute('rel', 'canonical');
+      }
+      document.head.appendChild(tag);
+    }
+    tag.setAttribute(attr, value);
+  };
+
+  // SEO-блок: обновляем <title>, description и og/канонические теги для конкретного товара.
+  useEffect(() => {
+    if (!product) return;
+    const fullTitle = `${product.brand ? `${product.brand} ` : ''}${product.name} – купить шины в MSKTires`;
+    const description = product.description?.slice(0, 160) || `Характеристики и наличие шины ${product.name}`;
+    const prevTitle = document.title;
+    const prevDescription = document.head.querySelector('meta[name="description"]')?.getAttribute('content') || DEFAULT_DESCRIPTION;
+
+    document.title = fullTitle;
+    updateMetaTag('meta[name="description"]', 'content', description);
+    updateMetaTag('link[rel="canonical"]', 'href', canonicalUrl);
+    updateMetaTag('meta[property="og:title"]', 'content', fullTitle);
+    updateMetaTag('meta[property="og:description"]', 'content', description);
+    updateMetaTag('meta[property="og:url"]', 'content', canonicalUrl);
+    updateMetaTag('meta[property="og:image"]', 'content', getFeaturedImage());
+
+    return () => {
+      document.title = prevTitle || DEFAULT_TITLE;
+      updateMetaTag('meta[name="description"]', 'content', prevDescription);
+    };
+  }, [product, canonicalUrl]);
+
+  // Structured Data: внедряем Product-schema, чтобы поисковик понимал цену и наличие.
+  useEffect(() => {
+    if (!product) return;
+    const scriptId = 'product-schema';
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      image: getFeaturedImage(),
+      description: product.description,
+      sku: product.article,
+      brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+      offers: {
+        '@type': 'Offer',
+        priceCurrency: 'RUB',
+        price: selectedStock?.price_retail ?? minPrice ?? undefined,
+        availability: totalCityStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+        url: canonicalUrl
+      }
+    };
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.id = scriptId;
+    script.text = JSON.stringify(schema);
+    const existing = document.getElementById(scriptId);
+    if (existing) existing.remove();
+    document.head.appendChild(script);
+    return () => {
+      document.getElementById(scriptId)?.remove();
+    };
+  }, [product, selectedStock, minPrice, totalCityStock, canonicalUrl]);
+
 
 
   // Если идёт загрузка
@@ -189,13 +284,7 @@ const handleAddToCart = (e) => {
     return <div className={styles.notFound}>Товар не найден</div>;
   }
 
-  // Рендер
-  const selectedStock = filteredProductStock.find((s) => s.id === selectedStockId);
-  const totalCityStock = filteredProductStock.reduce((sum, s) => sum + (s.stock || 0), 0);
-  const minPrice = (() => {
-    const prices = filteredProductStock.map(s => s.price_retail).filter(p => p != null);
-    return prices.length ? Math.min(...prices) : null;
-  })();
+  // Форматирование цен (без копеек) для UI.
   const formatPrice = (val) => {
     if (val == null) return '-';
     try {
@@ -209,6 +298,13 @@ const handleAddToCart = (e) => {
 
   return (
     <div className={styles.page}>
+    <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
+      <ol>
+        <li><NavLink to="/">Главная</NavLink></li>
+        <li><NavLink to="/productlist">Каталог</NavLink></li>
+        <li aria-current="page">{product.name}</li>
+      </ol>
+    </nav>
     <NavLink to="/productlist" className={styles.backLink} data-qa="productd_back">← К каталогу</NavLink>
     <div className={styles.detailedWrap} data-qa="product_detailed">
       {/* Блок с фото и названием */}
@@ -296,6 +392,11 @@ const handleAddToCart = (e) => {
             filteredProductStock[0] && (
               <span className={styles.warehouseLabel}>Склад: {filteredProductStock[0].location}</span>
             )
+          )}
+          {!hasCityStock && productStock.length > 0 && (
+            <p className={styles.noCityStock}>
+              В городе {selectedCity} нет остатков, но товар доступен на складах: {alternativeWarehouses.map(w => w.location).join(', ')}.
+            </p>
           )}
         </div>
 

@@ -144,6 +144,35 @@
 .qtyBtn { width: 2.5rem; height: 2.5rem; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
 
 .backLink { display: inline-block; margin: 0 0 $space-16; color: $primary; text-decoration: none; }
+.breadcrumbs {
+  margin-bottom: $space-12;
+  font-size: .875rem;
+  color: $text-muted;
+  ol {
+    display: flex;
+    list-style: none;
+    gap: $space-8;
+    padding: 0;
+    margin: 0;
+  }
+  li::after {
+    content: '/';
+    margin-left: $space-8;
+    color: $text-muted;
+  }
+  li:last-child::after {
+    content: '';
+  }
+  a {
+    color: $primary;
+    text-decoration: none;
+  }
+}
+.noCityStock {
+  margin-top: $space-8;
+  color: $accent;
+  font-size: .875rem;
+}
 
 /* Блок кнопок + и - */
 .BlockAddToCartBut {
