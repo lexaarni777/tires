@@ -295,6 +295,7 @@
 .navOpen {
   display: block !important;
   position: absolute;
+  z-index: 10;
 }
 
 .menu {
@@ -452,7 +453,7 @@
 
 }
 
-@media (max-width: 790px) {
+@media (max-width: 810px) {
   .utilityTextFerst span{
     width: 150px;
   }
@@ -465,37 +466,37 @@
 
 }
 
-@media (max-width:750px) {
+@media (max-width:760px) {
   .socialBtnVk {
     display: none;
   }
 
 }
 
-@media (max-width: 690px) {
+@media (max-width: 705px) {
   .utilityTextFerst {
    display: none;
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 670px) {
   .citySelectorDesc {
    display: none;
   }
 }
-@media (max-width: 640px) {
+@media (max-width: 670px) {
   .citySelectorMob {
    display: inline-flex;
   }
 }
 
-@media (max-width: 500px) {
+@media (max-width: 515px) {
   .socialBtnIns {
    display: none;
   }
 }
 
-@media (max-width: 450px) {
+@media (max-width: 460px) {
 .utilityGroup {
   gap: var(--sp-4);
 }

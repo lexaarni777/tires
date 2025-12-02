@@ -19,7 +19,7 @@
   padding: 0.75rem 0.5rem;
   border-radius: var(--radius-ai-md, 0.875rem);
   border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
-  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f6f8fa) 5%);
+  //background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f6f8fa) 5%);
   
   box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.625rem rgba(15, 23, 42, 0.15));
   aspect-ratio: 1 / 1;
@@ -52,7 +52,7 @@
 }
 
 .input:checked + .body {
-  background: color-mix(in srgb, var(--c-surface, #fff) 90%, #eef2ff 10%);
+  //background: color-mix(in srgb, var(--c-surface, #fff) 90%, #eef2ff 10%);
   border-color: color-mix(in srgb, var(--c-primary, #0057b8) 30%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%);
   box-shadow: inset 0.12rem 0.12rem 0.35rem rgba(15, 23, 42, 0.15), inset -0.12rem -0.12rem 0.35rem rgba(255, 255, 255, 0.65);
 }
