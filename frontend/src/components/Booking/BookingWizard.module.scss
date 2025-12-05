@@ -129,12 +129,11 @@
   border-radius: var(--radius-ai-md, 0.875rem);
   padding: clamp(1rem, 1vw + 0.8rem, 1.5rem);
   border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
-  //background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f6f8fa) 5%);
   box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.625rem rgba(15, 23, 42, 0.12));
 }
 
 .columnPrimary {
-  //background: color-mix(in srgb, var(--c-surface, #fff) 90%, #f0f4ff 10%);
+  
 }
 
 .columnSecondary {
@@ -179,7 +178,7 @@
   align-items: center;
   gap: 0.5rem;
   justify-content: space-between;
-  height: 2.5rem;
+  margin-bottom: 1rem;
 }
 
 .subsectionActions {
@@ -235,6 +234,7 @@
 .badgeInfo {
   background: color-mix(in srgb, var(--c-primary, #0057b8) 15%, var(--c-surface, #fff) 85%);
   color: var(--c-primary-600, #004a9c);
+  margin-left: auto;
 }
 
 .badgeAccent {
