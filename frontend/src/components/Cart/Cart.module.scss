@@ -306,7 +306,7 @@
 
 @include respond(md) {
   .cartLayout {
-    grid-template-columns: minmax(450px, 1fr);
+    grid-template-columns: minmax(414px, 1fr);
   }
 
   .summaryColumn {
@@ -330,5 +330,11 @@
  }
  .itemsHeader {
   margin-left: 0.5rem;
+}
+.itemCheckbox{
+  position: absolute;
+}
+.cartItemHeadFerst{
+  align-items: flex-start;
 }
 }
