@@ -185,7 +185,7 @@
   .BlockAddToCartBut {
 
     flex-direction: row;
-    align-items: stretch;           // Растягивание элементов
+    //align-items: center;           // Растягивание элементов
     max-height: 60px;
     button, input {
       width: 100%;                  // На всю ширину блока
