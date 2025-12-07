@@ -9,6 +9,7 @@ import store from '../../slices/store';
 import Button from '../ui/Button';
 import Radio from '../ui/Radio';
 import RadioTile from './RadioTile';
+import QuantityControl from '../Cart/QuantityControl';
 
 const radiusOptions = [
   { value: 'R13-15', label: 'R13–15' },
@@ -371,29 +372,17 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
                     <span className={`${styles.rowLabel} ${styles.rowLabelStretch}`}>{a.name}</span>
                     <div className={styles.addonMeta}>
                       {priceOf(a.id) ? <small className={styles.priceTag}>{priceOf(a.id)} ₽/шт</small> : null}
-                      <div className={styles.addonCounter}>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className={styles.counterBtn}
-                          onClick={() => setAddonQty(a.id, addonQuantity(a.id) - 1)}
-                          disabled={addonQuantity(a.id) <= 0}
-                        >
-                          −
-                        </Button>
-                        <div className={styles.counterValue}>{addonQuantity(a.id)}</div>
-                        <Button
-                          type="button"
-                          variant="secondary"
-                          size="sm"
-                          className={styles.counterBtn}
-                          onClick={() => setAddonQty(a.id, addonQuantity(a.id) + 1)}
-                          disabled={addonQuantity(a.id) >= a.qty_max}
-                        >
-                          +
-                        </Button>
-                      </div>
+                      <QuantityControl
+                        value={addonQuantity(a.id)}
+                        min={0}
+                        max={a.qty_max}
+                        onDecrement={() => setAddonQty(a.id, addonQuantity(a.id) - 1)}
+                        onIncrement={() => setAddonQty(a.id, addonQuantity(a.id) + 1)}
+                        variant="secondary"
+                        size="sm"
+                        qaPrefix="addon_qty"
+                        className={styles.addonCounter}
+                      />
                     </div>
                   </div>
                 ))}

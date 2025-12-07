@@ -21,7 +21,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow: inset 0.12rem 0.12rem 0.3rem rgba(15, 23, 42, 0.15), inset -0.12rem -0.12rem 0.3rem rgba(255, 255, 255, 0.75);
+  box-shadow: 
+    inset 0.1rem 0.1rem 0.25rem #c1c2c4,  // тёмная внутренняя тень снизу-справа
+    inset -0.1rem -0.1rem 0.25rem #f3f3f3; // светлая внутренняя тень сверху-слева
   transition: border-color var(--transition-ai, 220ms ease), box-shadow var(--transition-ai, 220ms ease), background var(--transition-ai, 220ms ease);
 }
 

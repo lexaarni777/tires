@@ -23,8 +23,6 @@ const Input = forwardRef(
     },
     ref
   ) => {
-
-    console.log('...rest:', rest);
     const generatedId = useId();
     const controlId = id || generatedId;
     const RootTag = multiline ? 'textarea' : 'input';
@@ -32,7 +30,8 @@ const Input = forwardRef(
     const fullWidthClass = fullWidth ? styles.fullWidth : null;
     const hasStartIcon = Boolean(startIcon);
     const hasEndIcon = Boolean(endIcon);
-console.log('...rest:', rest);
+    const isCheckbox = rest.type === 'checkbox';
+
     const depthClass =
       depth === 'raised'
         ? styles.neoRaised
@@ -41,8 +40,9 @@ console.log('...rest:', rest);
         : depth === 'sunkeninp'
         ? styles.neoSunkenInp
         : styles.neoFlat;
+
     const wrapperClasses = [styles.wrapper, fullWidthClass, className].filter(Boolean).join(' ');
-    
+
     const controlClasses = [
       styles.control,
       error && styles.controlError,
@@ -50,12 +50,15 @@ console.log('...rest:', rest);
       hasEndIcon && styles.withEndIcon,
       sizeClass,
       depthClass,
+      isCheckbox && styles.controlCheckbox,
     ]
       .filter(Boolean)
       .join(' ');
 
-    const inputClasses = [styles.input, inputClassName].filter(Boolean).join(' ');
-console.log('...rest:', rest);
+    const inputClasses = [styles.input, isCheckbox && styles.inputCheckbox, inputClassName]
+      .filter(Boolean)
+      .join(' ');
+
     return (
       <div className={wrapperClasses}>
         {(label || description) && (

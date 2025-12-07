@@ -1,185 +1,240 @@
-@import '../../styles/_variables.scss';  // Цвета, отступы, фон
-@import '../../styles/mixins.scss';     // Медиа-запросы
+@import '../../styles/_variables.scss';
+@import '../../styles/mixins.scss';
 
 .cartContainer {
-  max-width: 1440px;                      // Ограничиваем ширину корзины
-  margin: 20px auto;                     // Центруем по горизонтали с вертикальным отступом
-  padding: 20px;                         // Внутренние отступы
-  border: 1px solid $border-color;       // Серая рамка по переменной
-  border-radius: 8px;                    // Скругляем углы
-  background-color: #fff;                // Белый фон
-  min-width: 430px;
+  max-width: var(xl);
+  margin: 0 auto;
+  padding: clamp(1rem, 2vw, 2rem);
 }
 
-.cartItemHead{
-  width: 100%;
+.cartLayout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: clamp(1.5rem, 3vw, 3rem);
+  align-items: flex-start;
 }
 
-.cartItemHeadFerst{
+.itemsColumn {
   display: flex;
-  justify-content: space-between;
-  width: 100%;
+  flex-direction: column;
+  gap: var(--sp-16, 1rem);
 }
-.cartItemHeadSecond{
+
+.itemsHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-12, 0.75rem);
+  margin-left: 1rem;
+}
+
+.itemsColumn h2 {
+  margin: 0;
+  color: var(--c-text, #111826);
+}
+
+.selectAll {
+  display: inline-flex;
+  align-items: center;
+}
+
+.cartItems {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-12, 0.75rem);
+}
+
+.cartItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-12, 0.75rem);
+  padding: var(--sp-16, 1rem);
+  border-radius: var(--radius-ai-lg, 1rem);
+  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f4f6f8) 5%);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12));
+}
+
+.cartItemHeadFerst {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-12, 0.75rem);
   width: 100%;
-  
+}
+
+.cartItemHeadSecond {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-12, 0.75rem);
+  width: 100%;
+}
+
+.productImage {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-8, 0.5rem);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  cursor: pointer;
+}
+
+.productDetails {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.productDetails h3 {
+  margin: 0;
+  font-size: 1rem;
+  color: var(--c-text, #111826);
+}
+
+.productDetails p {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--c-text-muted, #5b6578);
 }
 
 .productControls {
   display: flex;
-  gap: 8px;
   align-items: center;
-}
-.productControlsMob {
-  display: none;
+  gap: 1rem;
 }
 
-.productControlsHead{
+.productControlsHead {
   display: flex;
-  p{
-    width: 150px;
-  }
-}
-.cartContainer h2 {
-  text-align: center;                    // Центровка заголовка
-  color: $text-primary;                  // Основной цвет текста
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.cartItems {
-  list-style: none;                      // Убираем маркеры списка
-  padding: 0;                            // Обнуляем отступы
-  margin: 20px 0;                        // Отступ сверху и снизу
-}
-
-.cartItem {
-  display: flex;                         // Горизонтальное расположение
-  align-items: center;                   // Центровка по вертикали
-  justify-content: space-between;       // Раскидываем по краям
-  padding: 10px 0;                       // Отступ сверху и снизу
-  border-bottom: 1px solid $border-color; // Линия снизу
-}
-
-.productImage {
-  width: 80px;                           // Фиксированная ширина
-  height: 80px;                          // Фиксированная высота
-  object-fit: cover;                     // Масштабирование изображения
-  border-radius: 4px;                    // Скругление углов
-}
-
-.productDetails {
-  flex: 1;                               // Занимает всё оставшееся пространство
-  margin-left: 15px;                     // Отступ слева от картинки
-}
-
-.productDetails h3 {
-  margin: 0 0 10px;                      // Отступ снизу от заголовка
-  font-size: 18px;                       // Размер шрифта
-  color: $text-primary;                  // Основной цвет текста
-}
-
-.productDetails p {
-  margin: 5px 0;                         // Вертикальные отступы между строками
-  font-size: 14px;                       // Размер шрифта
-  color: $text-muted;                    // Второстепенный цвет
+.productControlsHead p {
+  margin: 0;
+  font-weight: 600;
+  color: var(--c-text, #111826);
 }
 
 .cartActions {
-  display: flex;                         // Горизонтальное выравнивание
-  justify-content: space-between;       // Кнопки по краям
-  margin-top: 20px;                      // Отступ сверху
-  gap: 10px;                             // Отступ между кнопками
-  flex-wrap: wrap;                       // Перенос на мобильных
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-12, 0.75rem);
 }
 
 .actionButton {
   flex: 1;
-  min-width: 12.5rem;
+  min-width: 10rem;
 }
 
 .removeAction {
-  margin-left: 20px;
   cursor: pointer;
   color: $primary;
   opacity: 0.7;
+
   &:hover {
     color: $accent;
   }
-  &:active{
+
+  &:active {
     opacity: 1;
   }
 }
 
+.summaryColumn {
+  position: sticky;
+  top: 1rem;
+}
+
+.summaryCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-12, 0.75rem);
+  padding: var(--sp-20, 1.25rem);
+  border-radius: var(--radius-ai-lg, 1rem);
+  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f4f6f8) 5%);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12));
+}
+
+.summaryHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.summaryHeader h3 {
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.summaryLink {
+  min-height: auto;
+  padding: 0;
+  font-size: 0.85rem;
+}
+
+.summaryList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.summaryRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: color-mix(in srgb, var(--c-text, #111826) 80%, var(--c-text-muted, #5b6578) 20%);
+}
+
+.summaryTotal {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-weight: 700;
+  font-size: 1.1rem;
+  padding-top: var(--sp-8, 0.5rem);
+  border-top: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+}
+
+.summaryNote,
+.summaryNoteMuted {
+  font-size: 0.85rem;
+  border-radius: var(--radius-ai-md, 0.875rem);
+  padding: 0.35rem 0.5rem;
+}
+
+.summaryNote {
+  background: color-mix(in srgb, #d1fae5 60%, #fff 40%);
+  color: #065f46;
+}
+
+.summaryNoteMuted {
+  background: color-mix(in srgb, var(--c-bg, #f4f6f8) 80%, #fff 20%);
+  color: var(--c-text-muted, #5b6578);
+}
+
+.summaryButton {
+  margin-top: var(--sp-4, 0.25rem);
+}
+
 .emptyCart {
-  text-align: center;                    // Центровка текста
-  font-size: 18px;                       // Размер шрифта
-  color: $text-muted;                    // Серый цвет
-  padding: 40px 0;                       // Отступы сверху и снизу
+  text-align: center;
+  font-size: 18px;
+  color: $text-muted;
+  padding: 40px 0;
 }
-
-
-// -----------------------------
-// Блок: итог заказа (summary)
-// -----------------------------
-
-.summary {
-  margin-top: 24px;                  // Отступ сверху
-  padding: 20px;                     // Внутренние отступы
-  background-color: #fff;           // Белый фон
-  border: 1px solid $border-color;  // Граница по переменной
-  border-radius: 8px;               // Скругление
-  box-shadow: $shadow-light;        // Лёгкая тень
-  font-size: 15px;                  // Базовый размер текста
-  color: $text-primary;             // Основной цвет текста
-}
-
-// Заголовок "Ваш заказ"
-.title {
-  font-size: 16px;                   // Размер заголовка
-  font-weight: 600;                  // Жирный шрифт
-  margin-bottom: 12px;              // Отступ снизу
-  color: $text-primary;             // Цвет из переменной
-}
-
-// Список товаров
-.itemList {
-  list-style: none;                 // Убираем стандартные маркеры списка
-  padding-left: 0;                  // Убираем отступ
-  margin-bottom: 16px;              // Отступ снизу перед итогом
-}
-
-// Один товар в списке
-.item {
-  margin-bottom: 4px;               // Промежуток между элементами
-  line-height: 1.5;                 // Межстрочный интервал
-}
-
-// Название товара
-.itemName {
-  font-weight: 600;                 // Жирное выделение имени
-}
-
-// Блок с общей информацией (кол-во и сумма)
-.total {
-  font-size: 15px;                  // Размер текста
-  font-weight: 500;                 // Полужирный стиль
-  color: $text-primary;             // Основной цвет
-}
-
-// -----------------------------
-// Блок: форма оформления заказа
-// -----------------------------
 
 .orderForm {
-  display: flex;                 // Формируем вертикальный флекс-контейнер
-  flex-direction: column;       // Расположение элементов сверху вниз
-  gap: 20px;                     // Вертикальные отступы между блоками
-  padding: 24px;                 // Внутренние отступы
-  background-color: #fff;       // Белый фон формы
-  border-radius: 8px;           // Скругление углов формы
-  box-shadow: $shadow-light;    // Тень по проектным переменным
-  margin-top: 32px;             // Отступ сверху от предыдущего блока
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 24px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: $shadow-light;
+  margin-top: 32px;
 }
 
 .stickySummary {
@@ -195,148 +250,75 @@
   box-shadow: 0 -4px 12px rgba(17, 24, 38, 0.06);
 }
 
-// Строка формы (один label + input/textarea/радио)
 .formRow {
-  display: flex;                // Горизонтальная компоновка
-  flex-direction: column;      // Каждый элемент — на своей строке
-  gap: 8px;                     // Отступ между label и полем
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
-// Подпись к полю формы
 .formLabel {
-  font-weight: 500;            // Полужирный текст
-  font-size: 14px;             // Размер шрифта подписи
-  color: $text-primary;        // Цвет из переменных
+  font-weight: 500;
+  font-size: 14px;
+  color: $text-primary;
 }
 
-// Общий стиль для input и select
 .input {
-  padding: 8px 12px;           // Внутренние отступы
-  border: 1px solid $border-color; // Цвет границы из переменных
-  border-radius: 4px;          // Скругление углов
-  font-size: 15px;             // Размер текста
-  width: 100%;                 // Полная ширина
-  box-sizing: border-box;      // Учитываем padding в ширину
+  padding: 8px 12px;
+  border: 1px solid $border-color;
+  border-radius: 4px;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-// Текстовое поле
 .textarea {
-  @extend .input;              // Наследуем стили от input
-  resize: vertical;            // Разрешаем вертикальное изменение
-  min-height: 80px;            // Минимальная высота текстового поля
+  @extend .input;
+  resize: vertical;
+  min-height: 80px;
 }
 
-// Группа радиокнопок
 .radioGroup {
-  display: flex;               // Горизонтальное расположение
-  gap: 20px;                   // Промежуток между вариантами
-  flex-wrap: wrap;             // Перенос строк при узком экране
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
 
   label {
-    display: flex;             // Горизонтальное выравнивание внутри label
-    align-items: center;       // Центр по вертикали
-    gap: 6px;                  // Промежуток между input и текстом
-    font-size: 14px;           // Размер текста
-    cursor: pointer;           // Курсор указывает на интерактивность
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    cursor: pointer;
   }
 }
 
-// Обёртка для кнопок "Отмена" и "Оплатить"
 .formActions {
-  display: flex;               // Горизонтальное размещение кнопок
-  justify-content: flex-end;  // Кнопки прижаты вправо
-  gap: 12px;                   // Расстояние между кнопками
-  margin-top: 20px;            // Отступ сверху
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 20px;
 
   > * {
     min-width: 10rem;
   }
 }
 
-// Контролы количества (инкремент/декремент)
-.quantityControls {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-
-  .qtyBtn {
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-}
-}
-.buyQty { 
-  display: flex; 
-  min-width: 2rem; 
-  justify-content: center; 
-  align-items: center; 
-  font-weight: 600; 
-  border: 2px solid; 
-  border-radius: $radius-12; 
-  width: 40px; 
-  height: 40px; 
-  color: $primary;
-  text-align: center;
-}
-
 @include respond(md) {
-  .productControlsHead {
-  flex-direction: column;
-  text-align: center;
-  p{
-    margin-top: 0px;
+  .cartLayout {
+    grid-template-columns: minmax(0, 1fr);
   }
-}
 
-}
-@media (max-width: 620px) {
-  .productControlsHead {
-  display: none;
+  .summaryColumn {
+    position: static;
   }
-  .cartItem{
-    display: flex;
+
+  .productControls {
     flex-direction: column;
-  }
-  .productControlsMob{
-    display: flex;
-    gap: 8px;
-    justify-content: center;
+    align-items: flex-start;
   }
 }
 
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  backdrop-filter: blur(6px);
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: clamp(1rem, 2vw, 2.5rem);
-  overflow-y: auto;
-  z-index: 30;
-}
-
-.modalContent {
-  width: min(100%, 48rem);
-  margin: 0 auto;
-  border-radius: 1rem;
-  background: #fff;
-  box-shadow: 0 1rem 2.5rem rgba(15, 23, 42, 0.2);
-  padding: clamp(1rem, 1.5vw, 1.75rem);
-}
-
-.bookingModalContent {
-  width: min(100%, 96vw);
-  max-width: 78rem;
-  padding: clamp(0.75rem, 1vw, 1.5rem);
-}
-
-@media (min-width: 1200px) {
-  .bookingModalContent {
-    max-width: min(78rem, calc(100vw - 4rem));
+@include respond(sm) {
+  .actionButton {
+    min-width: auto;
   }
 }

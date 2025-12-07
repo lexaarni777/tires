@@ -5,6 +5,8 @@ import { fetchProfile, fetchAddresses} from '../../slices/profileSlice';
 import { useNavigate, NavLink } from 'react-router-dom';
 import styles from './Cart.module.scss';
 import Button from '../ui/Button';
+import Radio from '../ui/Radio';
+import QuantityControl from './QuantityControl';
 import BookingWizard from '../Booking/BookingWizard';
 import EmptyState from '../ui/EmptyState';
 import Skeleton from '../ui/Skeleton';
@@ -18,7 +20,6 @@ const Cart = () => {
   const navigate = useNavigate();
   const cartItems = useSelector((state) => state.cart.items);
   const cartStatus = useSelector((state) => state.cart.status);
-  console.log('cartItems', cartItems)
   const auth = useSelector((state) => state.auth);
 
   const [selectedIds, setSelectedIds] = useState([]);
@@ -222,6 +223,13 @@ const Cart = () => {
     );
   }
 
+  const formatCurrency = (value) =>
+    new Intl.NumberFormat('ru-RU', {
+      style: 'currency',
+      currency: 'RUB',
+      maximumFractionDigits: 0,
+    }).format(value);
+
   if (!cartItems.length) {
     return (
       <EmptyState data-qa="cart_empty" title="Ваша корзина пуста" description="Добавьте товары из каталога, чтобы оформить заказ.">
@@ -233,28 +241,42 @@ const Cart = () => {
   return (
     <div className={styles.cartContainer}>
       {!showModal && (
-        <>
-          <h2>Корзина</h2>
-          <label>
-          <input
-            type="checkbox"
-            checked={allSelected}
-            onChange={toggleSelectAll}
-          />
-            Выбрать всё
-          </label>
-          <ul className={styles.cartItems}>
+        <div className={styles.cartLayout}>
+          <section className={styles.itemsColumn}>
+              <h2>Корзина</h2>
+
+            <div className={styles.itemsHeader}>
+              <Radio
+                type="checkbox"
+                checked={allSelected}
+                onChange={toggleSelectAll}
+                label="Выбрать всё"
+                className={styles.selectAll}
+              />
+              <Button
+                  type="button"
+                  variant="tertiary"
+                  size="sm"
+                  onClick={() => navigate('/productlist')}
+                  className={styles.summaryLink}
+                >
+                  Продолжить покупки
+                </Button>
+            </div>
+            <ul className={styles.cartItems}>
             {cartItems.map((item) => (
               <li key={item.cart_id} className={styles.cartItem}>
 
                   <div className={styles.cartItemHeadSecond}>
                     <div className={styles.cartItemHeadFerst}>
-                      <input
+                      <Radio
                         type="checkbox"
                         checked={selectedIds.includes(item.cart_id)}
                         onChange={() => handleSelect(item.cart_id)}
+                        aria-label={`Выбрать ${item.product_name}`}
+                        label=""
+                        className={styles.itemCheckbox}
                       />
-                      {console.log('item.product_image', item.product_image)}
                       {item.product_image && (
                         <img
                           src={`${API_URL}${getThumbnailPath(item.product_image)}`}
@@ -264,37 +286,21 @@ const Cart = () => {
                         />
                       )}
                       <div className={styles.productDetails}>
-                        {console.log(item)}
                         <h3>{item.product_name}</h3>
+                        <p>Цена: {item.price} ₽/ед</p>
                         <p>Склад: {item.location}</p>
                       </div>
                     </div>
                     <div className={styles.productControls}>
                       <div className={styles.productControlsHead}> 
-                        <p>Цена: {item.price} ₽</p>
-                        <div className={styles.quantityControls}>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            icon={<span aria-hidden="true">−</span>}
-                            aria-label="Уменьшить"
-                            onClick={() => handleDecrement(item)}
-                            disabled={item.quantity === 1}
-                            className={styles.qtyBtn}
-                            data-qa="cart_qty_dec"
-                          />
-                          <span className={styles.buyQty} aria-live="polite">{item.quantity}</span>
-                          <Button
-                            variant="primary"
-                            size="sm"
-                            icon={<span aria-hidden="true">+</span>}
-                            aria-label="Увеличить"
-                            onClick={() => handleIncrement(item)}
-                            disabled={item.quantity >= item.stock}
-                            className={styles.qtyBtn}
-                            data-qa="cart_qty_inc"
-                          />
-                        </div>
+                        <QuantityControl
+                          value={item.quantity}
+                          min={1}
+                          max={item.stock}
+                          onDecrement={() => handleDecrement(item)}
+                          onIncrement={() => handleIncrement(item)}
+                          qaPrefix="cart_qty"
+                        />
                       </div>
                       <MdDeleteForever 
                         onClick={() => dispatch(removeFromCart(item.cart_id))}
@@ -303,62 +309,65 @@ const Cart = () => {
                       />
                     </div>
                   </div>
-
-                  
-
-                  <div className={styles.productControlsMob}>
-                    <p>Цена: {item.price} ₽</p>
-                    <div className={styles.quantityControls}>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        icon={<span aria-hidden="true">−</span>}
-                        aria-label="Уменьшить"
-                        onClick={() => handleDecrement(item)}
-                        disabled={item.quantity === 1}
-                        className={styles.qtyBtn}
-                        data-qa="cart_qty_dec"
-                      />
-                      <span className={styles.buyQty} aria-live="polite">{item.quantity}</span>
-
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        icon={<span aria-hidden="true">+</span>}
-                        aria-label="Увеличить"
-                        onClick={() => handleIncrement(item)}
-                        disabled={item.quantity >= item.stock}
-                        className={styles.qtyBtn}
-                        data-qa="cart_qty_inc"
-                      />
-                    </div>
-                    
-                  </div>
                   
 
               </li>
 
             ))}
-          </ul>
-          <div className={styles.cartActions}>
-            <Button
-              variant="secondary"
-              onClick={() => dispatch(clearCartServerSide())}
-              className={styles.actionButton}
-            >
-              Очистить корзину
-            </Button>
-            <Button
-              variant="accent"
-              onClick={() => { setShowModal(true); }}
-              disabled={!selectedIds.length}
-              className={styles.actionButton}
-              data-qa="checkout_open"
-            >
-              Оформить заказ
-            </Button>
-          </div>
-        </>
+            </ul>
+            <div className={styles.cartActions}>
+              <Button
+                variant="secondary"
+                onClick={() => dispatch(clearCartServerSide())}
+                className={styles.actionButton}
+              >
+                Очистить корзину
+              </Button>
+
+            </div>
+          </section>
+          <aside className={styles.summaryColumn}>
+            <div className={styles.summaryCard}>
+              <div className={styles.summaryHeader}>
+                <h3>Итог заказа</h3>
+              </div>
+              <div className={styles.summaryList}>
+                <div className={styles.summaryRow}>
+                  <span>Товары</span>
+                  <span>{totalQty} шт</span>
+                </div>
+                <div className={styles.summaryRow}>
+                  <span>Сумма</span>
+                  <span>{formatCurrency(totalAmount)}</span>
+                </div>
+                <div className={styles.summaryRow}>
+                  <span>Доставка</span>
+                  <span>{deliveryMethod === 'delivery' ? 'Определим при оформлении' : 'Бесплатно'}</span>
+                </div>
+              </div>
+              <div className={styles.summaryTotal}>
+                <span>К оплате</span>
+                <strong>{formatCurrency(totalAmount)}</strong>
+              </div>
+              {createdBookingId && (
+                <div className={styles.summaryNote}>
+                  Запись создана: №{createdBookingId}. Управление — в разделе «Мои записи».
+                </div>
+              )}
+
+              <Button
+                type="button"
+                variant="primary"
+                fullWidth
+                onClick={() => setShowModal(true)}
+                disabled={!selectedIds.length}
+                data-qa="checkout_open"
+              >
+                Оформить заказ
+              </Button>
+            </div>
+          </aside>
+        </div>
       )}
 
       {showModal && (
@@ -479,7 +488,7 @@ const Cart = () => {
 
               <div className={styles.stickySummary} data-qa="checkout_summary">
                 <span>Товаров: {totalQty}</span>
-                <strong>Итого: {new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB', maximumFractionDigits: 0 }).format(totalAmount)}</strong>
+                <strong>Итого: {formatCurrency(totalAmount)}</strong>
               </div>
               {/* CTA: запись на шиномонтаж при самовывозе в Москве */}
               <div className={styles.formRow}>

@@ -8,6 +8,7 @@ import styles from "./ProductDetailed.module.scss";
 import Button from "../ui/Button";
 import { deleteProduct } from "../../slices/productSlice";
 import { warehouseList } from "../../constants/warehouseList";
+import QuantityControl from "../Cart/QuantityControl";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 const DEFAULT_TITLE = 'MSKTires';
 const DEFAULT_DESCRIPTION = 'MSKTires — каталог шин и дисков';
@@ -103,7 +104,7 @@ const getFeaturedImage = () => {
 
   // Инкремент
   const handleIncrement = (e) => {
-    e.stopPropagation();
+    e?.stopPropagation();
     const selectedStock = filteredProductStock.find((s) => s.id === selectedStockId);
     if (!selectedStock) return;
     if ((cartItem?.quantity || 0) < selectedStock.stock) {
@@ -126,8 +127,10 @@ const getFeaturedImage = () => {
 
   // Декремент
   const handleDecrement = (e) => {
-    e.stopPropagation();
-    if (cartItem && cartItem.quantity > 1) {
+    e?.stopPropagation();
+    if (!cartItem) return;
+
+    if (cartItem.quantity > 1) {
       dispatch(
         decrementToCart({
           userId: auth.id || 0,
@@ -136,9 +139,10 @@ const getFeaturedImage = () => {
           quantity: 1,
         })
       );
-    } else if (cartItem && cartItem.quantity === 1) {
-      dispatch(removeFromCart(cartItem.id)); // id строки корзины!
+      return;
     }
+
+    dispatch(removeFromCart(cartItem.cart_id || cartItem.id));
   };
 
   // Переход в корзину
@@ -404,38 +408,31 @@ const handleAddToCart = (e) => {
         <div className={styles.buyRow} data-qa="productd_buy_row">
           {cartItem ? (
             <>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<span aria-hidden="true">−</span>}
-                aria-label="Уменьшить"
-                onClick={handleDecrement}
-                className={styles.qtyBtn}
-                disabled={cartItem.quantity === 1}
-              />
-              <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
-              <Button
-                variant="primary"
-                size="sm"
-                icon={<span aria-hidden="true">+</span>}
-                aria-label="Увеличить"
-                onClick={handleIncrement}
-                disabled={cartItem.quantity >= (selectedStock?.stock || 0)}
-                className={styles.qtyBtn}
+              <QuantityControl
+                value={cartItem.quantity}
+                min={0}
+                max={selectedStock?.stock}
+                onDecrement={handleDecrement}
+                onIncrement={handleIncrement}
+                className={styles.BlockAddToCartBut}
+                qaPrefix="productd_qty"
               />
               <Button 
-                variant="accent" 
+                variant="accent-low"
+                depth="raised"
                 onClick={handleGoToCart}>Перейти в корзину
+                
               </Button>
             </>
           ) : (
             <>
 
               <Button
-                variant="accent"
+                variant="accent-low"
                 onClick={handleAddToCart}
                 disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
                 data-qa="productd_add_to_cart"
+                depth="raised"
               >
                 Добавить в корзину
               </Button>
@@ -459,22 +456,13 @@ const handleAddToCart = (e) => {
         <div className={styles.stickyPrice}>{formatPrice(selectedStock?.price_retail ?? minPrice)}</div>
         {cartItem ? (
           <div className={styles.stickyControls}>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<span aria-hidden="true">-</span>}
-              aria-label="Уменьшить"
-              onClick={handleDecrement}
-              disabled={cartItem.quantity === 1}
-            />
-            <span className={styles.stickyQty} aria-live="polite">{cartItem.quantity}</span>
-            <Button
-              variant="primary"
-              size="sm"
-              icon={<span aria-hidden="true">+</span>}
-              aria-label="Увеличить"
-              onClick={handleIncrement}
-              disabled={cartItem.quantity >= (selectedStock?.stock || 0)}
+            <QuantityControl
+              value={cartItem.quantity}
+              min={1}
+              max={selectedStock?.stock}
+              onDecrement={handleDecrement}
+              onIncrement={handleIncrement}
+              qaPrefix="productd_qty_mobile"
             />
             <Button variant="accent" onClick={handleGoToCart}>Перейти в корзину</Button>
           </div>

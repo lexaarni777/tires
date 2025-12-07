@@ -1,8 +1,9 @@
 import { useState, useEffect, useMemo } from "react";
 import Button from "../ui/Button";
+import QuantityControl from "../Cart/QuantityControl";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { addToCart, decrementToCart } from "../../slices/cartSlice";
+import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
 import styles from "./ProductCard.module.scss";
 import { warehouseList } from "../../constants/warehouseList"; // Список складов
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
@@ -118,7 +119,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   const handleAddToCart = (e) => {
     // handleAddToCart — обработчик добавления товара в корзину
     // Срабатывает при клике на "Добавить в корзину"
-    e.stopPropagation();
+    e?.stopPropagation();
     // Останавливаем всплытие события, чтобы не сработал переход по карточке
     const selectedStock = filteredStock.find((s) => s.id === selectedStockId);
     // Ищем выбранный склад среди доступных
@@ -148,7 +149,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
   const handleIncrement = (e) => {
     // handleIncrement — обработчик для кнопки "+"
     // Увеличивает количество товара на складе в корзине на 1
-    e.stopPropagation();
+    e?.stopPropagation();
     const selectedStock = filteredStock.find((s) => s.id === selectedStockId);
     // Находим выбранный склад
     if (!selectedStock) return;
@@ -175,30 +176,32 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
 
   // Уменьшить количество в корзине (–)
   const handleDecrement = (e) => {
-    // handleDecrement — обработчик для кнопки "-"
-    // Уменьшает количество товара в корзине на 1
-    e.stopPropagation();
-    if (cartItem && cartItem.quantity > 1) {
-      // Если товар есть в корзине и его больше 1
+    // handleDecrement — обработчик для кнопки "-". Работает по принципу корзины:
+    // при количестве > 1 уменьшаем, при 1 удаляем позицию и возвращаем состояние "добавить".
+    e?.stopPropagation();
+    if (!cartItem) return;
+
+    if (cartItem.quantity > 1) {
       dispatch(
         decrementToCart({
           userId: auth.id || 0,
           productId: product.id,
           stockId: selectedStockId,
-          quantity: 1, // –1
+          quantity: 1, // уменьшаем на 1
         })
       );
-      // Отправляем экшен decrementToCart (уменьшить на 1)
-      // Если после уменьшения quantity станет 0, товар пропадёт из корзины (логика в Redux)
+      return;
     }
-    // Если quantity == 1, после клика товар исчезнет из корзины (логика в cartSlice)
+
+    // quantity === 1: убираем товар, чтобы показать кнопку "Добавить в корзину"
+    dispatch(removeFromCart(cartItem.cart_id));
   };
 
   // Перейти в корзину
   const handleGoToCart = (e) => {
     // handleGoToCart — обработчик для кнопки "Перейти в корзину"
     // Останавливает всплытие и переводит пользователя на страницу корзины
-    e.stopPropagation();
+    e?.stopPropagation();
     navigate("/cart");
   };
 
@@ -335,33 +338,15 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
             <div className={styles.BlockAddToCart}>
 
 
-              <div className={styles.BlockAddToCartBut}>
-                 <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<span aria-hidden="true">−</span>}
-                  aria-label="Уменьшить"
-                  onClick={handleDecrement}
-                  className={styles.qtyBtn}
-                  data-qa="qty_dec"
-                  disabled={cartItem.quantity === 1}
-                  depth="raised"
-                />
-                {/* Кнопка "+" — вызывает handleIncrement; дизейблится если достигнут максимум по складу */}
-                <span className={styles.buyQty} aria-live="polite">{cartItem.quantity}</span>
-                {/* Поле количества — выводит актуальное количество товара в корзине на этом складе */}
-                 <Button
-                  variant="primary"
-                  size="sm"
-                  icon={<span aria-hidden="true">+</span>}
-                  aria-label="Увеличить"
-                  onClick={handleIncrement}
-                  disabled={!selectedStock || cartItem.quantity >= selectedStock.stock}
-                  className={styles.qtyBtn}
-                  data-qa="qty_inc"
-                />
-                {/* Кнопка "-" — вызывает handleDecrement */}
-              </div>
+              <QuantityControl
+                value={cartItem.quantity}
+                min={0}
+                max={selectedStock?.stock}
+                onDecrement={handleDecrement}
+                onIncrement={handleIncrement}
+                className={styles.BlockAddToCartBut}
+                qaPrefix="product_qty"
+              />
               <Button variant="accent-low" className={styles.goToCartPC} onClick={handleGoToCart} data-qa="go_to_cart" depth="raised">
                 Перейти в корзину
               </Button>
