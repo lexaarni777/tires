@@ -25,6 +25,12 @@
   @extend %btn-secondary;
 }
 
+.variantSecondary-low {
+  @extend %btn-secondary-low;
+}
+.variantGreen-low {
+  @extend %btn-green;
+}
 .variantTertiary {
   @extend %btn-tertiary;
 }

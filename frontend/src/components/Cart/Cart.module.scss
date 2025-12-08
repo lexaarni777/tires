@@ -54,7 +54,7 @@
   gap: var(--sp-12, 0.75rem);
   padding: var(--sp-16, 1rem);
   border-radius: var(--radius-ai-lg, 1rem);
-  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f4f6f8) 5%);
+  background: var(--c-surface);
   box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12));
 }
 
@@ -156,7 +156,7 @@
   gap: var(--sp-12, 0.75rem);
   padding: var(--sp-20, 1.25rem);
   border-radius: var(--radius-ai-lg, 1rem);
-  background: color-mix(in srgb, var(--c-surface, #fff) 95%, var(--c-bg, #f4f6f8) 5%);
+  background: var(--c-surface);
   box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12));
 }
 
@@ -333,6 +333,11 @@
 }
 .itemCheckbox{
   position: absolute;
+  background-color: var(--c-surface);
+  border-bottom-right-radius: $radius-8;
+  height: 24px;
+  
+  //border: 1px solid color-mix(in srgb, var(--c-primary, #0057b8) 80%, #ffffff 20%);
 }
 .cartItemHeadFerst{
   align-items: flex-start;

@@ -131,6 +131,16 @@
   }
 }
 
+%btn-secondary-low {
+  background-color: white;
+  color: var(--c-text-muted);
+}
+
+%btn-green {
+  background-color: color-mix(in srgb, var(--st-delivered) 70%, white 30%);
+  
+}
+
 %btn-tertiary {
   background-color: transparent;
   border-color: transparent;

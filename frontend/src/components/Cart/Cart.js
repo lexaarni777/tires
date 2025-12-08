@@ -203,7 +203,8 @@ const Cart = () => {
     return null;
   };
 
-  if (cartStatus === 'loading') {
+  // Показываем скелетон только при первичной загрузке, чтобы не мерцать при инкрементах
+  if (cartStatus === 'loading' && cartItems.length === 0) {
     return (
       <div className={styles.cartContainer}>
         <ul className={styles.cartItems}>
@@ -317,9 +318,10 @@ const Cart = () => {
             </ul>
             <div className={styles.cartActions}>
               <Button
-                variant="secondary"
+                variant="secondary-low"
                 onClick={() => dispatch(clearCartServerSide())}
                 className={styles.actionButton}
+                depth="raised"
               >
                 Очистить корзину
               </Button>
@@ -357,11 +359,12 @@ const Cart = () => {
 
               <Button
                 type="button"
-                variant="primary"
+                variant="Green-low"
                 fullWidth
                 onClick={() => setShowModal(true)}
                 disabled={!selectedIds.length}
                 data-qa="checkout_open"
+                depth="raised"
               >
                 Оформить заказ
               </Button>
