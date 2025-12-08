@@ -120,8 +120,9 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
             const handleClick = () => {
               // handleClick — обработчик клика по карточке товара
               // При вызове переводит пользователя на страницу детального просмотра товара
-              navigate(`/productdetailed/${tyre.id}`);
-              // Программный переход, путь содержит ID товара
+              const slug = tyre.article;
+              navigate(`/productdetailed/${slug}`);
+              // Программный переход, путь содержит артикул товара
             };
 
 

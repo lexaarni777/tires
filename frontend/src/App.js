@@ -49,7 +49,7 @@ function App() {
       }/>
 
       {/* Маршрут для датализированной карточки продукта - доступен всем пользователям*/}
-      <Route path='/productdetailed/:id' element={<ProductDetailed/>
+      <Route path='/productdetailed/:article' element={<ProductDetailed/>
       }/>
       
       {/* Маршрут для списка продуктов - доступен всем пользователям */}

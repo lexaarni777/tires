@@ -154,7 +154,7 @@ const Orders = () => {
                   src={`${API_URL}${getThumbnailPath(item.image)}`}
                   alt={item.name}
                   className={styles.orders__itemImage}
-                  onClick={() => navigate(`/productdetailed/${item.product_id}`)}  
+                  onClick={() => navigate(`/productdetailed/${item.article || item.product_id}`)}  
                 />
               )}
 

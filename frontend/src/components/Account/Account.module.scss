@@ -3,12 +3,14 @@
 
 .account {
   max-width: 600px;                       // Ограничение ширины блока
-  margin: 0 auto;                         // Центровка по горизонтали
+  margin: $space-16 auto;                         // Центровка по горизонтали
   padding: 20px;                          // Внутренние отступы
   text-align: center;                     // Центровка содержимого
-  background-color: $background;          // Светлый фон
+  background-color: $surface;          // Светлый фон
   border-radius: 8px;                     // Скругление углов
-  box-shadow: $shadow-light;              // Лёгкая тень
+  box-shadow:
+    0.15rem 0.15rem 0.25rem #c1c2c4,  // тёмная внутренняя тень снизу-справа
+    -0.15rem -0.15rem 0.25rem #f3f3f3; // светлая внутренняя тень сверху-слева          // Лёгкая тень
 }
 
 .userInfo {

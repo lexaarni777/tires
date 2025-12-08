@@ -19,6 +19,7 @@ const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
  * - onEdit: функция редактирования (только для админа)
  */
 const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
+ 
   const navigate = useNavigate();
   // useNavigate — хук React Router, нужен чтобы программно перейти на другую страницу
   // Здесь: используется для перехода к детальной карточке товара или в корзину
@@ -82,10 +83,12 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
 
   // Функция перехода на детальную карточку товара
   const handleClick = () => {
+    console.log('Navigating to product detailed page for product ID:', product); 
     // handleClick — обработчик клика по карточке товара
     // При вызове переводит пользователя на страницу детального просмотра товара
-    navigate(`/productdetailed/${product.id}`);
-    // Программный переход, путь содержит ID товара
+    const slug = product.article || product.id;
+    navigate(`/productdetailed/${slug}`);
+    // Программный переход, путь содержит артикул товара (или ID как фолбек)
   };
 
   // Получить главное изображение шины
@@ -239,6 +242,8 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
       data-city={selectedCity}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleClick(); } }}
     >
+
+
       {/* Корневой контейнер карточки товара
           tabIndex={0} — делает div фокусируемым для клавиатуры
           onClick — переход на детальную карточку */}

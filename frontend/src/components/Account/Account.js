@@ -32,41 +32,46 @@ const Account = () => {
             <div className={styles.actions}>
                 <Button
                     type="button"
-                    variant="primary"
+                    variant="primary-low"
                     className={styles.actionButton}
                     onClick={() => navigate('/account/edit')}
+                    depth="raised"
+
                 >
                     Редактировать профиль
                 </Button>
                 <Button
                     as={NavLink}
                     to="/addproduct"
-                    variant="secondary"
-                    className={styles.actionButton}
+                    //variant="secondary-low"
+                    depth="raised"
                 >
                     Добавить продукт
                 </Button>
                 <Button
                     as={NavLink}
                     to="/usermanagement"
-                    variant="secondary"
+                    //variant="secondary-low"
                     className={styles.actionButton}
+                    depth="raised"
                 >
                     Менеджер пользователей
                 </Button>
                 <Button
                     as={NavLink}
                     to="/orders"
-                    variant="secondary"
+                    //variant="secondary-low"
                     className={styles.actionButton}
+                    depth="raised"
                 >
                     Мои заказы
                 </Button>
                 <Button
                     as={NavLink}
                     to="/account/bookings"
-                    variant="secondary"
+                    //variant="secondary-low"
                     className={styles.actionButton}
+                    depth="raised"
                 >
                     Записи шиномонтажа
                 </Button>
@@ -75,16 +80,18 @@ const Account = () => {
                     <Button
                       as={NavLink}
                       to="/admin/orders"
-                      variant="secondary"
+                      //variant="secondary-low"
                       className={styles.actionButton}
+                      depth="raised"
                     >
                       Админ: заказы
                     </Button>
                     <Button
                       as={NavLink}
                       to="/admin/tyre-booking"
-                      variant="secondary"
+                      //variant="secondary-low"
                       className={styles.actionButton}
+                      depth="raised"
                     >
                       Админ: шиномонтаж
                     </Button>
@@ -95,6 +102,7 @@ const Account = () => {
                   variant="danger"
                   className={styles.actionButton}
                   onClick={() => dispatch(logout())}
+                  depth="raised"
                 >
                   Выйти
                 </Button>

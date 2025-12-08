@@ -21,7 +21,7 @@ const DEFAULT_DESCRIPTION = 'MSKTires — каталог шин и дисков'
  * Добавлен функционал управления (редактирование, удаление, инкремент/декремент в корзине).
  */
 const ProductDetailed = () => {
-  const { id } = useParams();
+  const { article } = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
@@ -45,10 +45,22 @@ const ProductDetailed = () => {
 
 
 
-  // Найдём нужный товар по id
-  const product = products.find((p) => String(p.id) === String(id));
+  // Найдём нужный товар по артикулу (фолбек — по id)
+  const product = useMemo(() => {
+    if (!article) return undefined;
+    const normalized = String(article).toLowerCase();
+    return products.find(
+      (p) =>
+        String(p.article || '').toLowerCase() === normalized ||
+        String(p.id) === String(article)
+    );
+  }, [products, article]);
+  const productId = product?.id;
   // Остатки только по этому товару
-  const productStock = stock.filter((row) => String(row.tyre_id) === String(id));
+  const productStock = useMemo(
+    () => (productId ? stock.filter((row) => String(row.tyre_id) === String(productId)) : []),
+    [stock, productId]
+  );
   const filteredProductStock = productStock.filter(s => cityWarehouses.includes(s.location));
   // Склад выбранный пользователем (по умолчанию — первый)
   const [selectedStockId, setSelectedStockId] = useState(filteredProductStock[0]?.id || null);
@@ -62,20 +74,27 @@ const ProductDetailed = () => {
   // cartItem: позиция товара в корзине по productId и складу
   const cartItem = cartItems.find(
     (item) =>
-      item.product_id === product?.id &&
+      item.product_id === productId &&
       item.stock_id === selectedStockId
   );
 
   // Подгружаем данные при заходе на страницу
   useEffect(() => {
-    if (!products.length) dispatch(fetchProducts());
-    dispatch(fetchStock({ tyre_id: id }));
-  }, [dispatch, id]);
+    if (!products.length && productsStatus === 'idle') dispatch(fetchProducts());
+  }, [dispatch, products.length, productsStatus]);
+
+  useEffect(() => {
+    if (productId) {
+      dispatch(fetchStock({ tyre_id: productId }));
+    }
+  }, [dispatch, productId]);
 
   // Обновлять выбранный склад если поменялись productStock
   useEffect(() => {
     if (filteredProductStock.length && !filteredProductStock.find(s => s.id === selectedStockId)) {
       setSelectedStockId(filteredProductStock[0]?.id || null);
+    } else if (!filteredProductStock.length) {
+      setSelectedStockId(null);
     }
   }, [filteredProductStock, selectedStockId]);
 
@@ -281,7 +300,8 @@ const handleAddToCart = (e) => {
 
 
   // Если идёт загрузка
-  if (productsStatus === "loading" || stockStatus === "loading") {
+  const isLoading = productsStatus === "loading" || stockStatus === "loading" || (productsStatus === "idle" && !products.length);
+  if (isLoading) {
     return <div className={styles.loading}>Загрузка...</div>;
   }
   if (!product) {
@@ -298,11 +318,14 @@ const handleAddToCart = (e) => {
     }
   };
 
+   
  
 
   return (
     <div className={styles.page}>
     <nav className={styles.breadcrumbs} aria-label="Хлебные крошки">
+    { console.log('Navigating to product detailed page for product ID:')}
+
       <ol>
         <li><NavLink to="/">Главная</NavLink></li>
         <li><NavLink to="/productlist">Каталог</NavLink></li>

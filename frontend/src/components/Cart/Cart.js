@@ -283,7 +283,7 @@ const Cart = () => {
                           src={`${API_URL}${getThumbnailPath(item.product_image)}`}
                           alt={item.product_name || 'Товар'}
                           className={styles.productImage}
-                          onClick={() => navigate(`/productdetailed/${item.product_id}`)}  
+                          onClick={() => navigate(`/productdetailed/${item.article || item.product_id}`)}  
                         />
                       )}
                       <div className={styles.productDetails}>

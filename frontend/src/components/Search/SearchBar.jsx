@@ -82,7 +82,8 @@ const SearchBar = () => {
     } else if (e.key === 'Enter') {
       if (highlight >= 0 && items[highlight]) {
         e.preventDefault();
-        navigate(`/productdetailed/${items[highlight].id}`);
+        const slug = items[highlight].article || items[highlight].id;
+        navigate(`/productdetailed/${slug}`);
         setOpen(false);
         setHighlight(-1);
       } else if (term.trim()) {
@@ -118,7 +119,8 @@ const SearchBar = () => {
         onMouseEnter={() => setHighlight(idx)}
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {
-          navigate(`/productdetailed/${p.id}`);
+          const slug = p.article || p.id;
+          navigate(`/productdetailed/${slug}`);
           setOpen(false);
           setHighlight(-1);
         }}
