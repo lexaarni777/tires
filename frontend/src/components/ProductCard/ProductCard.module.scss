@@ -48,6 +48,48 @@
   color: $text-muted;               // Второстепенный цвет
 }
 
+.reviewInline {
+  margin: 4px 0 0;
+  display: inline-flex;
+  align-items: center;
+  gap: $space-8;
+  padding: 0;
+  color: $primary;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.starWrap {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.starBase {
+  width: 100%;
+  height: 100%;
+  color: #d1d5db;
+}
+
+.starFill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--star-color, #f59e0b);
+  clip-path: inset(calc(100% - var(--star-fill)) 0 0 0)
+}
+
+.reviewInlineText {
+  font-weight: 600;
+  color: $text-primary;
+}
+
 .meta {
   display: flex;                    // Горизонтальное расположение
   flex-wrap: wrap;                  // Перенос строк

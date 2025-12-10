@@ -29,9 +29,19 @@ exports.getProductsFromDB = async (filters = {}) => {
           FROM model_images mi
           WHERE mi.brand = t.brand AND mi.model = t.model
         ), '[]'
-      ) AS model_images
+      ) AS model_images,
+      COALESCE(rev.avg_rating, 0)::float AS avg_rating,
+      COALESCE(rev.review_count, 0) AS review_count
     FROM tyre_catalog t
     LEFT JOIN productsimages pi ON t.id = pi.product_id
+    LEFT JOIN LATERAL (
+      SELECT 
+        AVG(r.rating_value)::NUMERIC(3,2) AS avg_rating,
+        COUNT(*) AS review_count
+      FROM tyre_reviews r
+      WHERE r.brand ILIKE COALESCE(t.brand, '')
+        AND r.model ILIKE COALESCE(NULLIF(t.model, ''), t.name, '')
+    ) rev ON TRUE
   `;
 
   // Фильтры
@@ -108,7 +118,8 @@ exports.getProductsFromDB = async (filters = {}) => {
       t.id, t.article, t.name, t.brand, t.model, t.size, t.load_index, 
       t.speed_index, t.season, t.vehicle_type, t.tread_depth, 
       t.section_width, t.recommended_rim_width, t.diameter, 
-      t.country, t.description, t.studs, t.profile
+      t.country, t.description, t.studs, t.profile,
+      rev.avg_rating, rev.review_count
     ORDER BY t.id ASC
   `;
 
@@ -230,11 +241,21 @@ exports.getProductByIdFromDB = async (productId) => {
   const query = `
     SELECT 
       t.*, 
-      COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images
+      COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images,
+      COALESCE(rev.avg_rating, 0)::float AS avg_rating,
+      COALESCE(rev.review_count, 0) AS review_count
     FROM tyre_catalog t
     LEFT JOIN productsimages pi ON t.id = pi.product_id
+    LEFT JOIN LATERAL (
+      SELECT 
+        AVG(r.rating_value)::NUMERIC(3,2) AS avg_rating,
+        COUNT(*) AS review_count
+      FROM tyre_reviews r
+      WHERE r.brand ILIKE COALESCE(t.brand, '')
+        AND r.model ILIKE COALESCE(NULLIF(t.model, ''), t.name, '')
+    ) rev ON TRUE
     WHERE t.id = $1
-    GROUP BY t.id;
+    GROUP BY t.id, rev.avg_rating, rev.review_count;
   `;
 
   const { rows } = await pool.query(query, [productId]);
@@ -254,4 +275,3 @@ exports.getProductByIdFromDB = async (productId) => {
 
   return product;
 };
-

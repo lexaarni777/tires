@@ -229,7 +229,8 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     const val = Number(product.review_count ?? product.reviews_count ?? product.reviews_total);
     return Number.isFinite(val) ? val : 0;
   }, [product]);
-  const starFillPercent = ratingAvg ? Math.min(100, Math.max(0, (ratingAvg / 5) * 100)) : 0;
+  const hasReviews = ratingAvg !== null || reviewCount > 0;
+  const starFillPercent = ratingAvg ? Math.min(100, Math.max(0, (ratingAvg / 5) * 100)-20) : 0;
   const starTone = ratingAvg >= 4.5 ? '#10b981' : ratingAvg >= 3 ? '#f59e0b' : '#ef4444';
   const formatPrice = (val) => {
     if (val == null) return '-';
@@ -291,24 +292,24 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
         </div>
 
         <div className={styles.title} data-qa="product_title">{product.name}</div>
-        <button
-          type="button"
-          className={styles.reviewInline}
-          onClick={(e) => {
-            e.stopPropagation();
-            navigate(`/productdetailed/${product.id}#reviews`);
-          }}
-        >
-          <span className={styles.starWrap} style={{ '--star-fill': `${starFillPercent}%`, '--star-color': starTone }}>
-            <CiStar className={styles.starBase} aria-hidden="true" />
-            <AiFillStar className={styles.starFill} aria-hidden="true" />
-          </span>
-          <span className={styles.reviewInlineText}>
-            {reviewCount > 0
-              ? `${ratingAvg ?? '—'} · ${reviewCount} ${reviewCount === 1 ? 'отзыв' : reviewCount < 5 ? 'отзыва' : 'отзывов'}`
-              : 'Отзывов пока нет'}
-          </span>
-        </button>
+        {hasReviews && (
+          <button
+            type="button"
+            className={styles.reviewInline}
+            onClick={(e) => {
+              e.stopPropagation();
+              navigate(`/productdetailed/${product.id}#reviews`);
+            }}
+          >
+            <span className={styles.starWrap} style={{ '--star-fill': `${starFillPercent}%`, '--star-color': starTone }}>
+              <CiStar className={styles.starBase} aria-hidden="true" />
+              <AiFillStar className={styles.starFill} aria-hidden="true" />
+            </span>
+            <span className={styles.reviewInlineText}>
+              {`${ratingAvg ?? '—'} · ${reviewCount} ${reviewCount === 1 ? 'отзыв' : reviewCount < 5 ? 'отзыва' : 'отзывов'}`}
+            </span>
+          </button>
+        )}
         <div className={styles.article}>Артикул: {product.article}</div>
 
         <div className={styles.meta}>
