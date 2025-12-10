@@ -6,6 +6,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
 import styles from "./ProductCard.module.scss";
 import { warehouseList } from "../../constants/warehouseList"; // Список складов
+import { CiStar } from "react-icons/ci";
+import { AiFillStar } from "react-icons/ai";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 // убираем /api, если он в переменной
 
@@ -219,6 +221,16 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     const prices = filteredStock.map(s => s.price_retail).filter(p => p != null);
     return prices.length ? Math.min(...prices) : null;
   }, [filteredStock]);
+  const ratingAvg = useMemo(() => {
+    const val = Number(product.avg_rating ?? product.rating ?? product.rating_value);
+    return Number.isFinite(val) ? Number(val.toFixed(1)) : null;
+  }, [product]);
+  const reviewCount = useMemo(() => {
+    const val = Number(product.review_count ?? product.reviews_count ?? product.reviews_total);
+    return Number.isFinite(val) ? val : 0;
+  }, [product]);
+  const starFillPercent = ratingAvg ? Math.min(100, Math.max(0, (ratingAvg / 5) * 100)) : 0;
+  const starTone = ratingAvg >= 4.5 ? '#10b981' : ratingAvg >= 3 ? '#f59e0b' : '#ef4444';
   const formatPrice = (val) => {
     if (val == null) return '-';
     try {
@@ -279,6 +291,24 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
         </div>
 
         <div className={styles.title} data-qa="product_title">{product.name}</div>
+        <button
+          type="button"
+          className={styles.reviewInline}
+          onClick={(e) => {
+            e.stopPropagation();
+            navigate(`/productdetailed/${product.id}#reviews`);
+          }}
+        >
+          <span className={styles.starWrap} style={{ '--star-fill': `${starFillPercent}%`, '--star-color': starTone }}>
+            <CiStar className={styles.starBase} aria-hidden="true" />
+            <AiFillStar className={styles.starFill} aria-hidden="true" />
+          </span>
+          <span className={styles.reviewInlineText}>
+            {reviewCount > 0
+              ? `${ratingAvg ?? '—'} · ${reviewCount} ${reviewCount === 1 ? 'отзыв' : reviewCount < 5 ? 'отзыва' : 'отзывов'}`
+              : 'Отзывов пока нет'}
+          </span>
+        </button>
         <div className={styles.article}>Артикул: {product.article}</div>
 
         <div className={styles.meta}>

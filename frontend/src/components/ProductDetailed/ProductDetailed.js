@@ -358,7 +358,7 @@ const handleAddToCart = (e) => {
         <li aria-current="page">{product.name}</li>
       </ol>
     </nav>
-    <NavLink to="/productlist" className={styles.backLink} data-qa="productd_back">← К каталогу</NavLink>
+    
     <div className={styles.detailedWrap} data-qa="product_detailed">
       {/* Блок с фото */}
       <div className={styles.imageWrap}>
