@@ -1,14 +1,18 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProducts } from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
 import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
+import { fetchReviews } from "../../slices/reviewSlice";
 import styles from "./ProductDetailed.module.scss";
 import Button from "../ui/Button";
+import { CiStar } from "react-icons/ci";
+import { AiFillStar } from "react-icons/ai";
 import { deleteProduct } from "../../slices/productSlice";
 import { warehouseList } from "../../constants/warehouseList";
 import QuantityControl from "../Cart/QuantityControl";
+import ReviewCard from "./ReviewCard";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 const DEFAULT_TITLE = 'MSKTires';
 const DEFAULT_DESCRIPTION = 'MSKTires — каталог шин и дисков';
@@ -26,6 +30,10 @@ const ProductDetailed = () => {
   const navigate = useNavigate();
   const [quantity, setQuantity] = useState(1);
   const [activeIndex, setActiveIndex] = useState(0);
+  const reviewsRef = useRef(null);
+  const scrollToReviews = () => {
+    reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
 
   // Стор
@@ -36,6 +44,8 @@ const ProductDetailed = () => {
   const cartItems = useSelector((state) => state.cart.items);
   const auth = useSelector((state) => state.auth);
   const selectedCity = useSelector(state => state.city.selectedCity);
+  const reviews = useSelector((state) => state.reviews.items);
+  const reviewsStatus = useSelector((state) => state.reviews.status);
   // Список складов, которые относятся к выбранному пользователем городу.
   const cityWarehouses = warehouseList
   .filter(w => w.city === selectedCity)
@@ -88,6 +98,12 @@ const ProductDetailed = () => {
       dispatch(fetchStock({ tyre_id: productId }));
     }
   }, [dispatch, productId]);
+
+  useEffect(() => {
+    if (product?.brand && product?.model) {
+      dispatch(fetchReviews({ brand: product.brand, model: product.model }));
+    }
+  }, [dispatch, product?.brand, product?.model]);
 
   // Обновлять выбранный склад если поменялись productStock
   useEffect(() => {
@@ -297,7 +313,17 @@ const handleAddToCart = (e) => {
     };
   }, [product, selectedStock, minPrice, totalCityStock, canonicalUrl]);
 
-
+  const ratingStats = useMemo(() => {
+    if (!reviews?.length) return { avg: null, count: 0 };
+    const validRatings = reviews
+      .map(r => Number(r.rating_value))
+      .filter((v) => Number.isFinite(v));
+    if (!validRatings.length) return { avg: null, count: reviews.length };
+    const avg = validRatings.reduce((sum, val) => sum + val, 0) / validRatings.length;
+    return { avg: Number(avg.toFixed(1)), count: reviews.length };
+  }, [reviews]);
+  const starFillPercent = ratingStats.avg ? Math.min(100, Math.max(0, (ratingStats.avg / 5) * 100)-20) : 0;
+  const starTone = ratingStats.avg >= 4.5 ? '#10b981' : ratingStats.avg >= 3 ? '#f59e0b' : '#ef4444';
 
   // Если идёт загрузка
   const isLoading = productsStatus === "loading" || stockStatus === "loading" || (productsStatus === "idle" && !products.length);
@@ -334,7 +360,7 @@ const handleAddToCart = (e) => {
     </nav>
     <NavLink to="/productlist" className={styles.backLink} data-qa="productd_back">← К каталогу</NavLink>
     <div className={styles.detailedWrap} data-qa="product_detailed">
-      {/* Блок с фото и названием */}
+      {/* Блок с фото */}
       <div className={styles.imageWrap}>
         <div className={styles.mainImgWrap}>
           <img src={activeImage} alt={product.name} className={styles.image} />
@@ -356,9 +382,50 @@ const handleAddToCart = (e) => {
         )}
       </div>
       
+      {/* Средняя колонка — описание и характеристики */}
       <div className={styles.info}>
         <div className={styles.title} data-qa="productd_title">{product.name}</div>
+        <button
+          type="button"
+          className={styles.reviewInline}
+          onClick={scrollToReviews}
+        >
+          <span className={styles.starWrap} style={{ '--star-fill': `${starFillPercent}%`, '--star-color': starTone }}>
+            <CiStar className={styles.starBase} aria-hidden="true" />
+            <AiFillStar className={styles.starFill} aria-hidden="true" />
+          </span>
+          <span className={styles.reviewInlineText}>
+            {ratingStats.count > 0
+              ? `${ratingStats.avg ?? '—'} · ${ratingStats.count} ${ratingStats.count === 1 ? 'отзыв' : ratingStats.count < 5 ? 'отзыва' : 'отзывов'}`
+              : 'Отзывов пока нет'}
+          </span>
+        </button>
         <div className={styles.article}>Артикул: {product.article}</div>
+        <div className={styles.chips}>
+          {product.size && (<span className={styles.chip} data-qa="productd_chip_size">Размер: {product.size}</span>)}
+          {product.season && (<span className={styles.chip} data-qa="productd_chip_season">Сезон: {product.season}</span>)}
+          {(product.load_index || product.speed_index) && (
+            <span className={styles.chip} data-qa="productd_chip_index">Индексы: {product.load_index || '-'} / {product.speed_index || '-'}</span>
+          )}
+          {(product.studs !== undefined && product.studs !== null) && (
+            <span className={styles.chip} data-qa="productd_chip_studs">Шипы: {product.studs === true || product.studs === 'true' ? 'есть' : 'нет'}</span>
+          )}
+          {product.brand && (<span className={styles.chip}>Бренд: {product.brand}</span>)}
+        </div>
+        <div className={styles.deliveryHint} data-qa="productd_delivery_hint">Отгрузим сегодня при заказе до 18:00 • Самовывоз: {selectedCity}</div>
+        <div className={styles.description}>{product.description}</div>
+
+        {/* Действия для администратора: удалить / редактировать */}
+        {auth.roles && auth.roles.indexOf("admin") !== -1 && (
+          <div className={styles.adminControls}>
+            <button onClick={handleEdit}>Редактировать</button>
+            <button onClick={handleDelete}>Удалить</button>
+          </div>
+        )}
+      </div>
+
+      {/* Правая колонка — покупка */}
+      <aside className={styles.buyCard}>
         <div className={styles.topRow}>
           <div className={styles.price} data-qa="productd_price">{formatPrice(selectedStock?.price_retail ?? minPrice)}</div>
           <div className={
@@ -384,21 +451,7 @@ const handleAddToCart = (e) => {
               : `В наличии: ${totalCityStock} шт.`}
           </div>
         </div>
-        <div className={styles.chips}>
-          {product.size && (<span className={styles.chip} data-qa="productd_chip_size">Размер: {product.size}</span>)}
-          {product.season && (<span className={styles.chip} data-qa="productd_chip_season">Сезон: {product.season}</span>)}
-          {(product.load_index || product.speed_index) && (
-            <span className={styles.chip} data-qa="productd_chip_index">Индексы: {product.load_index || '-'} / {product.speed_index || '-'}</span>
-          )}
-          {(product.studs !== undefined && product.studs !== null) && (
-            <span className={styles.chip} data-qa="productd_chip_studs">Шипы: {product.studs === true || product.studs === 'true' ? 'есть' : 'нет'}</span>
-          )}
-          {product.brand && (<span className={styles.chip}>Бренд: {product.brand}</span>)}
-        </div>
-        <div className={styles.deliveryHint} data-qa="productd_delivery_hint">Отгрузим сегодня при заказе до 18:00 • Самовывоз: {selectedCity}</div>
-        <div className={styles.description}>{product.description}</div>
 
-        {/* Склад */}
         <div className={styles.stockRow}>
           <span className={styles.warehouseLabel}>Город: {selectedCity}</span>
           {filteredProductStock.length > 1 ? (
@@ -427,7 +480,6 @@ const handleAddToCart = (e) => {
           )}
         </div>
 
-        {/* Покупательская строка под ценой */}
         <div className={styles.buyRow} data-qa="productd_buy_row">
           {cartItem ? (
             <>
@@ -462,17 +514,44 @@ const handleAddToCart = (e) => {
             </>
           )}
         </div>
+      </aside>
 
-          {/* Действия для администратора: удалить / редактировать */}
-          {auth.roles && auth.roles.indexOf("admin") !== -1 && (
-            <div className={styles.adminControls}>
-              <button onClick={handleEdit}>Редактировать</button>
-              <button onClick={handleDelete}>Удалить</button>
-            </div>
-          )}
+    </div>
+
+      <section className={styles.reviews} aria-label="Отзывы о шине" ref={reviewsRef}>
+        <div className={styles.reviewsHeader}>
+          <div>
+            <h2>Отзывы о шине {product.brand} {product.model}</h2>
+          </div>
+          <Button
+            type="button"
+            variant="tertiary"
+            className={styles.reviewsSummaryBtn}
+            onClick={scrollToReviews}
+          >
+            {ratingStats.count > 0
+              ? `${ratingStats.count} ${ratingStats.count === 1 ? 'отзыв' : ratingStats.count < 5 ? 'отзыва' : 'отзывов'} · средняя ${ratingStats.avg ?? '—'}`
+              : 'Отзывы пока недоступны'}
+          </Button>
         </div>
 
-      </div>
+        {reviewsStatus === 'loading' && (
+          <p className={styles.reviewsNote}>Загружаем отзывы...</p>
+        )}
+        {reviewsStatus === 'failed' && (
+          <p className={styles.reviewsNote}>Не удалось получить отзывы.</p>
+        )}
+        {reviewsStatus === 'succeeded' && reviews?.length === 0 && (
+          <p className={styles.reviewsNote}>Отзывов по этой модели пока нет.</p>
+        )}
+        {reviews?.length > 0 && (
+          <div className={styles.reviewList}>
+            {reviews.map((review) => (
+              <ReviewCard key={review.id} review={review} />
+            ))}
+          </div>
+        )}
+      </section>
       
       {/* Sticky action bar (mobile) */}
       <div className={styles.stickyBar} data-qa="productd_sticky_bar">

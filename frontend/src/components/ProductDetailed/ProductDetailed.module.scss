@@ -4,17 +4,19 @@
 
 /* Главный контейнер карточки товара */
 .detailedWrap {
-  display: flex;                      // Располагаем блоки по горизонтали
-  gap: $space-24;                     // Промежуток между изображением и инфоблоком
-  padding: $space-24;                 // Внутренние отступы со всех сторон
-  background-color: $surface;         // Белый фон блока
-  border-radius: $radius-12;          // Скругление углов
-  box-shadow: $shadow-soft;           // Применяем тень
+  display: grid;
+  grid-template-columns: 0.5fr 1fr 0.5fr;
+  gap: $space-24;
+  padding: $space-24;
+  background-color: $surface;
+  border-radius: $radius-12;
+  box-shadow: $shadow-soft;
 }
 
 /* Обёртка для изображения товара */
 .imageWrap {
-  flex: 0 0 320px;                    // Ширина колонки галереи
+  //flex: 0 0 320px;                    // Ширина колонки галереи
+  max-width: 300px;
 }
 
 .descriptionMob{
@@ -42,10 +44,9 @@
 
 /* Контейнер информационного блока */
 .info {
-  flex: 1;                            // Занимает всё доступное пространство
-  display: flex;                      // Используем флекс для вложенных блоков
-  flex-direction: column;            // Располагаем вертикально
-  gap: $space-16;                     // Отступ между элементами
+  display: flex;
+  flex-direction: column;
+  gap: $space-16;
 }
 
 /* Заголовок карточки */
@@ -55,6 +56,47 @@
   color: $text-primary;              // Цвет основного текста
 }
 
+.reviewInline {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: $space-8;
+  padding: 0;
+  color: $primary;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.starWrap {
+  position: relative;
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.starBase {
+  width: 100%;
+  height: 100%;
+  color: #d1d5db;
+}
+
+.starFill {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  color: var(--star-color, #f59e0b);
+  clip-path: inset(calc(100% - var(--star-fill)) 0 0 0)
+}
+
+.reviewInlineText {
+  font-weight: 600;
+  color: $text-muted; 
+}
 /* Артикул или модель */
 .article {
   font-size: 14px;                   // Размер текста
@@ -137,9 +179,16 @@
 .chip { background: $background; color: $text-primary; border: 1px solid $border-color; border-radius: $radius-12; padding: $space-4 $space-8; font-size: .8125rem; font-weight: 600; }
 
 .deliveryHint { color: $text-muted; font-size: .9375rem; }
-.stockRow { display: flex; align-items: center; gap: $space-12; margin-top: $space-12; }
+.stockRow { display: flex; align-items: center; gap: $space-12; margin-top: $space-12; flex-wrap: wrap; }
 .warehouseLabel { color: $text-muted; font-size: .875rem; }
-.buyRow { display: flex; align-items: center; gap: $space-12; margin-top: $space-12; }
+.buyRow { 
+  display: flex; 
+  align-items: center; 
+  gap: $space-12; 
+  margin-top: $space-12 auto; 
+  flex-wrap: wrap; 
+  justify-content: center;
+}
 
 .backLink { display: inline-block; margin: 0 0 $space-16; color: $primary; text-decoration: none; }
 .breadcrumbs {
@@ -177,15 +226,6 @@
   display: flex;                     // Горизонтальный флекс
   align-items: center;              // Выравнивание по центру
   gap: $space-8;                     // Промежуток между кнопками
-
-  .qtyBtn {
-    width: 2.5rem;
-    height: 2.5rem;
-    padding: 0;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-  }
 }
 
 /* Инпут количества */
@@ -240,6 +280,20 @@
   }
 }
 
+.buyCard {
+  align-self: start;
+  padding: $space-16;
+  //border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  border-radius: var(--radius-ai-lg, 1rem);
+  //background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
+  box-shadow:
+    0.15rem 0.15rem 0.25rem #c1c2c4,  // тёмная тень снизу-справа
+    -0.15rem -0.15rem 0.25rem #f3f3f3;  // светлая тень сверху-слеваS
+  display: flex;
+  flex-direction: column;
+  gap: $space-16;
+}
+
 /* Сообщения загрузки и ошибки */
 .loading,
 .notFound {
@@ -273,6 +327,73 @@
 .stockOut { color: $danger; }
 .stockWarning { color: $accent; }
 
+.reviews {
+  margin-top: $space-24;
+  padding: $space-24;
+  background: color-mix(in srgb, var(--c-surface, #fff) 94%, var(--c-bg, #f6f8fa) 6%);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  border-radius: var(--radius-ai-lg, 1rem);
+  box-shadow: var(--shadow-raised, 0.35rem 0.35rem 0.8rem rgba(15, 23, 42, 0.12)), -0.25rem -0.25rem 0.7rem rgba(255, 255, 255, 0.8);
+}
+
+.reviewsHeader {
+  display: flex;
+  justify-content: space-between;
+  gap: $space-16;
+  align-items: center;
+  flex-wrap: wrap;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.reviewsSub { color: $text-muted; margin-top: 4px; }
+
+.reviewsSummaryBtn {
+  color: $text-primary;
+  background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
+  border-radius: var(--radius-ai-md, 0.875rem);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  box-shadow: var(--shadow-raised, 0.35rem 0.35rem 0.8rem rgba(15, 23, 42, 0.12)), -0.25rem -0.25rem 0.7rem rgba(255, 255, 255, 0.8);
+  padding: 8px 14px;
+}
+
+.reviewsScore {
+  min-width: 140px;
+  padding: $space-12;
+  border: 1px solid $border-color;
+  border-radius: $radius-12;
+  background: $background;
+  text-align: right;
+}
+
+.reviewsScoreValue { display: block; font-weight: 700; font-size: 1.5rem; }
+.reviewsScoreLabel { color: $text-muted; font-size: .875rem; }
+.reviewsNote { color: $text-muted; margin-top: $space-12; }
+
+.reviewList {
+  margin-top: $space-12;
+  display: flex;
+  flex-direction: column;
+  gap: $space-12;
+}
+
+.reviewCard {
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  border-radius: var(--radius-ai-lg, 1rem);
+  padding: $space-16;
+  background: color-mix(in srgb, var(--c-surface, #fff) 96%, var(--c-bg, #f6f8fa) 4%);
+  box-shadow: inset 0.15rem 0.15rem 0.35rem rgba(15, 23, 42, 0.08), inset -0.15rem -0.15rem 0.35rem rgba(255, 255, 255, 0.8);
+}
+
+.reviewCardHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: $space-8; }
+.reviewAuthor { font-weight: 700; color: $text-primary; }
+.reviewMeta { color: $text-muted; font-size: .875rem; }
+.reviewRating { font-weight: 700; color: $accent; min-width: 48px; text-align: right; }
+.reviewText { margin-top: $space-8; color: $text-primary; line-height: 1.5; }
+
 // Sticky action bar (мобайл)
 .stickyBar {
   display: none;
@@ -293,8 +414,21 @@
 }
 
 @include respond(md) {
+  .detailedWrap {
+    grid-template-columns: 1fr;
+  }
+  .buyCard {
+    order: 3;
+  }
+  .imageWrap {
+    order: 1;
+  }
+  .info {
+    order: 2;
+  }
   .stickyBar {
     position: sticky;
+    width: 100%;
     bottom: 0;
     left: 0;
     right: 0;
