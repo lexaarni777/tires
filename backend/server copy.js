@@ -16,6 +16,8 @@ const ordersRoutes = require('./routes/ordersRoutes');
 const userRoutes = require('./routes/userRoutes');
 const adminOrdersRoutes = require('./routes/adminOrdersRoutes');
 const tyreBookingRoutes = require('./routes/tyreBookingRoutes');
+const reviewsRoutes = require('./routes/reviewsRoutes');
+
 
 // Настройка приложения
 dotenv.config();
@@ -47,6 +49,7 @@ app.use('/api/orders', ordersRoutes); // Маршруты для работы с
 app.use('/api/user', userRoutes);
 app.use('/api/admin/orders', adminOrdersRoutes);
 app.use('/api/tyre-booking', tyreBookingRoutes);
+app.use('/api/reviews', reviewsRoutes);
 
 app.use(express.static(path.join(__dirname, '../frontend/build')));
 app.get('*', (req, res) => {
