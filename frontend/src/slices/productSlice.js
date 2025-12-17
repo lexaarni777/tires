@@ -20,6 +20,49 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+const normalizeKey = (val) => String(val ?? '').trim().toLowerCase();
+
+/**
+ * Асинхронное действие для загрузки конкретной шины по артикулу.
+ * Не перетирает общий список `items` (в отличие от fetchProducts).
+ */
+export const fetchProductByArticle = createAsyncThunk(
+  'products/fetchProductByArticle',
+  async (article) => {
+    const articleKey = normalizeKey(article);
+    const query = new URLSearchParams({ article: String(article ?? '') }).toString();
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/products/catalog?${query}`
+    );
+    if (!response.ok) {
+      throw new Error('Ошибка при загрузке товара по артикулу');
+    }
+    const data = await response.json();
+    const product = Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
+    return { articleKey, product };
+  }
+);
+
+/**
+ * Асинхронное действие для загрузки конкретной шины по ID.
+ * Не перетирает общий список `items` (в отличие от fetchProducts).
+ */
+export const fetchProductById = createAsyncThunk(
+  'products/fetchProductById',
+  async (id) => {
+    const idKey = String(id ?? '');
+    const response = await fetch(
+      `${process.env.REACT_APP_API_URL}/products/catalog/${encodeURIComponent(idKey)}`
+    );
+    if (!response.ok) {
+      if (response.status === 404) return { idKey, product: null };
+      throw new Error('Ошибка при загрузке товара по ID');
+    }
+    const product = await response.json();
+    return { idKey, product: product ?? null };
+  }
+);
+
 /**
  * Асинхронное действие для удаления шины из каталога.
  * Удаляет из базы строку из tyre_catalog (а на бэке желательно каскадно удалять и все остатки/изображения!)
@@ -126,6 +169,12 @@ const productSlice = createSlice({
     items: [], // Массив всех шин (tyre_catalog)
     status: 'idle', // idle | loading | succeeded | failed
     error: null,
+    byArticle: {}, // { [articleLower]: product|null }
+    byArticleStatus: {}, // { [articleLower]: idle|loading|succeeded|failed }
+    byArticleError: {}, // { [articleLower]: string|null }
+    byId: {}, // { [id]: product|null }
+    byIdStatus: {}, // { [id]: idle|loading|succeeded|failed }
+    byIdError: {}, // { [id]: string|null }
   },
   reducers: {
     // Ручная установка каталога (например, после массового импорта)
@@ -147,6 +196,40 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+      })
+
+      // Загрузка товара по артикулу (точечно)
+      .addCase(fetchProductByArticle.pending, (state, action) => {
+        const articleKey = normalizeKey(action.meta.arg);
+        state.byArticleStatus[articleKey] = 'loading';
+        state.byArticleError[articleKey] = null;
+      })
+      .addCase(fetchProductByArticle.fulfilled, (state, action) => {
+        const { articleKey, product } = action.payload;
+        state.byArticleStatus[articleKey] = 'succeeded';
+        state.byArticle[articleKey] = product;
+      })
+      .addCase(fetchProductByArticle.rejected, (state, action) => {
+        const articleKey = normalizeKey(action.meta.arg);
+        state.byArticleStatus[articleKey] = 'failed';
+        state.byArticleError[articleKey] = action.error.message;
+      })
+
+      // Загрузка товара по ID (точечно)
+      .addCase(fetchProductById.pending, (state, action) => {
+        const idKey = String(action.meta.arg ?? '');
+        state.byIdStatus[idKey] = 'loading';
+        state.byIdError[idKey] = null;
+      })
+      .addCase(fetchProductById.fulfilled, (state, action) => {
+        const { idKey, product } = action.payload;
+        state.byIdStatus[idKey] = 'succeeded';
+        state.byId[idKey] = product;
+      })
+      .addCase(fetchProductById.rejected, (state, action) => {
+        const idKey = String(action.meta.arg ?? '');
+        state.byIdStatus[idKey] = 'failed';
+        state.byIdError[idKey] = action.error.message;
       })
 
       // Добавление новой шины

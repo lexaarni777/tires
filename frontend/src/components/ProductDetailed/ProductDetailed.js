@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useNavigate, NavLink } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { fetchProducts } from "../../slices/productSlice";
+import { fetchProductByArticle, fetchProductById } from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
 import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
 import { fetchReviews } from "../../slices/reviewSlice";
@@ -40,6 +40,10 @@ const ProductDetailed = () => {
   // Стор
   const products = useSelector((state) => state.products.items);
   const productsStatus = useSelector((state) => state.products.status);
+  const productByArticle = useSelector((state) => state.products.byArticle);
+  const productByArticleStatus = useSelector((state) => state.products.byArticleStatus);
+  const productById = useSelector((state) => state.products.byId);
+  const productByIdStatus = useSelector((state) => state.products.byIdStatus);
   const stock = useSelector((state) => state.stock.items);
   const stockStatus = useSelector((state) => state.stock.status);
   const cartItems = useSelector((state) => state.cart.items);
@@ -61,12 +65,23 @@ const ProductDetailed = () => {
   const product = useMemo(() => {
     if (!article) return undefined;
     const normalized = String(article).toLowerCase();
-    return products.find(
+    const fromList = products.find(
       (p) =>
         String(p.article || '').toLowerCase() === normalized ||
         String(p.id) === String(article)
     );
-  }, [products, article]);
+    if (fromList) return fromList;
+
+    const fromArticle = productByArticle?.[normalized];
+    if (fromArticle) return fromArticle;
+
+    const isNumeric = /^\d+$/.test(String(article));
+    if (isNumeric) {
+      const fromId = productById?.[String(article)];
+      if (fromId) return fromId;
+    }
+    return undefined;
+  }, [products, article, productByArticle, productById]);
   const productId = product?.id;
   // Остатки только по этому товару
   const productStock = useMemo(
@@ -90,10 +105,27 @@ const ProductDetailed = () => {
       item.stock_id === selectedStockId
   );
 
-  // Подгружаем данные при заходе на страницу
+  const normalizedArticle = useMemo(
+    () => (article ? String(article).toLowerCase() : ''),
+    [article]
+  );
+  const isNumericArticle = /^\d+$/.test(String(article || ''));
+  const selectedStatus = isNumericArticle
+    ? (productByIdStatus?.[String(article)] || 'idle')
+    : (productByArticleStatus?.[normalizedArticle] || 'idle');
+
+  // Подгружаем товар точечно при заходе на страницу.
   useEffect(() => {
-    if (!products.length && productsStatus === 'idle') dispatch(fetchProducts());
-  }, [dispatch, products.length, productsStatus]);
+    if (!article) return;
+    if (product) return;
+    if (selectedStatus === 'loading' || selectedStatus === 'succeeded') return;
+
+    if (isNumericArticle) {
+      dispatch(fetchProductById(article));
+    } else {
+      dispatch(fetchProductByArticle(article));
+    }
+  }, [dispatch, article, product, selectedStatus, isNumericArticle]);
 
   useEffect(() => {
     if (productId) {
@@ -367,7 +399,10 @@ const handleAddToCart = (e) => {
   const starTone = ratingStats.avg >= 4.5 ? '#10b981' : ratingStats.avg >= 3 ? '#f59e0b' : '#ef4444';
 
   // Если идёт загрузка
-  const isLoading = productsStatus === "loading" || stockStatus === "loading" || (productsStatus === "idle" && !products.length);
+  const isLoading =
+    productsStatus === "loading" ||
+    stockStatus === "loading" ||
+    selectedStatus === 'loading';
   if (isLoading) {
     return <div className={styles.loading}>Загрузка...</div>;
   }
