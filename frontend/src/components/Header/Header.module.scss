@@ -1,4 +1,4 @@
-@import '../../styles/_mixins.scss';
+@use '../../styles/mixins' as *;
 
 .header {
   background-color: var(--c-surface);

@@ -1,6 +1,16 @@
-@import '../../styles/_variables.scss'; // Подключаем переменные (цвета, отступы, тени)
-@import '../../styles/_mixins.scss';
-@import '../../styles/_typography.scss';
+@use '../../styles/variables' as *; // Подключаем переменные (цвета, отступы, тени)
+@use '../../styles/mixins' as *;
+@use '../../styles/typography' as *;
+@use 'sass:map';
+
+// Внешний контейнер страниц детальной карточки — как catalogContent по ширине
+.page {
+  max-width: map.get($breakpoints, xl);
+  margin: 0 auto;
+  padding: 16px; // как в ProductList.wrapper
+  min-width: map.get($breakpoints, xsm);
+}
+
 
 /* Главный контейнер карточки товара */
 .detailedWrap {
@@ -10,7 +20,7 @@
   padding: $space-24;
   background-color: $surface;
   border-radius: $radius-12;
-  box-shadow: $shadow-soft;
+  box-shadow: $shadow-neo-sunken;
 }
 
 /* Обёртка для изображения товара */
@@ -27,19 +37,139 @@
   max-width: 70ch;
 }
 
-.mainImgWrap { margin-bottom: $space-12; }
+.mainImgWrap {
+  margin-bottom: $space-12;
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  border: 1px solid $border-color;
+  border-radius: $radius-12;
+  background: $surface;
+  box-shadow: $shadow-soft;
+  overflow: hidden;
+}
+
+.mainImgBtn {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: zoom-in;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .thumbs { display: flex; gap: $space-8; flex-wrap: wrap; }
 .thumb { border: 1px solid $border-color; border-radius: $radius-8; padding: 2px; background: $surface; cursor: pointer; }
 .thumbActive { border-color: $primary; box-shadow: 0 0 0 2px token-alpha($primary, .2); }
 .thumb img { width: 56px; height: 56px; object-fit: contain; display: block; }
 
+.galleryArrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.6rem rgba(15, 23, 42, 0.12)), -0.2rem -0.2rem 0.55rem rgba(255, 255, 255, 0.85);
+  color: $text-primary;
+  font-size: 1.75rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.galleryArrowLeft { left: 0.5rem; }
+.galleryArrowRight { right: 0.5rem; }
+
+.galleryArrow:active {
+  box-shadow: inset 0.12rem 0.12rem 0.3rem rgba(15, 23, 42, 0.12), inset -0.12rem -0.12rem 0.3rem rgba(255, 255, 255, 0.75);
+}
+
+.galleryOverlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  z-index: 1000;
+}
+
+.galleryModal {
+  width: min(1100px, 96vw);
+  max-height: 92vh;
+  border-radius: var(--radius-ai-lg, 1rem);
+  background: color-mix(in srgb, var(--c-surface, #fff) 94%, var(--c-bg, #f6f8fa) 6%);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
+  position: relative;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.galleryClose {
+  position: absolute;
+  top: 0.65rem;
+  right: 0.65rem;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 0.85rem;
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.6rem rgba(15, 23, 42, 0.12)), -0.2rem -0.2rem 0.55rem rgba(255, 255, 255, 0.85);
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: $text-primary;
+}
+
+.galleryStage {
+  position: relative;
+  width: 90%;
+  aspect-ratio: 16 / 10;
+  border-radius: 0.9rem;
+  background: $surface;
+  border: 1px solid $border-color;
+  overflow: hidden;
+  margin: 0 auto;
+}
+
+.galleryImage {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.galleryArrowModal {
+  top: 50%;
+}
+
+.galleryThumbs {
+  display: flex;
+  gap: $space-8;
+  overflow-x: auto;
+  padding: 0.25rem 0.15rem;
+}
+
 /* Стилизуем изображение */
 .image {
-  width: 100%;                        // Растягиваем на ширину родителя
-  height: auto;                       // Автоматическая высота по пропорции
-  border: 1px solid $border-color;   // Обводка
-  border-radius: $radius-12;         // Скругление углов
-  object-fit: cover;                 // Масштабируем без искажений
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  border: 0;
+  border-radius: 0;
 }
 
 /* Контейнер информационного блока */
@@ -367,9 +497,34 @@
   text-align: right;
 }
 
-.reviewsScoreValue { display: block; font-weight: 700; font-size: 1.5rem; }
+.reviewsScoreValue { display: block; font-weight: 800; font-size: 1.6rem; }
 .reviewsScoreLabel { color: $text-muted; font-size: .875rem; }
 .reviewsNote { color: $text-muted; margin-top: $space-12; }
+
+.avgGood { color: #10b981; }
+.avgMid { color: #f59e0b; }
+.avgBad { color: #ef4444; }
+
+.reviewsToolbar {
+  display: flex;
+  align-items: center;
+  gap: $space-12;
+  margin-top: $space-12;
+}
+
+.reviewsToolbarLabel {
+  color: $text-muted;
+  font-size: 0.9rem;
+}
+
+.reviewsSort {
+  padding: 0.5rem 0.75rem;
+  border-radius: 0.9rem;
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
+  box-shadow: inset 0.12rem 0.12rem 0.28rem rgba(15, 23, 42, 0.08), inset -0.12rem -0.12rem 0.28rem rgba(255, 255, 255, 0.85);
+  color: $text-primary;
+}
 
 .reviewList {
   margin-top: $space-12;
@@ -379,18 +534,86 @@
 }
 
 .reviewCard {
-  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  border: 1px solid color-mix(in srgb, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%, transparent 30%);
   border-radius: var(--radius-ai-lg, 1rem);
-  padding: $space-16;
-  background: color-mix(in srgb, var(--c-surface, #fff) 96%, var(--c-bg, #f6f8fa) 4%);
-  box-shadow: inset 0.15rem 0.15rem 0.35rem rgba(15, 23, 42, 0.08), inset -0.15rem -0.15rem 0.35rem rgba(255, 255, 255, 0.8);
+  padding: 0.9rem 1rem;
+  background: color-mix(in srgb, var(--c-surface, #fff) 97%, var(--c-bg, #f6f8fa) 3%);
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.55rem rgba(15, 23, 42, 0.10)), -0.2rem -0.2rem 0.5rem rgba(255, 255, 255, 0.9);
+  transition: transform 120ms ease, box-shadow var(--transition-ai, 220ms ease), background 180ms ease;
 }
 
-.reviewCardHeader { display: flex; justify-content: space-between; align-items: flex-start; gap: $space-8; }
+.reviewCard:hover {
+  transform: translateY(-0.5px);
+  box-shadow: inset 0.14rem 0.14rem 0.34rem rgba(15, 23, 42, 0.10),
+    inset -0.14rem -0.14rem 0.34rem rgba(255, 255, 255, 0.9);
+}
+
+.reviewCardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: $space-12;
+}
+
 .reviewAuthor { font-weight: 700; color: $text-primary; }
-.reviewMeta { color: $text-muted; font-size: .875rem; }
-.reviewRating { font-weight: 700; color: $accent; min-width: 48px; text-align: right; }
-.reviewText { margin-top: $space-8; color: $text-primary; line-height: 1.5; }
+.reviewMeta { color: $text-muted; font-size: 0.85rem; margin-top: 2px; }
+
+.reviewRating {
+  font-weight: 800;
+  min-width: 3.25rem;
+  text-align: right;
+  padding: 0.25rem 0.55rem;
+  border-radius: 0.75rem;
+  border: 1px solid color-mix(in srgb, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%, transparent 30%);
+  background: color-mix(in srgb, var(--c-surface, #fff) 92%, var(--c-bg, #f6f8fa) 8%);
+  box-shadow: inset 0.12rem 0.12rem 0.28rem rgba(15, 23, 42, 0.10), inset -0.12rem -0.12rem 0.28rem rgba(255, 255, 255, 0.85);
+  color: $accent;
+}
+
+.ratingGood {
+  color: #065f46;
+  border-color: color-mix(in srgb, #10b981 45%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 55%);
+  background: color-mix(in srgb, #10b981 12%, var(--c-surface, #fff) 88%);
+}
+
+.ratingMid {
+  color: #92400e;
+  border-color: color-mix(in srgb, #f59e0b 45%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 55%);
+  background: color-mix(in srgb, #f59e0b 12%, var(--c-surface, #fff) 88%);
+}
+
+.ratingBad {
+  color: #991b1b;
+  border-color: color-mix(in srgb, #ef4444 40%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 60%);
+  background: color-mix(in srgb, #ef4444 10%, var(--c-surface, #fff) 90%);
+}
+
+.reviewText {
+  margin-top: $space-12;
+  color: $text-primary;
+  line-height: 1.55;
+  font-size: 0.95rem;
+}
+
+.reviewClamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.reviewMoreBtn {
+  margin-top: 0.4rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: $primary;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  align-self: flex-start;
+}
 
 // Sticky action bar (мобайл)
 .stickyBar {
@@ -425,7 +648,7 @@
     order: 2;
   }
   .stickyBar {
-    position: sticky;
+    position: fixed;
     width: 100%;
     bottom: 0;
     left: 0;
@@ -440,8 +663,11 @@
     box-shadow: 0 -8px 16px token-alpha($text-primary, 0.08);
     z-index: 20;
   }
-  .buyRow{
+  .buyCard{
     display: none;
+  }
+  .imageWrap{
+    margin: 0 auto;
   }
   .stickyPrice { @include tabular-nums; font-weight: 700; font-size: 1.25rem; color: $text-primary; }
   .stickyControls { display: inline-flex; align-items: center; gap: $space-8; }
@@ -461,20 +687,6 @@
       flex-direction: column;
   }
   .imageWrap{
-    max-width: 250px;
-    margin: 0 auto;
+    max-width: 250px; 
   }
-}
-
-@media (max-width: 430px) {
-  .page{
-    min-width: 430px;
-  }
-}
-
-// Внешний контейнер страниц детальной карточки — как catalogContent по ширине
-.page {
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 16px; // как в ProductList.wrapper
 }

@@ -1,5 +1,5 @@
-@import '../../styles/_variables.scss';
-@import '../../styles/mixins.scss';
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
 
 .cartContainer {
   max-width: var(xl);

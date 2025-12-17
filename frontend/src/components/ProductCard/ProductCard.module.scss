@@ -1,11 +1,11 @@
-@import '../../styles/_variables.scss';  // Токены
-@import '../../styles/_mixins.scss';     // Миксины
-@import '../../styles/_typography.scss'; // Типографика
+@use '../../styles/variables' as *;  // Токены
+@use '../../styles/mixins' as *;     // Миксины
+@use '../../styles/typography' as *; // Типографика
 
 .card {
   background: $surface;                // Фон карточки
-  border: 1px solid $border-color;     // Граница
-  border-radius: $radius-12;           // Скругление углов
+  //border: 1px solid $border-color;     // Граница
+  border-radius: var(--radius-ai-lg, 1rem);
   box-shadow: $shadow-soft;            // Мягкая тень
   padding: $space-16;                  // Внутренний отступ
   cursor: pointer;                     // Курсор — рука

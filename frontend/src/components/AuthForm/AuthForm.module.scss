@@ -1,5 +1,5 @@
-@import '../../styles/_variables.scss';  // Цвета, шрифты, отступы
-@import '../../styles/mixins.scss';     // Медиа-запросы
+@use '../../styles/variables' as *;  // Цвета, шрифты, отступы
+@use '../../styles/mixins' as *;     // Медиа-запросы
 
 .authForm {
   width: 430px;                      // Ограничиваем ширину формы

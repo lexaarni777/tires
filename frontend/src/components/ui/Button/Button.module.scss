@@ -1,4 +1,4 @@
-@import '../../../styles/_button-core.scss';
+@use '../../../styles/button-core' as *;
 
 .root {
   @extend %btn-base;

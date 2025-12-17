@@ -1,5 +1,5 @@
-@import '../../styles/_variables.scss'; // Импорт переменных
-@import '../../styles/mixins.scss';    // Импорт миксинов
+@use '../../styles/variables' as *; // Импорт переменных
+@use '../../styles/mixins' as *;    // Импорт миксинов
 
 .userManagement__container {
   max-width: 800px;                      // Ширина блока

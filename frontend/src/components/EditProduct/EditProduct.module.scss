@@ -1,5 +1,5 @@
-@import '../../styles/_variables.scss';  // Цвета, отступы, шрифты
-@import '../../styles/mixins.scss';     // Медиа-запросы
+@use '../../styles/variables' as *;  // Цвета, отступы, шрифты
+@use '../../styles/mixins' as *;     // Медиа-запросы
 
 .editProduct {
   max-width: 800px;                         // Ограничение ширины контейнера

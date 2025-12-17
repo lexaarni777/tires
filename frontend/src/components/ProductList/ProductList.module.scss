@@ -1,15 +1,16 @@
-@import '../../styles/_variables.scss';  // Цвета, отступы, шрифты
-@import '../../styles/mixins.scss';     // Медиазапросы
+@use 'sass:map';
+@use '../../styles/variables' as *;  // Цвета, отступы, шрифты
+@use '../../styles/mixins' as *;     // Медиазапросы
 
 .wrapper {
-  max-width: 1440px;                  // Ограничение по ширине контейнера
+  max-width: map.get($breakpoints, xl);                  // Ограничение по ширине контейнера
   margin: 0 auto;                     // Центровка
   padding: 16px;                      // Отступы слева и справа
   display: grid;
   grid-template-columns: minmax(150px, 320px) minmax(0, 1fr);
   gap: 24px;
   align-items: start;
-  min-width: 430px;
+  min-width: map.get($breakpoints, xsm);
 }
 
 .sidebar {
@@ -31,9 +32,8 @@
   padding: 24px;
   background: #fff;
   border: 1px solid $border-color;
-  border-radius: 12px;
+  border-radius: var(--radius-ai-lg, 1rem);
   box-shadow: $shadow-light;
-
 }
 
 .filtersHeader {

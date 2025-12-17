@@ -1,7 +1,7 @@
 // Стили инпута для AI-неоморфного интерфейса
 // Здесь описывается внешний вид обёртки, состояния поля, размеров и иконок
-@import '../../../styles/_variables.scss';
-@import '../../../styles/_button-core.scss';
+@use '../../../styles/variables' as *;
+@use '../../../styles/button-core' as *;
 
 // Глубина инпута: вдавленный неоморфный стиль
 // Используем плейсхолдер %inp-neo-sunken из _button-core.scss, чтобы инпут

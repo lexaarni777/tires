@@ -34,6 +34,7 @@ const ProductDetailed = () => {
   const scrollToReviews = () => {
     reviewsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
+  const [galleryOpen, setGalleryOpen] = useState(false);
 
 
   // Стор
@@ -46,6 +47,7 @@ const ProductDetailed = () => {
   const selectedCity = useSelector(state => state.city.selectedCity);
   const reviews = useSelector((state) => state.reviews.items);
   const reviewsStatus = useSelector((state) => state.reviews.status);
+  const [reviewSort, setReviewSort] = useState('newest'); // newest | rating_desc | rating_asc
   // Список складов, которые относятся к выбранному пользователем городу.
   const cityWarehouses = warehouseList
   .filter(w => w.city === selectedCity)
@@ -226,6 +228,33 @@ const handleAddToCart = (e) => {
   const activeImage = galleryImages[activeIndex]?.image_path
     ? `${API_URL}${galleryImages[activeIndex].image_path}`
     : getFeaturedImage();
+  const canNavigateGallery = galleryImages.length > 1;
+
+  const handlePrevImage = () => {
+    if (!canNavigateGallery) return;
+    setActiveIndex((idx) => (idx - 1 + galleryImages.length) % galleryImages.length);
+  };
+
+  const handleNextImage = () => {
+    if (!canNavigateGallery) return;
+    setActiveIndex((idx) => (idx + 1) % galleryImages.length);
+  };
+
+  useEffect(() => {
+    if (!galleryOpen) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setGalleryOpen(false);
+      if (e.key === 'ArrowLeft') handlePrevImage();
+      if (e.key === 'ArrowRight') handleNextImage();
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.body.style.overflow = prevOverflow;
+      window.removeEventListener('keydown', onKeyDown);
+    };
+  }, [galleryOpen, canNavigateGallery, galleryImages.length]);
 
   // Подсчитываем общий остаток по выбранному городу и минимальную цену среди складов.
   const totalCityStock = filteredProductStock.reduce((sum, s) => sum + (s.stock || 0), 0);
@@ -322,6 +351,18 @@ const handleAddToCart = (e) => {
     const avg = validRatings.reduce((sum, val) => sum + val, 0) / validRatings.length;
     return { avg: Number(avg.toFixed(1)), count: reviews.length };
   }, [reviews]);
+
+  const sortedReviews = useMemo(() => {
+    const list = Array.isArray(reviews) ? [...reviews] : [];
+    if (reviewSort === 'rating_desc') {
+      return list.sort((a, b) => (Number(b.rating_value) || 0) - (Number(a.rating_value) || 0));
+    }
+    if (reviewSort === 'rating_asc') {
+      return list.sort((a, b) => (Number(a.rating_value) || 0) - (Number(b.rating_value) || 0));
+    }
+    // newest (server already sorts by date desc)
+    return list;
+  }, [reviews, reviewSort]);
   const starFillPercent = ratingStats.avg ? Math.min(100, Math.max(0, (ratingStats.avg / 5) * 100)-20) : 0;
   const starTone = ratingStats.avg >= 4.5 ? '#10b981' : ratingStats.avg >= 3 ? '#f59e0b' : '#ef4444';
 
@@ -363,7 +404,40 @@ const handleAddToCart = (e) => {
       {/* Блок с фото */}
       <div className={styles.imageWrap}>
         <div className={styles.mainImgWrap}>
-          <img src={activeImage} alt={product.name} className={styles.image} />
+          <button
+            type="button"
+            className={styles.mainImgBtn}
+            onClick={() => setGalleryOpen(true)}
+            aria-label="Открыть галерею"
+          >
+            <img src={activeImage} alt={product.name} className={styles.image} />
+          </button>
+          {canNavigateGallery && (
+            <>
+              <button
+                type="button"
+                className={`${styles.galleryArrow} ${styles.galleryArrowLeft}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handlePrevImage();
+                }}
+                aria-label="Предыдущее фото"
+              >
+                ‹
+              </button>
+              <button
+                type="button"
+                className={`${styles.galleryArrow} ${styles.galleryArrowRight}`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleNextImage();
+                }}
+                aria-label="Следующее фото"
+              >
+                ›
+              </button>
+            </>
+          )}
         </div>
         {!!galleryImages.length && (
           <div className={styles.thumbs}>
@@ -518,22 +592,105 @@ const handleAddToCart = (e) => {
 
     </div>
 
+    {galleryOpen && (
+      <div
+        className={styles.galleryOverlay}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Галерея изображений"
+        onClick={() => setGalleryOpen(false)}
+      >
+        <div className={styles.galleryModal} onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className={styles.galleryClose}
+            onClick={() => setGalleryOpen(false)}
+            aria-label="Закрыть"
+          >
+            ×
+          </button>
+          <div className={styles.galleryStage}>
+            <img src={activeImage} alt={product.name} className={styles.galleryImage} />
+            {canNavigateGallery && (
+              <>
+                <button
+                  type="button"
+                  className={`${styles.galleryArrow} ${styles.galleryArrowLeft} ${styles.galleryArrowModal}`}
+                  onClick={handlePrevImage}
+                  aria-label="Предыдущее фото"
+                >
+                  ‹
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.galleryArrow} ${styles.galleryArrowRight} ${styles.galleryArrowModal}`}
+                  onClick={handleNextImage}
+                  aria-label="Следующее фото"
+                >
+                  ›
+                </button>
+              </>
+            )}
+          </div>
+          {!!galleryImages.length && (
+            <div className={styles.galleryThumbs} aria-label="Миниатюры">
+              {galleryImages.map((img, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  className={`${styles.thumb} ${idx === activeIndex ? styles.thumbActive : ''}`}
+                  onClick={() => setActiveIndex(idx)}
+                  aria-label={`Фото ${idx + 1}`}
+                >
+                  <img src={`${API_URL}${img.image_path}`} alt="" aria-hidden="true" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    )}
+
       <section className={styles.reviews} aria-label="Отзывы о шине" ref={reviewsRef}>
         <div className={styles.reviewsHeader}>
           <div>
             <h2>Отзывы о шине {product.brand} {product.model}</h2>
           </div>
-          <Button
-            type="button"
-            variant="tertiary"
-            className={styles.reviewsSummaryBtn}
-            onClick={scrollToReviews}
-          >
-            {ratingStats.count > 0
-              ? `${ratingStats.count} ${ratingStats.count === 1 ? 'отзыв' : ratingStats.count < 5 ? 'отзыва' : 'отзывов'} · средняя ${ratingStats.avg ?? '—'}`
-              : 'Отзывы пока недоступны'}
-          </Button>
+          <div className={styles.reviewsScore} aria-label="Средняя оценка и количество отзывов">
+            <span
+              className={`${styles.reviewsScoreValue} ${
+                ratingStats.avg == null
+                  ? ''
+                  : ratingStats.avg >= 4.5
+                  ? styles.avgGood
+                  : ratingStats.avg >= 3
+                  ? styles.avgMid
+                  : styles.avgBad
+              }`}
+            >
+              {ratingStats.avg ?? '—'}
+            </span>
+            <span className={styles.reviewsScoreLabel}>
+              {ratingStats.count > 0
+                ? `${ratingStats.count} ${ratingStats.count === 1 ? 'отзыв' : ratingStats.count < 5 ? 'отзыва' : 'отзывов'}`
+                : 'Нет отзывов'}
+            </span>
+          </div>
         </div>
+        {reviewsStatus === 'succeeded' && sortedReviews.length > 1 && (
+          <div className={styles.reviewsToolbar} aria-label="Сортировка отзывов">
+            <span className={styles.reviewsToolbarLabel}>Сортировка:</span>
+            <select
+              className={styles.reviewsSort}
+              value={reviewSort}
+              onChange={(e) => setReviewSort(e.target.value)}
+            >
+              <option value="newest">Сначала новые</option>
+              <option value="rating_desc">Сначала высокие</option>
+              <option value="rating_asc">Сначала низкие</option>
+            </select>
+          </div>
+        )}
 
         {reviewsStatus === 'loading' && (
           <p className={styles.reviewsNote}>Загружаем отзывы...</p>
@@ -544,9 +701,9 @@ const handleAddToCart = (e) => {
         {reviewsStatus === 'succeeded' && reviews?.length === 0 && (
           <p className={styles.reviewsNote}>Отзывов по этой модели пока нет.</p>
         )}
-        {reviews?.length > 0 && (
+        {sortedReviews?.length > 0 && (
           <div className={styles.reviewList}>
-            {reviews.map((review) => (
+            {sortedReviews.map((review) => (
               <ReviewCard key={review.id} review={review} />
             ))}
           </div>
@@ -560,22 +717,30 @@ const handleAddToCart = (e) => {
           <div className={styles.stickyControls}>
             <QuantityControl
               value={cartItem.quantity}
-              min={1}
+              min={0}
               max={selectedStock?.stock}
               onDecrement={handleDecrement}
               onIncrement={handleIncrement}
               qaPrefix="productd_qty_mobile"
             />
-            <Button variant="accent" onClick={handleGoToCart}>Перейти в корзину</Button>
+            <Button 
+                variant="accent-low"
+                depth="raised" 
+                onClick={handleGoToCart}
+              >
+                Перейти в корзину</Button>
           </div>
         ) : (
           <Button
-            variant="accent"
+            variant="accent-low"
             onClick={handleAddToCart}
             disabled={!selectedStockId || (selectedStock?.stock || 0) < 1}
+            data-qa="productd_add_to_cart"
+            depth="raised"
           >
             Добавить в корзину
           </Button>
+
         )}
       </div>
     </div>

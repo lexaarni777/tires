@@ -1,6 +1,6 @@
-@import '../../styles/_variables.scss';
-@import '../../styles/_mixins.scss';
-@import '../../styles/_typography.scss';
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+@use '../../styles/typography' as *;
 
 .editProfile {
   padding: var(--sp-16);

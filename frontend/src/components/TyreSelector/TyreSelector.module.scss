@@ -1,6 +1,6 @@
-@import '../../styles/_variables';
-@import '../../styles/mixins';
-@import '../../styles/typography';
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+@use '../../styles/typography' as *;
 
 .wrapper {
   padding: $space-md;

@@ -1,9 +1,9 @@
-@import '../../styles/_mixins.scss';
+@use '../../styles/mixins' as *;
 
 .wrapper {
   max-width: 1440px;
   margin: 0 auto;
-  padding: clamp(1.25rem, 2vw, 2.5rem);
+  padding: 16px;
   display: flex;
   flex-direction: column;
   gap: var(--sp-24, 1.5rem);

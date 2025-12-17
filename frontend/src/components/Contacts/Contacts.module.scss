@@ -1,6 +1,6 @@
-@import '../../styles/_variables.scss';
-@import '../../styles/typography.scss';
-@import '../../styles/mixins.scss';
+@use '../../styles/variables' as *;
+@use '../../styles/typography' as *;
+@use '../../styles/mixins' as *;
 
 .contactsPage {
   @include flex-column;

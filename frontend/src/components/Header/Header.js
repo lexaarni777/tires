@@ -41,6 +41,7 @@ const Header = () => {
   const cartQuantity = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
   const formattedCartQuantity = cartQuantity > 99 ? '99+' : cartQuantity;
   const userLabel = user?.first_name || user?.name || user?.email || 'Войти';
+  const logoSrc = `${process.env.PUBLIC_URL || ''}/logo.png`;
 
   useEffect(() => {
     setIsNavOpen(false);
@@ -160,7 +161,7 @@ const Header = () => {
             data-qa="nav_toggle"
           />
           <NavLink to="/" className={styles.logo} data-qa="nav_logo">
-            <img className={styles.logoTitle} src="logo.png" alt="MSK Tires" />
+            <img className={styles.logoTitle} src={logoSrc} alt="MSK Tires" />
           </NavLink>
         </div>
         

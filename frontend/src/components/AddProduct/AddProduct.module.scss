@@ -1,5 +1,5 @@
-@import '../../styles/_variables.scss';  // Цвета, отступы, фон
-@import '../../styles/mixins.scss';     // Медиа-запросы
+@use '../../styles/variables' as *;  // Цвета, отступы, фон
+@use '../../styles/mixins' as *;     // Медиа-запросы
 
 .container {
   max-width: 800px;                           // Ограничиваем ширину блока

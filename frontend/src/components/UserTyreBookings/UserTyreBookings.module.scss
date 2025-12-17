@@ -1,7 +1,8 @@
-@import '../../styles/_mixins.scss';
+@use '../../styles/mixins' as *;
 
 .wrapper {
-  padding: clamp(1.25rem, 2vw, 2.75rem);
+  max-width: 1440px;                  // Ограничение по ширине контейнера
+  padding: 16px;
   border-radius: var(--radius-ai-lg, 1rem);
   background: linear-gradient(
     135deg,

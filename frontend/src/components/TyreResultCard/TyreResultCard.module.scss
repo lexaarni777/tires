@@ -1,7 +1,7 @@
-@import '../../styles/_variables';
-@import '../../styles/mixins';
-@import '../../styles/typography';
-@import '../../styles/button-core';
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+@use '../../styles/typography' as *;
+@use '../../styles/button-core' as *;
 
 .cardGroup {
   margin-top: $space-xl;
@@ -11,7 +11,6 @@
   background-color: var(--c-surface);
   box-shadow: $shadow-soft;
 }
-
 
 .image {
   width: 100%;

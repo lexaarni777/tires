@@ -1,4 +1,5 @@
-@import '../../styles/mixins';
+@use "sass:map";
+@use '../../styles/mixins' as *;
 .wrap {
   position: relative;
   min-width: 260px;
@@ -89,7 +90,7 @@
   border-top: 1px solid var(--c-line);
 }
 
-@media (max-width: map-get($breakpoints, lg)) {
+@media (max-width: map.get($breakpoints, lg)) {
   .wrap {
     margin: 0 var(--sp-16) var(--sp-16);
   }
