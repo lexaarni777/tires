@@ -1,22 +1,29 @@
 @use '../../styles/variables' as *;
 @use '../../styles/typography' as *;
 @use '../../styles/mixins' as *;
+@use 'sass:map';
 
 .contactsPage {
+  margin: 0 auto;
+  padding: 16px;
+  max-width: map.get($breakpoints, xl);
+  min-width: map.get($breakpoints, xsm);
+}
+.contactsContainer{
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px;
   @include flex-column;
   gap: 24px;
-  padding: 32px 24px;
   background-color: #fff;
-  border-radius: 8px;
   box-shadow: $shadow-light;
   color: $text-primary;
-
+  border-radius: var(--radius-ai-lg);
   h2 {
     margin: 0;
     font-size: 28px;
     font-weight: 600;
   }
-
   @include respond(sm) {
     padding: 24px 16px;
   }

@@ -1,7 +1,43 @@
 
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { logout } from './authSlice'; // если путь другой — поменяй
-const initialGuestCart = JSON.parse(localStorage.getItem('guestCart') || '[]');
+
+const API_URL_BASE = (process.env.REACT_APP_API_URL || '').replace('/api', '');
+
+const normalizeGuestCartImage = (image) => {
+  if (!image) return image;
+
+  // If we stored a full URL (e.g. `${API_URL_BASE}/uploads/...`), convert it to a relative path.
+  if (/^(https?:)?\/\//i.test(image) && API_URL_BASE && image.startsWith(API_URL_BASE)) {
+    return image.slice(API_URL_BASE.length) || '';
+  }
+
+  return image;
+};
+
+const readInitialGuestCart = () => {
+  try {
+    const raw = localStorage.getItem('guestCart');
+    const parsed = JSON.parse(raw || '[]');
+    if (!Array.isArray(parsed)) return [];
+
+    const normalized = parsed.map((item) => ({
+      ...item,
+      product_image: normalizeGuestCartImage(item?.product_image),
+    }));
+
+    // Migrate already-saved carts to normalized format.
+    if (raw && JSON.stringify(parsed) !== JSON.stringify(normalized)) {
+      localStorage.setItem('guestCart', JSON.stringify(normalized));
+    }
+
+    return normalized;
+  } catch {
+    return [];
+  }
+};
+
+const initialGuestCart = readInitialGuestCart();
 
 export const mergeLocalCartWithServer = createAsyncThunk(
   'cart/mergeLocalCartWithServer',
@@ -88,7 +124,7 @@ export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getSt
 export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (item, { getState, dispatch }) => {
     const { auth } = getState();
     if (!auth.token) {
-      dispatch(localDecrement({ productId: item.productId, stockId: item.stockId }));
+      dispatch(localDecrement({ cart_id: item.cart_id, productId: item.productId, stockId: item.stockId }));
       return item;
     }
     const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/decrement`, {
@@ -112,7 +148,7 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (car
     const { auth } = getState();
 
     if (!auth.token) {
-      dispatch(localRemove(cart_id)); // payload: { productId, stockId }
+      dispatch(localRemove({ cart_id })); // payload: { cart_id } or { productId, stockId }
       return cart_id;
     }
     await fetch(`${process.env.REACT_APP_API_URL}/cart/delete/${cart_id}`, {
@@ -230,7 +266,7 @@ const cartSlice = createSlice({
                 cart_id, // уникальный id позиции
                 product_id: item.productId,
                 product_name: item.productName,
-                product_image: item.image,
+                product_image: normalizeGuestCartImage(item.image),
                 stock_id: item.stockId,
                 location: item.location,
                 price: item.price,
@@ -245,7 +281,10 @@ const cartSlice = createSlice({
             localStorage.setItem('guestCart', JSON.stringify(state.items));
         },
         localRemove: (state, action) => {
-            const { cart_id, product_id, stock_id } = action.payload;
+            const payload = action.payload;
+            const cart_id = typeof payload === 'string' ? payload : (payload?.cart_id ?? payload?.cartId);
+            const product_id = payload?.product_id ?? payload?.productId;
+            const stock_id = payload?.stock_id ?? payload?.stockId;
 
             state.items = state.items.filter(i => {
             if (cart_id) return i.cart_id !== cart_id;
@@ -257,7 +296,10 @@ const cartSlice = createSlice({
             localStorage.setItem('guestCart', JSON.stringify(state.items));
         },
         localDecrement: (state, action) => {
-            const { cart_id, product_id, stock_id } = action.payload;
+            const payload = action.payload;
+            const cart_id = payload?.cart_id ?? payload?.cartId;
+            const product_id = payload?.product_id ?? payload?.productId;
+            const stock_id = payload?.stock_id ?? payload?.stockId;
             const item = state.items.find(i => {
             if (cart_id) return i.cart_id === cart_id;
             return i.product_id === product_id && i.stock_id === stock_id;

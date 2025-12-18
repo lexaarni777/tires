@@ -14,6 +14,24 @@ import { getThumbnailPath } from '../../utils/thumb';
 import { MdDeleteForever } from "react-icons/md";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
+const resolveCartThumbnailSrc = (productImage) => {
+  if (!productImage) return '';
+
+  // If stored as an absolute URL (guest cart can contain full URLs), avoid duplicating API_URL.
+  if (/^(https?:)?\/\//i.test(productImage)) {
+    // If the URL points to our own origin, still try to build a thumb URL.
+    if (API_URL && productImage.startsWith(API_URL)) {
+      const relativePath = productImage.slice(API_URL.length) || '';
+      return `${API_URL}${getThumbnailPath(relativePath)}`;
+    }
+    // External/placeholder images: keep as-is.
+    return productImage;
+  }
+
+  // Relative path from backend (server cart format).
+  return `${API_URL}${getThumbnailPath(productImage)}`;
+};
+
 
 const Cart = () => {
   const dispatch = useDispatch();
@@ -280,7 +298,7 @@ const Cart = () => {
                       />
                       {item.product_image && (
                         <img
-                          src={`${API_URL}${getThumbnailPath(item.product_image)}`}
+                          src={resolveCartThumbnailSrc(item.product_image)}
                           alt={item.product_name || 'Товар'}
                           className={styles.productImage}
                           onClick={() => navigate(`/productdetailed/${item.article || item.product_id}`)}  

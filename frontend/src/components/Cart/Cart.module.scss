@@ -1,18 +1,26 @@
 @use '../../styles/variables' as *;
 @use '../../styles/mixins' as *;
+@use 'sass:map';
 
 .cartContainer {
-  max-width: var(xl);
   margin: 0 auto;
-  padding: clamp(1rem, 2vw, 2rem);
-  //min-width: 400px;
+  padding: 16px;
+  max-width: map.get($breakpoints, xl);
+  min-width: map.get($breakpoints, xsm);
 }
 
 .cartLayout {
+  width: 100%;
+  margin: 0 auto;
+  padding: 16px;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 320px;
   gap: clamp(1.5rem, 3vw, 3rem);
   align-items: flex-start;
+  border-radius: var(--radius-ai-lg);
+  background: var(--c-surface);
+  box-shadow: $shadow-light;
+
 }
 
 .itemsColumn {
@@ -53,7 +61,7 @@
   flex-direction: column;
   gap: var(--sp-12, 0.75rem);
   padding: var(--sp-16, 1rem);
-  border-radius: var(--radius-ai-lg, 1rem);
+  border-radius: var(--radius-ai-lg);
   background: var(--c-surface);
   box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12));
 }
@@ -155,7 +163,7 @@
   flex-direction: column;
   gap: var(--sp-12, 0.75rem);
   padding: var(--sp-20, 1.25rem);
-  border-radius: var(--radius-ai-lg, 1rem);
+  border-radius: var(--radius-ai-lg);
   background: var(--c-surface);
   box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12));
 }

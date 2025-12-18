@@ -72,7 +72,8 @@ const Contacts = () => {
   };
 
   return (
-    <section className={styles.contactsPage}>
+    <div className={styles.contactsPage}>
+      <div className={styles.contactsContainer}>
       <h2>Контакты</h2>
 
       <div className={styles.sectionStack}>
@@ -162,7 +163,8 @@ const Contacts = () => {
           </ul>
         </div>
       </div>
-    </section>
+    </div>
+    </div>
   );
 };
 
