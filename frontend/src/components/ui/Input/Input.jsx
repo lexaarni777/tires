@@ -6,6 +6,7 @@ const capitalize = (value = '') => value.charAt(0).toUpperCase() + value.slice(1
 const Input = forwardRef(
   (
     {
+      as,
       id,
       label,
       description,
@@ -19,13 +20,14 @@ const Input = forwardRef(
       className,
       inputClassName,
       depth = 'flat', // 'flat' | 'raised' | 'sunken' | 'sunkeninp'
+      children,
       ...rest
     },
     ref
   ) => {
     const generatedId = useId();
     const controlId = id || generatedId;
-    const RootTag = multiline ? 'textarea' : 'input';
+    const RootTag = as || (multiline ? 'textarea' : 'input');
     const sizeClass = size !== 'md' ? styles[`size${capitalize(size)}`] : null;
     const fullWidthClass = fullWidth ? styles.fullWidth : null;
     const hasStartIcon = Boolean(startIcon);
@@ -79,7 +81,9 @@ const Input = forwardRef(
             className={inputClasses}
             aria-invalid={Boolean(error) || undefined}
             {...rest}
-          />
+          >
+            {RootTag === 'select' ? children : null}
+          </RootTag>
           {hasEndIcon && <span className={styles.icon}>{endIcon}</span>}
         </div>
         {error ? (

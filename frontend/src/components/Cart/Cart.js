@@ -10,6 +10,7 @@ import QuantityControl from './QuantityControl';
 import BookingWizard from '../Booking/BookingWizard';
 import EmptyState from '../ui/EmptyState';
 import Skeleton from '../ui/Skeleton';
+import Input from '../ui/Input';
 import { getThumbnailPath } from '../../utils/thumb';
 import { MdDeleteForever } from "react-icons/md";
 const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
@@ -99,6 +100,10 @@ const Cart = () => {
       });
     }
   }, [showModal, dispatch]);
+
+  useEffect(() => {
+    if (!showModal) setShowBooking(false);
+  }, [showModal]);
 
   const resetForm = () => {
     setPaymentMethod('cash');
@@ -400,38 +405,59 @@ const Cart = () => {
               <div className={styles.formRow}>
                 <span className={styles.formLabel}>Способ оплаты:</span>
                 <div className={styles.radioGroup}>
-                  <label>
-                    <input type="radio" value="cash" checked={paymentMethod === 'cash'} onChange={() => setPaymentMethod('cash')} /> Наличными
-                  </label>
-                  <label>
-                    <input type="radio" value="card" checked={paymentMethod === 'card'} onChange={() => setPaymentMethod('card')} /> Картой при получении
-                  </label>
+                  <Radio
+                    name="paymentMethod"
+                    type="radio"
+                    checked={paymentMethod === 'cash'}
+                    onChange={() => setPaymentMethod('cash')}
+                    label="Наличными"
+                  />
+                  <Radio
+                    name="paymentMethod"
+                    type="radio"
+                    checked={paymentMethod === 'card'}
+                    onChange={() => setPaymentMethod('card')}
+                    label="Картой при получении"
+                  />
                 </div>
               </div>
 
               <div className={styles.formRow}>
                 <span className={styles.formLabel}>Доставка:</span>
                 <div className={styles.radioGroup}>
-                  <label>
-                    <input type="radio" value="pickup" checked={deliveryMethod === 'pickup'} onChange={() => setDeliveryMethod('pickup')} /> Самовывоз
-                  </label>
-                  <label>
-                    <input type="radio" value="delivery" checked={deliveryMethod === 'delivery'} onChange={() => setDeliveryMethod('delivery')} /> Доставка
-                  </label>
+                  <Radio
+                    name="deliveryMethod"
+                    type="radio"
+                    checked={deliveryMethod === 'pickup'}
+                    onChange={() => setDeliveryMethod('pickup')}
+                    label="Самовывоз"
+                  />
+                  <Radio
+                    name="deliveryMethod"
+                    type="radio"
+                    checked={deliveryMethod === 'delivery'}
+                    onChange={() => setDeliveryMethod('delivery')}
+                    label="Доставка"
+                  />
                 </div>
               </div>
               
               {deliveryMethod === 'pickup' && (
                 <div className={styles.formRow}>
-                  <label className={styles.formLabel}>Склад для самовывоза:</label>
-                  <select value={pickupWarehouse} onChange={e => setPickupWarehouse(e.target.value)} className={styles.input}>
+                  <Input
+                    as="select"
+                    label="Склад для самовывоза"
+                    value={pickupWarehouse}
+                    onChange={(e) => setPickupWarehouse(e.target.value)}
+                    depth="sunkeninp"
+                  >
                     <option value="">Выберите склад</option>
-                      {availableWarehouses.map(wh => (
-                        <option key={wh} value={wh}>
-                          {warehouseNames[wh] || wh}
-                        </option>
-                      ))}
-                  </select>
+                    {availableWarehouses.map((wh) => (
+                      <option key={wh} value={wh}>
+                        {warehouseNames[wh] || wh}
+                      </option>
+                    ))}
+                  </Input>
                 </div>
               )}
 
@@ -439,8 +465,9 @@ const Cart = () => {
                 <>
                   {addressList.length > 0 && (
                     <div className={styles.formRow}>
-                      <label className={styles.formLabel}>Адрес доставки:</label>
-                      <select
+                      <Input
+                        as="select"
+                        label="Адрес доставки"
                         value={selectedAddress}
                         onChange={(e) => {
                           const val = e.target.value;
@@ -452,24 +479,25 @@ const Cart = () => {
                             setAddress(addrObj?.address || '');
                           }
                         }}
-                        className={styles.input}
+                        depth="sunkeninp"
                       >
                         {addressList.map(addr => (
                           <option key={addr.id} value={addr.id}>{addr.address}</option>
                         ))}
                         <option value="new">Новый адрес</option>
-                      </select>
+                      </Input>
                     </div>
                   )}
 
                   {(selectedAddress === 'new' || addressList.length === 0) && (
                     <div className={styles.formRow}>
-                      <input
+                      <Input
+                        label="Новый адрес"
                         type="text"
                         value={address}
-                        onChange={e => setAddress(e.target.value)}
-                        className={styles.input}
+                        onChange={(e) => setAddress(e.target.value)}
                         placeholder="Улица, дом, квартира"
+                        depth="sunkeninp"
                       />
                     </div>
                   )}
@@ -477,8 +505,8 @@ const Cart = () => {
               )}
 
               <div className={styles.formRow}>
-                <label className={styles.formLabel}>Телефон:</label>
-                <input
+                <Input
+                  label="Телефон"
                   type="tel"
                   required
                   inputMode="tel"
@@ -496,15 +524,21 @@ const Cart = () => {
                     }
                     setPhone(out);
                   }}
-                  className={styles.input}
                   placeholder="+7 900 000-00-00"
                   data-qa="checkout_phone"
+                  depth="sunkeninp"
                 />
               </div>
 
               <div className={styles.formRow}>
-                <label className={styles.formLabel}>Комментарий:</label>
-                <textarea value={comment} onChange={e => setComment(e.target.value)} className={styles.textarea} placeholder="Пожелания к заказу" />
+                <Input
+                  label="Комментарий"
+                  multiline
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Пожелания к заказу"
+                  depth="sunkeninp"
+                />
               </div>
 
               <div className={styles.stickySummary} data-qa="checkout_summary">
@@ -545,18 +579,34 @@ const Cart = () => {
                 </Button>
               </div>
             </form>
-            {showBooking && (
-              <div className={styles.modalOverlay} style={{ zIndex: 50 }}>
-                <div className={`${styles.modalContent} ${styles.bookingModalContent}`}>
-                  <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:8 }}>
-                    <h3>Запись на шиномонтаж</h3>
-                    <Button type="button" variant="tertiary" onClick={() => setShowBooking(false)}>Закрыть</Button>
-                  </div>
-                  <BookingWizard prefillRadius={prefill.radius} returnTo='/cart'
-                    onBooked={(resp)=>{ setCreatedBookingId(resp.booking_id); setShowBooking(false); }} />
-                </div>
-              </div>
-            )}
+          </div>
+        </div>
+      )}
+
+      {showBooking && (
+        <div
+          className={styles.bookingOverlay}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Запись на шиномонтаж"
+          onClick={() => setShowBooking(false)}
+        >
+          <div
+            className={`${styles.modalContent} ${styles.bookingModalContent}`}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className={styles.bookingHeader}>
+              <h3 className={styles.bookingTitle}>Запись на шиномонтаж</h3>
+              <Button type="button" variant="tertiary" onClick={() => setShowBooking(false)}>Закрыть</Button>
+            </div>
+            <BookingWizard
+              prefillRadius={prefill.radius}
+              returnTo="/cart"
+              onBooked={(resp) => {
+                setCreatedBookingId(resp.booking_id);
+                setShowBooking(false);
+              }}
+            />
           </div>
         </div>
       )}

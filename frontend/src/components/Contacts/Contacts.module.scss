@@ -16,7 +16,7 @@
   @include flex-column;
   gap: 24px;
   background-color: #fff;
-  box-shadow: $shadow-light;
+  box-shadow: $shadow-soft;
   color: $text-primary;
   border-radius: var(--radius-ai-lg);
   h2 {

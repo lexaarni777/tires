@@ -21,7 +21,7 @@
   padding: $space-24;
   background-color: $surface;
   border-radius: var(--radius-ai-lg);
-  box-shadow: $shadow-neo-sunken;
+  box-shadow: $shadow-soft;
 }
 
 /* Обёртка для изображения товара */
@@ -462,7 +462,7 @@
   background: color-mix(in srgb, var(--c-surface, #fff) 94%, var(--c-bg, #f6f8fa) 6%);
   border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
   border-radius: var(--radius-ai-lg);
-  box-shadow: var(--shadow-raised, 0.35rem 0.35rem 0.8rem rgba(15, 23, 42, 0.12)), -0.25rem -0.25rem 0.7rem rgba(255, 255, 255, 0.8);
+  box-shadow: $shadow-soft;
 }
 
 .reviewsHeader {
