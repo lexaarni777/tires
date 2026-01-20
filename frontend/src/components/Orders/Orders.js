@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
 import styles from './Orders.module.scss';
@@ -15,6 +15,21 @@ const Orders = () => {
   const [openOrderId, setOpenOrderId] = useState(null); // ← ДОБАВЬ ЭТО
   const navigate = useNavigate();
   const auth = useSelector((state) => state.auth);
+
+  const statusClassFor = (status) => {
+    switch (status) {
+      case 'В обработке':
+        return styles.statusProcessing;
+      case 'Готов к выдаче':
+        return styles.statusReady;
+      case 'Доставлен':
+        return styles.statusDelivered;
+      case 'Отменён':
+        return styles.statusCancelled;
+      default:
+        return styles.statusDefault;
+    }
+  };
 
 
   useEffect(() => {
@@ -117,7 +132,7 @@ const Orders = () => {
           </div>
 
           <div className={styles.orders__statusRow}>
-            <span className={styles.badge}>
+            <span className={`${styles.badge} ${statusClassFor(order.status)}`}>
               {order.status}
             </span>
             <span className={styles.orders__total}>Итого: {order.total_amount} ₽</span>

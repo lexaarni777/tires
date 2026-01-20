@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './EditProfile.module.scss';
 import Button from '../ui/Button';
+import Input from '../ui/Input';
 import Skeleton from '../ui/Skeleton';
 import EmptyState from '../ui/EmptyState';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
@@ -216,18 +217,17 @@ useEffect(() => {
             {!hasName && (
               <div className={styles.fieldHint}>Имя нужно для обращения в заказах.</div>
             )}
-            <label className={styles.formLabel}>
-              <input
-                type="text"
-                name="name"
-                value={form.name}
-                onChange={handleFormChange}
-                className={styles.inputField}
-                placeholder="Ваше имя"
-                autoComplete="name"
-                ref={nameInputRef}
-              />
-            </label>
+            <Input
+              label="Имя"
+              type="text"
+              name="name"
+              value={form.name}
+              onChange={handleFormChange}
+              placeholder="Ваше имя"
+              autoComplete="name"
+              ref={nameInputRef}
+              depth="sunkeninp"
+            />
             {nameDirty ? (
               <Button type="submit" variant="accent" data-qa="profile_update" disabled={!form.name.trim()}>
                 {nameCta}
@@ -235,11 +235,10 @@ useEffect(() => {
             ) : (
               hasName && (
                 <Button
-                  type="button"
-                  variant="tertiary"
+                  variant="primary-low"
+                  depth="raised"
                   onClick={() => nameInputRef.current?.focus()}
                   data-qa="profile_edit_name"
-                  className={styles.buttonBorder}
                 >
                   Изменить
                 </Button>
@@ -249,67 +248,71 @@ useEffect(() => {
 
           <form onSubmit={handleChangePassword} className={styles.passwordBlock}>
             <h3 className={styles.sectionSubtitle}>Смена пароля</h3>
-            <div className={styles.inputWrap}>
-              <input
-                type={showOldPwd ? 'text' : 'password'}
-                name="old"
-                value={passwords.old}
-                onChange={handlePasswordChange}
-                placeholder="Старый пароль"
-                className={styles.inputField}
-                autoComplete="current-password"
-              />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                aria-label={showOldPwd ? 'Скрыть пароль' : 'Показать пароль'}
-                aria-pressed={showOldPwd}
-                onClick={() => setShowOldPwd(v => !v)}
-              >
-                {showOldPwd ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}
-              </button>
-            </div>
-            <div className={styles.inputWrap}>
-              <input
-                type={showNewPwd ? 'text' : 'password'}
-                name="new"
-                value={passwords.new}
-                onChange={handlePasswordChange}
-                placeholder="Новый пароль"
-                className={styles.inputField}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                aria-label={showNewPwd ? 'Скрыть пароль' : 'Показать пароль'}
-                aria-pressed={showNewPwd}
-                onClick={() => setShowNewPwd(v => !v)}
-              >
-                {showNewPwd ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}
-              </button>
-            </div>
-            <div className={styles.inputWrap}>
-              <input
-                type={showRepeatPwd ? 'text' : 'password'}
-                name="repeat"
-                value={passwords.repeat}
-                onChange={handlePasswordChange}
-                placeholder="Повторить новый пароль"
-                className={styles.inputField}
-                autoComplete="new-password"
-              />
-              <button
-                type="button"
-                className={styles.eyeBtn}
-                aria-label={showRepeatPwd ? 'Скрыть пароль' : 'Показать пароль'}
-                aria-pressed={showRepeatPwd}
-                onClick={() => setShowRepeatPwd(v => !v)}
-              >
-                {showRepeatPwd ? <MdVisibilityOff size={20}/> : <MdVisibility size={20}/>}
-              </button>
-            </div>
-            <Button type="submit" variant="accent" data-qa="password_change">Изменить пароль</Button>
+            <Input
+              type={showOldPwd ? 'text' : 'password'}
+              name="old"
+              value={passwords.old}
+              onChange={handlePasswordChange}
+              placeholder="Старый пароль"
+              autoComplete="current-password"
+              depth="sunkeninp"
+              endIcon={
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  aria-label={showOldPwd ? 'Скрыть пароль' : 'Показать пароль'}
+                  aria-pressed={showOldPwd}
+                  onClick={() => setShowOldPwd((v) => !v)}
+                >
+                  {showOldPwd ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
+                </button>
+              }
+            />
+            <Input
+              type={showNewPwd ? 'text' : 'password'}
+              name="new"
+              value={passwords.new}
+              onChange={handlePasswordChange}
+              placeholder="Новый пароль"
+              autoComplete="new-password"
+              depth="sunkeninp"
+              endIcon={
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  aria-label={showNewPwd ? 'Скрыть пароль' : 'Показать пароль'}
+                  aria-pressed={showNewPwd}
+                  onClick={() => setShowNewPwd((v) => !v)}
+                >
+                  {showNewPwd ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
+                </button>
+              }
+            />
+            <Input
+              type={showRepeatPwd ? 'text' : 'password'}
+              name="repeat"
+              value={passwords.repeat}
+              onChange={handlePasswordChange}
+              placeholder="Повторить новый пароль"
+              autoComplete="new-password"
+              depth="sunkeninp"
+              endIcon={
+                <button
+                  type="button"
+                  className={styles.eyeBtn}
+                  aria-label={showRepeatPwd ? 'Скрыть пароль' : 'Показать пароль'}
+                  aria-pressed={showRepeatPwd}
+                  onClick={() => setShowRepeatPwd((v) => !v)}
+                >
+                  {showRepeatPwd ? <MdVisibilityOff size={20} /> : <MdVisibility size={20} />}
+                </button>
+              }
+            />
+            <Button 
+              variant="primary-low"
+              depth="raised"
+              data-qa="password_change"
+              >Изменить пароль</Button>
           </form>
         </div>
 
@@ -318,9 +321,7 @@ useEffect(() => {
             <h3 className={styles.sectionSubtitle}>{form.email ? 'Ваш email' : 'Добавьте email'}</h3>
             {form.email ? (
               <>
-                <label className={styles.formLabel}>
-                  <input type="email" name="email" value={form.email} disabled className={styles.inputField} />
-                </label>
+                <Input type="email" name="email" value={form.email} disabled depth="sunkeninp" />
                 <div className={styles.fieldHint}>Измените при необходимости — подтвердим кодом.</div>
               </>
             ) : (
@@ -328,29 +329,34 @@ useEffect(() => {
             )}
             {emailStep === 1 ? (
               <div className={styles.inlineGroup}>
-                <input
+                <Input
                   type="email"
                   placeholder="Новый email"
                   value={newEmail}
                   onChange={(e) => setNewEmail(e.target.value)}
-                  className={styles.inputField}
                   autoComplete="email"
+                  depth="sunkeninp"
                 />
-                <Button variant="primary" onClick={handleRequestEmailCode} data-qa="request_email_change">
+                <Button 
+                  variant="primary-low"
+                  depth="raised"
+                  onClick={handleRequestEmailCode} 
+                  data-qa="request_email_change"
+                >
                   {form.email ? 'Изменить email' : 'Добавить email'}
                 </Button>
               </div>
             ) : (
               <div className={styles.inlineGroup}>
                 <div className={styles.fieldHint}>Шаг 2/2: Мы отправили код на {newEmail || form.email}</div>
-                <input
+                <Input
                   type="text"
                   placeholder="Код с email"
                   value={emailCode}
                   onChange={(e) => setEmailCode(e.target.value)}
-                  className={styles.inputField}
                   inputMode="numeric"
                   autoComplete="one-time-code"
+                  depth="sunkeninp"
                 />
                 <Button variant="accent" onClick={handleConfirmEmailCode} data-qa="confirm_email_change">Подтвердить email</Button>
                 <Button
@@ -378,9 +384,7 @@ useEffect(() => {
             <h3 className={styles.sectionSubtitle}>{form.phone ? 'Ваш телефон' : 'Добавьте телефон'}</h3>
             {form.phone ? (
               <>
-                <label className={styles.formLabel}>
-                  <input type="tel" name="phone" value={form.phone} disabled className={styles.inputField} />
-                </label>
+                <Input type="tel" name="phone" value={form.phone} disabled depth="sunkeninp" />
                 <div className={styles.fieldHint}>Измените при необходимости — подтвердим кодом.</div>
               </>
             ) : (
@@ -388,30 +392,34 @@ useEffect(() => {
             )}
             {phoneStep === 1 ? (
               <div className={styles.inlineGroup}>
-                <input
+                <Input
                   type="tel"
                   placeholder="Новый телефон"
                   value={newPhone}
                   onChange={(e) => setNewPhone(e.target.value)}
-                  className={styles.inputField}
                   inputMode="tel"
                   autoComplete="tel"
+                  depth="sunkeninp"
                 />
-                <Button variant="primary" onClick={handleRequestPhoneCode} data-qa="request_phone_change">
+                <Button 
+                  variant="primary-low"
+                  depth="raised" 
+                  onClick={handleRequestPhoneCode} 
+                  data-qa="request_phone_change">
                   {form.phone ? 'Изменить телефон' : 'Добавить телефон'}
                 </Button>
               </div>
             ) : (
               <div className={styles.inlineGroup}>
                 <div className={styles.fieldHint}>Шаг 2/2: Мы отправили код на {maskPhone(newPhone || form.phone)}</div>
-                <input
+                <Input
                   type="text"
                   placeholder="Код из SMS"
                   value={phoneCode}
                   onChange={(e) => setPhoneCode(e.target.value)}
-                  className={styles.inputField}
                   inputMode="numeric"
                   autoComplete="one-time-code"
+                  depth="sunkeninp"
                 />
                 <Button variant="accent" onClick={handleConfirmPhoneCode} data-qa="confirm_phone_change">Подтвердить телефон</Button>
                 <Button
@@ -463,15 +471,19 @@ useEffect(() => {
               </ul>
             )}
             <form onSubmit={handleAddAddress} className={styles.addressForm}>
-              <input
-                    type="text"
-                    name="address"
-                    value={newAddress.address}
-                    onChange={(e) => setNewAddress({ address: e.target.value })}
-                    placeholder="Введите полный адрес"
-                    className={styles.inputField}
-                />
-              <Button type="submit" variant="primary" data-qa="address_add">Добавить адрес</Button>
+              <Input
+                type="text"
+                name="address"
+                value={newAddress.address}
+                onChange={(e) => setNewAddress({ address: e.target.value })}
+                placeholder="Введите полный адрес"
+                depth="sunkeninp"
+              />
+              <Button
+                variant="primary-low"
+                depth="raised" 
+                data-qa="address_add"
+              >Добавить адрес</Button>
             </form>
           </div>
         </div>

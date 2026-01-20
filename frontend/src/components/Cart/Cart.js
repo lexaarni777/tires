@@ -257,7 +257,12 @@ const Cart = () => {
   if (!cartItems.length) {
     return (
       <EmptyState data-qa="cart_empty" title="Ваша корзина пуста" description="Добавьте товары из каталога, чтобы оформить заказ.">
-        <Button as={NavLink} to="/productlist" variant="primary">Перейти в каталог</Button>
+        <Button 
+        as={NavLink} 
+        to="/productlist" 
+        variant="primary-low"
+        depth="raised"
+        >Перейти в каталог</Button>
       </EmptyState>
     );
   }

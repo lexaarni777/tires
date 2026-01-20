@@ -2,116 +2,138 @@
 @use '../../styles/mixins' as *;     // Импорт миксинов, включая адаптивность
 
 .orders__container {
-  max-width: 960px;                     // Ограничиваем ширину контейнера
-  margin: 0 auto;                       // Центрируем по горизонтали
-  padding: 24px;                        // Внутренние отступы
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
 .orders__header {
-  font-size: 28px;                      // Крупный заголовок
-  font-weight: 700;                     // Жирный шрифт
-  text-align: center;                   // Центровка текста
-  margin-bottom: 32px;                  // Отступ снизу
-  color: $text-primary;                 // Основной цвет текста
+  margin: 0 0 1.25rem;
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: var(--c-text, $text-primary);
 }
 
 .orders__card {
-  background-color: #fff;               // Белый фон карточки
-  border: 1px solid $border-color;      // Тонкая граница
-  border-radius: 8px;                   // Скруглённые углы
-  padding: 20px;                        // Отступ внутри карточки
-  margin-bottom: 20px;                  // Отступ между карточками
-  box-shadow: $shadow-light;            // Лёгкая тень по переменной
-  transition: box-shadow 0.2s ease;     // Плавная анимация при наведении
+  background: color-mix(in srgb, var(--c-surface, #fff) 96%, var(--c-bg, #f6f8fa) 4%);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  border-radius: var(--radius-ai-lg, 1rem);
+  padding: 1rem;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.65rem rgba(15, 23, 42, 0.12));
+  transition: transform 120ms ease, box-shadow var(--transition-ai, 220ms ease);
+}
 
-  &:hover {
-    box-shadow: $shadow-hover;          // Более сильная тень при наведении
-  }
+.orders__card:hover {
+  transform: translateY(-0.5px);
+  box-shadow: inset 0.14rem 0.14rem 0.34rem rgba(15, 23, 42, 0.10),
+    inset -0.14rem -0.14rem 0.34rem rgba(255, 255, 255, 0.9);
 }
 
 .orders__top {
-  display: flex;                        // Горизонтальное расположение
-  justify-content: space-between;      // Распределение по краям
-  align-items: center;                 // Вертикальное выравнивание
-  margin-bottom: 12px;                 // Отступ снизу
-}
-
-.orders__number {
-  font-weight: 600;                    // Жирный номер заказа
-  font-size: 18px;                     // Размер шрифта
-  color: $primary;                     // Основной синий
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
 }
 
 .orders__date {
-  font-size: 14px;                     // Меньше размер даты
-  color: $text-muted;                  // Серый текст
+  font-size: 0.875rem;
+  color: var(--c-text-muted, $text-muted);
 }
 
 .orders__statusRow {
-  display: flex;                       // Горизонтальное расположение
-  justify-content: space-between;     // Раскидываем статус и сумму
-  align-items: center;                // Выравнивание по центру
-  margin-bottom: 16px;                // Отступ снизу
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
 }
 
 .orders__total {
-  font-weight: 600;                   // Жирный текст
-  font-size: 16px;                    // Размер шрифта
-  color: $text-primary;               // Основной цвет
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--c-text, $text-primary);
+  font-variant-numeric: tabular-nums;
 }
 
 .orders__items {
-  list-style: none;                   // Убираем маркеры списка
-  padding: 0;                         // Убираем отступы
-  margin: 0;                          // Обнуляем отступ
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
 }
 
 .orders__item {
-  display: flex;                      // Горизонтальное выравнивание
-  justify-content: space-between;    // Название и сумма по краям
-  padding: 6px 0;                     // Отступ сверху и снизу
-  border-top: 1px solid $border-color; // Разделитель между строками
-  font-size: 14px;                    // Меньший шрифт
-  color: $text-primary;               // Цвет текста
-
-  &:first-child {
-    border-top: none;                // Убираем верхнюю границу у первого элемента
-  }
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border-radius: var(--radius-ai-md, 0.875rem);
+  border: 1px solid color-mix(in srgb, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%, transparent 30%);
+  background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
+  box-shadow: inset 0.12rem 0.12rem 0.28rem rgba(15, 23, 42, 0.08), inset -0.12rem -0.12rem 0.28rem rgba(255, 255, 255, 0.85);
 }
 
 .badge {
-  padding: 4px 10px;                 // Внутренний отступ
-  border-radius: 20px;              // Скругление — бейдж
-  font-size: 13px;                  // Размер текста
-  font-weight: 500;                 // Полужирный
-  color: #fff;                      // Белый текст
-  text-transform: capitalize;       // Приведение к виду "Слово"
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: color-mix(in srgb, var(--c-surface, #fff) 92%, var(--c-bg, #f6f8fa) 8%);
+  color: var(--c-text, $text-primary);
 }
 
-// === Цветовые статусы для заказов ===
-.status__В\20обработке {
-  background-color: orange;
-  color: white;
+.statusDefault {
+  border-color: color-mix(in srgb, #94a3b8 30%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%);
+  background: color-mix(in srgb, #94a3b8 10%, var(--c-surface, #fff) 90%);
+  color: #334155;
 }
 
-.status__Готов\20к\20выдаче {
-  background-color: dodgerblue;
-  color: white;
+.statusProcessing {
+  border-color: color-mix(in srgb, #f59e0b 35%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 65%);
+  background: color-mix(in srgb, #f59e0b 12%, var(--c-surface, #fff) 88%);
+  color: #92400e;
 }
 
-.status__Доставлен {
-  background-color: green;
-  color: white;
+.statusReady {
+  border-color: color-mix(in srgb, var(--c-primary, #0057b8) 30%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%);
+  background: color-mix(in srgb, var(--c-primary, #0057b8) 10%, var(--c-surface, #fff) 90%);
+  color: var(--c-primary, #0057b8);
 }
 
-.status__Отменён {
-  background-color: crimson;
-  color: white;
+.statusDelivered {
+  border-color: color-mix(in srgb, #10b981 35%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 65%);
+  background: color-mix(in srgb, #10b981 12%, var(--c-surface, #fff) 88%);
+  color: #065f46;
 }
+
+.statusCancelled {
+  border-color: color-mix(in srgb, #ef4444 30%, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%);
+  background: color-mix(in srgb, #ef4444 10%, var(--c-surface, #fff) 90%);
+  color: #991b1b;
+}
+
 .orders__deliveryInfo {
   margin-top: 0.5rem;
   font-size: 0.95rem;
-  color: #444;
+  color: var(--c-text, $text-primary);
+
+  p {
+    margin: 0.25rem 0 0;
+    color: var(--c-text-muted, $text-muted);
+  }
+
+  strong {
+    color: var(--c-text, $text-primary);
+  }
 }
 
 .orders__toggle {
@@ -126,35 +148,29 @@
 }
 
 .orders__details {
-  margin-top: 8px;
-  padding: 8px 12px;
-  background: #f9f9f9;
-  border-radius: 8px;
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: var(--radius-ai-lg, 1rem);
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  background: color-mix(in srgb, var(--c-surface, #fff) 92%, var(--c-bg, #f6f8fa) 8%);
   animation: slideDown 0.2s ease-out;
 }
 
 .orders__actions {
-  margin-top: 12px;
+  margin-top: 0.75rem;
   display: flex;
-  gap: 8px;
-}
-
-.orders__item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin: 8px 0;
-  padding: 8px;
-  background: #f0f0f0;
-  border-radius: 6px;
+  gap: 0.5rem;
+  flex-wrap: wrap;
 }
 
 .orders__itemImage {
-  width: 60px;
-  height: 60px;
+  width: 3.75rem;
+  height: 3.75rem;
   object-fit: contain;
-  border: 1px solid #ddd;
-  border-radius: 4px;
+  border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
+  border-radius: 0.75rem;
+  background: var(--c-surface, #fff);
+  cursor: pointer;
 }
 
 .orders__itemDetails {
@@ -163,13 +179,15 @@
 
 .orders__itemName {
   font-weight: bold;
-  margin-bottom: 2px;
+  margin: 0 0 0.1rem;
+  color: var(--c-text, $text-primary);
 }
 
 .orders__itemBrand,
 .orders__itemQty {
+  margin: 0.1rem 0 0;
   font-size: 0.9rem;
-  color: #555;
+  color: var(--c-text-muted, $text-muted);
 }
 
 .linkButton {
@@ -203,4 +221,15 @@
   font-size: 16px;                  // Размер шрифта
   font-weight: bold;                // Жирный шрифт
   color: $text-muted;               // Серый цвет
+}
+
+@include respond(md) {
+  .orders__container {
+    padding: 0.75rem;
+  }
+
+  .orders__top {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
