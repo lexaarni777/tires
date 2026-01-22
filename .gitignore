@@ -12,6 +12,7 @@ frontend/.pnp
 frontend/.pnp.js
 frontend/.env
 frontend/build
+frontend/.next
 
 # testing
 /coverage
