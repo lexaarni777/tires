@@ -275,3 +275,50 @@ exports.getProductByIdFromDB = async (productId) => {
 
   return product;
 };
+
+// Получить одну шину (товар) по article с изображениями
+exports.getProductByArticleFromDB = async (article) => {
+  const query = `
+    SELECT
+      t.*,
+      COALESCE(json_agg(pi) FILTER (WHERE pi.id IS NOT NULL), '[]') AS images,
+      COALESCE(rev.avg_rating, 0)::float AS avg_rating,
+      COALESCE(rev.review_count, 0) AS review_count
+    FROM tyre_catalog t
+    LEFT JOIN productsimages pi ON t.id = pi.product_id
+    LEFT JOIN LATERAL (
+      SELECT
+        AVG(r.rating_value)::NUMERIC(3,2) AS avg_rating,
+        COUNT(*) AS review_count
+      FROM tyre_reviews r
+      WHERE r.brand ILIKE COALESCE(t.brand, '')
+        AND r.model ILIKE COALESCE(NULLIF(t.model, ''), t.name, '')
+    ) rev ON TRUE
+    WHERE t.article = $1
+    GROUP BY t.id, rev.avg_rating, rev.review_count;
+  `;
+
+  const { rows } = await pool.query(query, [article]);
+  if (rows.length === 0) return null;
+
+  const product = rows[0];
+
+  // Подгружаем model_images
+  const modelImagesQuery = `
+    SELECT * FROM model_images
+    WHERE brand = $1 AND model = $2
+    ORDER BY "order" ASC, id ASC
+  `;
+  const modelImagesResult = await pool.query(modelImagesQuery, [product.brand, product.model]);
+  product.model_images = modelImagesResult.rows;
+
+  return product;
+};
+
+// Данные для sitemap: список article всех товаров
+exports.getAllProductArticlesForSitemapFromDB = async () => {
+  const { rows } = await pool.query(
+    `SELECT article FROM tyre_catalog ORDER BY id ASC;`
+  );
+  return rows.map((r) => r.article);
+};

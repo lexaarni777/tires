@@ -34,6 +34,30 @@ exports.getTyreById = async (req, res) => {
   }
 };
 
+// Получить одну шину по article (для SSR/SEO-страниц)
+exports.getTyreByArticle = async (req, res) => {
+  try {
+    const { article } = req.params;
+    const product = await productModel.getProductByArticleFromDB(article);
+    if (!product) return res.status(404).json({ message: 'Товар не найден' });
+    res.json(product);
+  } catch (err) {
+    console.error('Ошибка при получении шины по article:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
+// Данные для sitemap: список article всех товаров
+exports.getSitemapArticles = async (_req, res) => {
+  try {
+    const articles = await productModel.getAllProductArticlesForSitemapFromDB();
+    res.json(articles);
+  } catch (err) {
+    console.error('Ошибка при получении данных для sitemap:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
 
 
 // Создать новую шину в каталоге

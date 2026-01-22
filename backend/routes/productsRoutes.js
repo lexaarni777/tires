@@ -23,6 +23,7 @@ const express = require('express');
 const {
   getAllTyres,           // Получить все шины каталога (с фильтрацией)
   getTyreById,           // Получить одну шину по id
+  getTyreByArticle,      // Получить одну шину по article (для SSR/SEO)
   createTyre,            // Добавить новую шину (только для админа)
   uploadTyresXlsx,       // Массовый импорт каталога шин (только для админа)
   updateTyre,            // Обновить шину (только для админа)
@@ -32,7 +33,8 @@ const {
   createStock,           // Добавить остаток (только для админа)
   uploadStockXlsx,       // Массовый импорт остатков (только для админа)
   updateStock,           // Обновить остаток (только для админа)
-  deleteStock            // Удалить остаток (только для админа)
+  deleteStock,           // Удалить остаток (только для админа)
+  getSitemapArticles     // Данные для sitemap
 } = require('../controllers/productsController');
 
 const { getImagesForProduct } = require('../controllers/imagesController');
@@ -45,8 +47,14 @@ const router = express.Router();
 // GET /api/products/catalog — Получить все шины с возможной фильтрацией по query (например, бренд, размер, сезон и т.д.)
 router.get('/catalog', getAllTyres);
 
+// GET /api/products/catalog/by-article/:article — Получить шину по article (для SSR/SEO)
+router.get('/catalog/by-article/:article', getTyreByArticle);
+
 // GET /api/products/catalog/:id — Получить конкретную шину по ID
 router.get('/catalog/:id', getTyreById);
+
+// GET /api/products/sitemap — Данные для sitemap (список article)
+router.get('/sitemap', getSitemapArticles);
 
 // POST /api/products/catalog — Добавить новую шину (только админ)
 router.post('/catalog', verifyToken, verifyAdmin, createTyre);
