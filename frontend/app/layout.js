@@ -1,4 +1,6 @@
 import '../src/index.css';
+import Layout from '../src/components/Layout';
+import Providers from './providers';
 
 export const metadata = {
   title: 'MSKTires',
@@ -8,8 +10,11 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ru">
-      <body>{children}</body>
+      <body>
+        <Providers>
+          <Layout>{children}</Layout>
+        </Providers>
+      </body>
     </html>
   );
 }
-

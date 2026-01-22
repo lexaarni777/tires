@@ -1,5 +1,7 @@
+'use client';
+
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import styles from './SearchBar.module.scss';
 import { getThumbnailPath } from '../../utils/thumb';
 import Input from '../UI/Input';
@@ -7,7 +9,7 @@ import Input from '../UI/Input';
 const DEBOUNCE_MS = 300;
 
 const SearchBar = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [term, setTerm] = useState('');
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -38,7 +40,8 @@ const SearchBar = () => {
       setLoading(true);
       setError(null);
       try {
-        const url = `${process.env.REACT_APP_API_URL}/products/catalog?q=${encodeURIComponent(term)}&limit=10`;
+        const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL;
+        const url = `${apiBase}/products/catalog?q=${encodeURIComponent(term)}&limit=10`;
         const resp = await fetch(url);
         if (!resp.ok) throw new Error('Ошибка загрузки');
         const data = await resp.json();
@@ -83,12 +86,12 @@ const SearchBar = () => {
       if (highlight >= 0 && items[highlight]) {
         e.preventDefault();
         const slug = items[highlight].article || items[highlight].id;
-        navigate(`/productdetailed/${slug}`);
+        router.push(`/productdetailed/${slug}`);
         setOpen(false);
         setHighlight(-1);
       } else if (term.trim()) {
         e.preventDefault();
-        navigate(`/search?q=${encodeURIComponent(term.trim())}`);
+        router.push(`/search?q=${encodeURIComponent(term.trim())}`);
         setOpen(false);
         setHighlight(-1);
       }
@@ -98,7 +101,10 @@ const SearchBar = () => {
     }
   };
 
-  const API_URL = useMemo(() => (process.env.REACT_APP_API_URL || '').replace('/api',''), []);
+  const API_URL = useMemo(() => {
+    const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+    return apiBase.replace('/api', '');
+  }, []);
 
   const getThumbUrl = (p) => {
     const rel = (p.images && p.images[0]?.image_path) || (p.model_images && p.model_images[0]?.image_path) || '';
@@ -120,7 +126,7 @@ const SearchBar = () => {
         onMouseDown={(e) => e.preventDefault()}
         onClick={() => {
           const slug = p.article || p.id;
-          navigate(`/productdetailed/${slug}`);
+          router.push(`/productdetailed/${slug}`);
           setOpen(false);
           setHighlight(-1);
         }}
@@ -168,7 +174,7 @@ const SearchBar = () => {
                 className={`${styles.item} ${styles.all}`}
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => {
-                  navigate(`/search?q=${encodeURIComponent(term.trim())}`);
+                  router.push(`/search?q=${encodeURIComponent(term.trim())}`);
                   setOpen(false);
                   setHighlight(-1);
                 }}

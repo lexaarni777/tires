@@ -1,7 +1,10 @@
+'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { FiMapPin, FiMenu, FiPhone, FiTruck, FiUser, FiX } from 'react-icons/fi';
 import { FaInstagram, FaShoppingCart, FaTelegramPlane, FaVk } from 'react-icons/fa';
-import { NavLink, useLocation, useNavigate } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 
 import styles from './Header.module.scss';
@@ -18,8 +21,8 @@ const navItems = [
 
 const Header = () => {
   const [isNavOpen, setIsNavOpen] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
+  const router = useRouter();
+  const pathname = usePathname();
   const dispatch = useDispatch();
 
   const selectedCity = useSelector((state) => state.city?.selectedCity);
@@ -41,11 +44,11 @@ const Header = () => {
   const cartQuantity = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
   const formattedCartQuantity = cartQuantity > 99 ? '99+' : cartQuantity;
   const userLabel = user?.first_name || user?.name || user?.email || 'Войти';
-  const logoSrc = `${process.env.PUBLIC_URL || ''}/logo.png`;
+  const logoSrc = '/logo.png';
 
   useEffect(() => {
     setIsNavOpen(false);
-  }, [location.pathname]);
+  }, [pathname]);
 
   const handleNavToggle = () => {
     setIsNavOpen((prev) => !prev);
@@ -56,31 +59,37 @@ const Header = () => {
   };
 
   const handleCartClick = () => {
-    navigate('/cart');
+    router.push('/cart');
   };
 
   const handleAccountClick = () => {
     if (user) {
-      navigate('/account');
+      router.push('/account');
     } else {
-      navigate('/authform', { state: { from: 'header_account' } });
+      router.push('/authform?from=header_account');
     }
   };
 
-  const renderNavLink = (item) => (
-    <li key={item.path} className={styles.menuItem}>
-      <NavLink
-        to={item.path}
-        className={({ isActive }) =>
-          `${styles.menuLink} ${isActive ? styles.menuLinkActive : ''}`
-        }
-        end={item.path === '/'}
-        data-qa={item.qa}
-      >
-        {item.label}
-      </NavLink>
-    </li>
-  );
+  const isActivePath = (href) => {
+    if (!href) return false;
+    if (href === '/') return pathname === '/';
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
+
+  const renderNavLink = (item) => {
+    const isActive = isActivePath(item.path);
+    return (
+      <li key={item.path} className={styles.menuItem}>
+        <Link
+          href={item.path}
+          className={`${styles.menuLink} ${isActive ? styles.menuLinkActive : ''}`}
+          data-qa={item.qa}
+        >
+          {item.label}
+        </Link>
+      </li>
+    );
+  };
 
   const isTireServiceAvailable = currentCity === 'Москва';
 
@@ -160,9 +169,9 @@ const Header = () => {
             aria-label={isNavOpen ? 'Закрыть меню' : 'Открыть меню'}
             data-qa="nav_toggle"
           />
-          <NavLink to="/" className={styles.logo} data-qa="nav_logo">
+          <Link href="/" className={styles.logo} data-qa="nav_logo">
             <img className={styles.logoTitle} src={logoSrc} alt="MSK Tires" />
-          </NavLink>
+          </Link>
         </div>
         
       <div className={styles.searchDesktop}>
@@ -244,15 +253,13 @@ const Header = () => {
           {navItems.map(renderNavLink)}
           <li className={styles.menuItem}>
             {isTireServiceAvailable ? (
-              <NavLink
-                to="/booking"
-                className={({ isActive }) =>
-                  `${styles.menuLink} ${isActive ? styles.menuLinkActive : ''}`
-                }
+              <Link
+                href="/booking"
+                className={`${styles.menuLink} ${isActivePath('/booking') ? styles.menuLinkActive : ''}`}
                 data-qa="nav_tire_service"
               >
                 Шиномонтаж
-              </NavLink>
+              </Link>
             ) : (
               <span className={styles.menuLinkDisabled} title="Доступно только в Москве">
                 Шиномонтаж
@@ -260,15 +267,13 @@ const Header = () => {
             )}
           </li>
           <li className={styles.menuItem}>
-            <NavLink
-              to="/contacts"
-              className={({ isActive }) =>
-                `${styles.menuLink} ${isActive ? styles.menuLinkActive : ''}`
-              }
+            <Link
+              href="/contacts"
+              className={`${styles.menuLink} ${isActivePath('/contacts') ? styles.menuLinkActive : ''}`}
               data-qa="nav_contacts"
             >
               Контакты
-            </NavLink>
+            </Link>
           </li>
         </ul>
       </nav>

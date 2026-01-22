@@ -195,26 +195,40 @@ export const verifyEmail = createAsyncThunk('auth/verifyEmail', async ({ email, 
 
 
 /// Слайс для аутентификации
+const safeLocalStorageGet = (key) => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+};
+
+const safeLocalStorageGetJson = (key, fallback) => {
+  const raw = safeLocalStorageGet(key);
+  if (!raw || raw === 'undefined') return fallback;
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return fallback;
+  }
+};
+
 const authSlice = createSlice({
     name: 'auth',
     initialState: {
-        user: JSON.parse(localStorage.getItem('user')) || null,
+        user: safeLocalStorageGetJson('user', null),
         token: (() => {
-        const raw = localStorage.getItem('token');
+        const raw = safeLocalStorageGet('token');
         return raw && raw !== 'undefined' ? raw : null;
         })(),
 
         roles: (() => {
-            const data = localStorage.getItem('roles');
-            try {
-                return data && data !== 'undefined' ? JSON.parse(data) : [];
-            } catch {
-                return [];
-            }
+            return safeLocalStorageGetJson('roles', []);
             })(),
         status: 'idle',
         error: null,
-        id: localStorage.getItem('id') || null,
+        id: safeLocalStorageGet('id') || null,
     },
     reducers: {
         logout: (state) => {

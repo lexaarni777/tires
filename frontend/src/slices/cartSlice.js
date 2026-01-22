@@ -2,7 +2,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { logout } from './authSlice'; // если путь другой — поменяй
 
-const API_URL_BASE = (process.env.REACT_APP_API_URL || '').replace('/api', '');
+const API_URL_BASE = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
+const IS_BROWSER = typeof window !== 'undefined';
 
 const normalizeGuestCartImage = (image) => {
   if (!image) return image;
@@ -16,6 +17,7 @@ const normalizeGuestCartImage = (image) => {
 };
 
 const readInitialGuestCart = () => {
+  if (!IS_BROWSER) return [];
   try {
     const raw = localStorage.getItem('guestCart');
     const parsed = JSON.parse(raw || '[]');
