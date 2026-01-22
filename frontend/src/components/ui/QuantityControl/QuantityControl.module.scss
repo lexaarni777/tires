@@ -1,4 +1,4 @@
-@use '../../styles/variables' as *;
+@use '../../../styles/variables' as *;
 
 .quantityControls {
   display: inline-flex;
@@ -20,7 +20,7 @@
   background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
   box-shadow: var(--shadow-raised, 0.2rem 0.2rem 0.45rem rgba(15, 23, 42, 0.18)),
     -0.15rem -0.15rem 0.3rem rgba(255, 255, 255, 0.85);
-  color: var(--c-primary, #0057b8);
+  //color: var(--c-primary, #0057b8);
   font-size: 1rem;
   display: inline-flex;
   align-items: center;
@@ -54,5 +54,4 @@
   min-width: 2rem;
   text-align: center;
   font-weight: 600;
-  color: var(--c-primary, $primary);
 }

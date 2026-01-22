@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct, addStock, uploadProductsFromExcel } from '../../slices/productSlice';
 import styles from './AddProduct.module.scss';
-import Button from '../ui/Button';
+import Button from '../UI/Button';
 import { warehouseList } from '../../constants/warehouseList';
 
 /**

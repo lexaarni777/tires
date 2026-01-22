@@ -3,7 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchProducts } from '../../slices/productSlice';
 import { fetchStock } from '../../slices/stockSlice';
 import TyreResultCard from '../TyreResultCard/TyreResultCard';
-import Button from '../ui/Button';
+import Button from '../UI/Button';
 import styles from './TyreSelector.module.scss';
 import { LuSun, LuSunSnow } from "react-icons/lu";
 import { IoIosSnow } from "react-icons/io";

@@ -5,8 +5,8 @@ import { fetchProducts, deleteProduct } from '../../slices/productSlice';
 import { fetchStock } from '../../slices/stockSlice';
 import ProductCard from '../ProductCard/ProductCard';
 import ProductCardSkeleton from '../ProductCard/ProductCard.Skeleton';
-import EmptyState from '../ui/EmptyState';
-import Button from '../ui/Button';
+import EmptyState from '../UI/EmptyState';
+import Button from '../UI/Button';
 import styles from './SearchResults.module.scss';
 
 const SearchResults = () => {

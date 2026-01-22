@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import styles from './SearchBar.module.scss';
 import { getThumbnailPath } from '../../utils/thumb';
-import Input from '../ui/Input';
+import Input from '../UI/Input';
 
 const DEBOUNCE_MS = 300;
 

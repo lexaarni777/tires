@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import styles from './EditProfile.module.scss';
-import Button from '../ui/Button';
-import Input from '../ui/Input';
-import Skeleton from '../ui/Skeleton';
-import EmptyState from '../ui/EmptyState';
+import Button from '../UI/Button';
+import Input from '../UI/Input';
+import Skeleton from '../UI/Skeleton';
+import EmptyState from '../UI/EmptyState';
 import { MdVisibility, MdVisibilityOff } from 'react-icons/md';
 import {
   fetchProfile,

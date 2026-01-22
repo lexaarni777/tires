@@ -7,7 +7,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styles from './Header.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
 import { setCity } from '../../slices/citySlice';
-import Button from '../ui/Button';
+import Button from '../UI/Button';
 import SearchBar from '../Search/SearchBar';
 
 const navItems = [

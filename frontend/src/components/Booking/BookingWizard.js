@@ -6,10 +6,10 @@ import styles from './BookingWizard.module.scss';
 import { sendSmsCode, registerUser } from '../../slices/authSlice';
 import { validatePhone } from '../../utils/validators';
 import store from '../../slices/store';
-import Button from '../ui/Button';
-import Radio from '../ui/Radio';
+import Button from '../UI/Button';
+import Radio from '../UI/Radio';
 import RadioTile from './RadioTile';
-import QuantityControl from '../Cart/QuantityControl';
+import QuantityControl from '../UI/QuantityControl/QuantityControl';
 
 const radiusOptions = [
   { value: 'R13-15', label: 'R13–15' },
