@@ -1,5 +1,6 @@
 // utils/authFetch.js
 export const fetchWithRefresh = async (url, options = {}, { dispatch, getState }) => {
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL;
   let token = getState().auth.token;
   let mergedOptions = {
     ...options,
@@ -14,8 +15,9 @@ export const fetchWithRefresh = async (url, options = {}, { dispatch, getState }
   // Если access token истёк — пробуем refresh
   if (response.status === 401) {
     // Запрашиваем новый токен
-    console.log('process.env.REACT_APP_API_URL',process.env.REACT_APP_API_URL)
-    const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
+    if (!apiBase) throw new Error('API base URL is not configured');
+
+    const refreshResp = await fetch(`${apiBase}/auth/refresh`, {
       method: 'POST',
       credentials: 'include',
     });
@@ -25,7 +27,9 @@ export const fetchWithRefresh = async (url, options = {}, { dispatch, getState }
     const data = await refreshResp.json();
     token = data.accessToken;
     dispatch({ type: 'auth/tokenRefreshed', payload: token });
-    localStorage.setItem('token', token);
+    if (typeof window !== 'undefined') {
+      window.localStorage.setItem('token', token);
+    }
 
     // Повторяем исходный запрос уже с новым токеном
     mergedOptions.headers.Authorization = `Bearer ${token}`;

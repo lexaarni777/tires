@@ -1,3 +1,5 @@
+import Orders from '../../src/components/Orders/Orders';
+
 export const metadata = {
   title: 'Мои заказы – MSKTires',
   description: 'История заказов.',
@@ -7,9 +9,7 @@ export const metadata = {
 export default function OrdersPage() {
   return (
     <main style={{ padding: 24 }}>
-      <h1>Мои заказы</h1>
-      <p>Эта страница в процессе миграции. Скоро подключим текущий компонент Orders.</p>
+      <Orders />
     </main>
   );
 }
-

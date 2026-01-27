@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchOrders, repeatOrder, cancelOrder} from '../../slices/ordersSlice';
@@ -5,15 +7,15 @@ import styles from './Orders.module.scss';
 import EmptyState from '../ui/EmptyState';
 import Button from '../ui/Button';
 import Skeleton from '../ui/Skeleton';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { getThumbnailPath } from '../../utils/thumb';
-const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
 
 const Orders = () => {
   const dispatch = useDispatch();
   const { items: orders, loading, error } = useSelector((state) => state.orders);
   const [openOrderId, setOpenOrderId] = useState(null); // ← ДОБАВЬ ЭТО
-  const navigate = useNavigate();
+  const router = useRouter();
   const auth = useSelector((state) => state.auth);
 
   const statusClassFor = (status) => {
@@ -72,7 +74,9 @@ const Orders = () => {
       title="У вас пока нет заказов"
       description="Найдите нужные шины в каталоге и оформите первый заказ."
     >
-      <Button as={NavLink} to="/productlist" variant="primary">Перейти в каталог</Button>
+      <Button type="button" variant="primary" onClick={() => router.push('/productlist')}>
+        Перейти в каталог
+      </Button>
     </EmptyState>
   );
 
@@ -102,7 +106,7 @@ const Orders = () => {
               size="sm"
               onClick={async () => {
                 await dispatch(repeatOrder(order.items));
-                navigate('/cart');
+                router.push('/cart');
               }}
             >
               Повторить заказ
@@ -123,7 +127,7 @@ const Orders = () => {
                 size="sm"
                 onClick={() => {
                   const r = radiusFromOrder(order);
-                  navigate(r ? `/booking?radius=${encodeURIComponent(r)}` : '/booking');
+                  router.push(r ? `/booking?radius=${encodeURIComponent(r)}` : '/booking');
                 }}
               >
                 Записаться на шиномонтаж
@@ -152,7 +156,7 @@ const Orders = () => {
                   type="button"
                   variant="tertiary"
                   className={styles.linkButton}
-                  onClick={() => navigate(`/account/bookings#${order.booking_id}`)}
+                  onClick={() => router.push(`/account/bookings#${order.booking_id}`)}
                 >
                   перейти
                 </Button>
@@ -169,7 +173,7 @@ const Orders = () => {
                   src={`${API_URL}${getThumbnailPath(item.image)}`}
                   alt={item.name}
                   className={styles.orders__itemImage}
-                  onClick={() => navigate(`/productdetailed/${item.article || item.product_id}`)}  
+                  onClick={() => router.push(`/productdetailed/${item.article || item.product_id}`)}  
                 />
               )}
 
