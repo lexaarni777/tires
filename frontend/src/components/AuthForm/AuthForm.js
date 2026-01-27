@@ -1,10 +1,12 @@
+ 'use client';
+
 import React, { useEffect, useRef, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { registerUser, loginUser, sendSmsCode, sendResetCode, resetPassword, sendEmailCode, verifyEmail  } from '../../slices/authSlice';
 import styles from './AuthForm.module.scss';
 import Button from '../ui/Button';
 import Input from '../ui/Input';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { mergeLocalCartWithServer, clearGuestCart } from '../../slices/cartSlice';
 import { validatePhone, validateEmail } from '../../utils/validators';
 import { MdVisibility, MdVisibilityOff } from "react-icons/md";
@@ -12,8 +14,8 @@ import { MdVisibility, MdVisibilityOff } from "react-icons/md";
 
 const AuthForm = () => {
     const user = useSelector((state) => state.auth.user);
-    const navigate = useNavigate();
-    const location = useLocation();
+    const router = useRouter();
+    const searchParams = useSearchParams();
    
   
     const [isRegistering, setIsRegistering] = useState(false);
@@ -69,31 +71,33 @@ const AuthForm = () => {
 
     // Prefill phone from query (?phone=) or state and capture return URL
     useEffect(() => {
-      const params = new URLSearchParams(location.search);
-      const phoneFromQuery = params.get('phone');
-      const phoneFromState = location.state && location.state.prefillPhone;
-      const prefill = phoneFromQuery || phoneFromState;
+      const phoneFromQuery = searchParams?.get('phone');
+      const prefill = phoneFromQuery;
       if (prefill) {
         setForm(prev => ({ ...prev, phone: prefill }));
       }
-      const ret = params.get('return') || (location.state && location.state.returnUrl) || null;
+      const ret = searchParams?.get('return') || searchParams?.get('from') || null;
       if (ret) returnToRef.current = ret;
-    }, [location.search, location.state]);
+    }, [searchParams]);
 
     useEffect(() => {
       // Только при смене пользователя перенаправляем: если нет гостевой корзины — по returnTo или в корзину
+      const hasGuestCart =
+        typeof window !== 'undefined' && window.localStorage.getItem('guestCart');
       if (
         user &&
         previousUserRef.current !== user &&
-        !localStorage.getItem('guestCart')
+        !hasGuestCart
       ) {
-        navigate(returnToRef.current || '/cart');
+        router.push(returnToRef.current || '/cart');
       }
       previousUserRef.current = user;
-    }, [user, navigate]);
+    }, [user, router]);
     useEffect(() => {
     // Если появился токен и в localStorage есть guestCart, показываем модалку
-    if (auth.token && localStorage.getItem('guestCart')) {
+    const hasGuestCart =
+      typeof window !== 'undefined' && window.localStorage.getItem('guestCart');
+    if (auth.token && hasGuestCart) {
         setShowMergeModal(true);
     }
     }, [auth.token]);
@@ -102,12 +106,12 @@ const AuthForm = () => {
     const handleMerge = () => {
         dispatch(mergeLocalCartWithServer());
         setShowMergeModal(false);
-        navigate(returnToRef.current || '/cart');
+        router.push(returnToRef.current || '/cart');
     };
     const handleClear = () => {
         dispatch(clearGuestCart());
         setShowMergeModal(false);
-        navigate(returnToRef.current || '/cart');
+        router.push(returnToRef.current || '/cart');
     };
 
 

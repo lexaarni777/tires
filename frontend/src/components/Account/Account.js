@@ -1,7 +1,9 @@
+ 'use client';
+
 import React from 'react';
 import styles from './Account.module.scss'; // Импортируем стили
 import { useDispatch, useSelector } from 'react-redux'; // Импортируем хуки для работы с Redux
-import { NavLink, useNavigate} from 'react-router-dom'; // Импортируем NavLink для навигации между страницами
+import { useRouter } from 'next/navigation';
 import { logout } from '../../slices/authSlice'; // Импортируем действие для выхода из аккаунта
 import Button from '../ui/Button';
 
@@ -10,7 +12,7 @@ const Account = () => {
     const user = useSelector((state) => state.auth.user); // Данные текущего пользователя
     const roles = useSelector((state) => state.auth.roles); // Роли текущего пользователя
     const dispatch = useDispatch(); // Хук для отправки действий в Redux
-    const navigate = useNavigate(); // Хук для навигации между страницами
+    const router = useRouter(); // Навигация Next
 
     // Если пользователь не авторизован, отображаем сообщение
     if (!user) {
@@ -21,7 +23,6 @@ const Account = () => {
         <div className={styles.account}>
             <h1>Личный кабинет</h1>
             {/* Информация о пользователе */}
-            {console.log('user.',user)}
             <div className={styles.userInfo}>
                 <p><strong>Имя:</strong> {user.name || 'Имя не указано'}</p>
                 <p><strong>Email:</strong> {user.email || 'Email не указан'}</p>
@@ -34,23 +35,23 @@ const Account = () => {
                     type="button"
                     variant="primary-low"
                     className={styles.actionButton}
-                    onClick={() => navigate('/account/edit')}
+                    onClick={() => router.push('/account/edit')}
                     depth="raised"
 
                 >
                     Редактировать профиль
                 </Button>
                 <Button
-                    as={NavLink}
-                    to="/addproduct"
+                    type="button"
+                    onClick={() => router.push('/addproduct')}
                     //variant="secondary-low"
                     depth="raised"
                 >
                     Добавить продукт
                 </Button>
                 <Button
-                    as={NavLink}
-                    to="/usermanagement"
+                    type="button"
+                    onClick={() => router.push('/usermanagement')}
                     //variant="secondary-low"
                     className={styles.actionButton}
                     depth="raised"
@@ -58,8 +59,8 @@ const Account = () => {
                     Менеджер пользователей
                 </Button>
                 <Button
-                    as={NavLink}
-                    to="/orders"
+                    type="button"
+                    onClick={() => router.push('/orders')}
                     //variant="secondary-low"
                     className={styles.actionButton}
                     depth="raised"
@@ -67,8 +68,8 @@ const Account = () => {
                     Мои заказы
                 </Button>
                 <Button
-                    as={NavLink}
-                    to="/account/bookings"
+                    type="button"
+                    onClick={() => router.push('/account/bookings')}
                     //variant="secondary-low"
                     className={styles.actionButton}
                     depth="raised"
@@ -78,8 +79,8 @@ const Account = () => {
                 {roles.includes('admin') && (
                   <>
                     <Button
-                      as={NavLink}
-                      to="/admin/orders"
+                      type="button"
+                      onClick={() => router.push('/admin/orders')}
                       //variant="secondary-low"
                       className={styles.actionButton}
                       depth="raised"
@@ -87,8 +88,8 @@ const Account = () => {
                       Админ: заказы
                     </Button>
                     <Button
-                      as={NavLink}
-                      to="/admin/tyre-booking"
+                      type="button"
+                      onClick={() => router.push('/admin/tyre-booking')}
                       //variant="secondary-low"
                       className={styles.actionButton}
                       depth="raised"

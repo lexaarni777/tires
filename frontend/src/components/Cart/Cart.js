@@ -1,8 +1,10 @@
+ 'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchCart, removeFromCart, clearCartServerSide, placeOrder, addToCart, decrementToCart, clearGuestCart } from '../../slices/cartSlice';
 import { fetchProfile, fetchAddresses} from '../../slices/profileSlice';
-import { useNavigate, NavLink } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import styles from './Cart.module.scss';
 import Button from '../ui/Button';
 import Radio from '../ui/Radio';
@@ -13,7 +15,7 @@ import Skeleton from '../ui/Skeleton';
 import Input from '../ui/Input';
 import { getThumbnailPath } from '../../utils/thumb';
 import { MdDeleteForever } from "react-icons/md";
-const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
 
 const resolveCartThumbnailSrc = (productImage) => {
   if (!productImage) return '';
@@ -36,7 +38,7 @@ const resolveCartThumbnailSrc = (productImage) => {
 
 const Cart = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const cartItems = useSelector((state) => state.cart.items);
   const cartStatus = useSelector((state) => state.cart.status);
   const auth = useSelector((state) => state.auth);
@@ -182,7 +184,7 @@ const Cart = () => {
       alert('Заказ успешно создан!');
       resetForm();
       setShowModal(false);
-      navigate('/orders');
+      router.push('/orders');
       if (!auth.token) {
         dispatch(clearGuestCart());
       }
@@ -258,8 +260,8 @@ const Cart = () => {
     return (
       <EmptyState data-qa="cart_empty" title="Ваша корзина пуста" description="Добавьте товары из каталога, чтобы оформить заказ.">
         <Button 
-        as={NavLink} 
-        to="/productlist" 
+        type="button"
+        onClick={() => router.push('/productlist')}
         variant="primary-low"
         depth="raised"
         >Перейти в каталог</Button>
@@ -286,7 +288,7 @@ const Cart = () => {
                   type="button"
                   variant="tertiary"
                   size="sm"
-                  onClick={() => navigate('/productlist')}
+                  onClick={() => router.push('/productlist')}
                   className={styles.summaryLink}
                 >
                   Продолжить покупки
@@ -311,7 +313,7 @@ const Cart = () => {
                           src={resolveCartThumbnailSrc(item.product_image)}
                           alt={item.product_name || 'Товар'}
                           className={styles.productImage}
-                          onClick={() => navigate(`/productdetailed/${item.article || item.product_id}`)}  
+                          onClick={() => router.push(`/productdetailed/${item.article || item.product_id}`)}  
                         />
                       )}
                       <div className={styles.productDetails}>

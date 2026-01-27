@@ -1,14 +1,16 @@
+ 'use client';
+
 import { useState, useEffect, useMemo } from "react";
 import Button from "../ui/Button";
 import QuantityControl from "../ui/QuantityControl/QuantityControl";
-import { useNavigate } from "react-router-dom";
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart, decrementToCart, removeFromCart } from "../../slices/cartSlice";
 import styles from "./ProductCard.module.scss";
 import { warehouseList } from "../../constants/warehouseList"; // Список складов
 import { CiStar } from "react-icons/ci";
 import { AiFillStar } from "react-icons/ai";
-const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
 // убираем /api, если он в переменной
 
 
@@ -22,7 +24,7 @@ const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
  */
 const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
  
-  const navigate = useNavigate();
+  const router = useRouter();
   // useNavigate — хук React Router, нужен чтобы программно перейти на другую страницу
   // Здесь: используется для перехода к детальной карточке товара или в корзину
 
@@ -85,11 +87,10 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
 
   // Функция перехода на детальную карточку товара
   const handleClick = () => {
-    console.log('Navigating to product detailed page for product ID:', product); 
     // handleClick — обработчик клика по карточке товара
     // При вызове переводит пользователя на страницу детального просмотра товара
     const slug = product.article || product.id;
-    navigate(`/productdetailed/${slug}`);
+    router.push(`/productdetailed/${slug}`);
     // Программный переход, путь содержит артикул товара (или ID как фолбек)
   };
 
@@ -207,7 +208,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     // handleGoToCart — обработчик для кнопки "Перейти в корзину"
     // Останавливает всплытие и переводит пользователя на страницу корзины
     e?.stopPropagation();
-    navigate("/cart");
+    router.push("/cart");
   };
 
   // Основной рендер
@@ -298,7 +299,7 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
             className={styles.reviewInline}
             onClick={(e) => {
               e.stopPropagation();
-              navigate(`/productdetailed/${product.id}#reviews`);
+              router.push(`/productdetailed/${product.article || product.id}#reviews`);
             }}
           >
             <span className={styles.starWrap} style={{ '--star-fill': `${starFillPercent}%`, '--star-color': starTone }}>
