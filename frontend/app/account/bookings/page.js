@@ -1,3 +1,5 @@
+import UserTyreBookings from '../../../src/components/UserTyreBookings/UserTyreBookings';
+
 export const metadata = {
   title: 'Мои записи – MSKTires',
   description: 'Записи шиномонтажа.',
@@ -7,9 +9,7 @@ export const metadata = {
 export default function AccountBookingsPage() {
   return (
     <main style={{ padding: 24 }}>
-      <h1>Мои записи шиномонтажа</h1>
-      <p>Эта страница в процессе миграции. Скоро подключим текущий компонент UserTyreBookings.</p>
+      <UserTyreBookings />
     </main>
   );
 }
-

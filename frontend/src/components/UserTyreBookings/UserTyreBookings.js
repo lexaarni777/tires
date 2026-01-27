@@ -1,12 +1,14 @@
+'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { fetchWithRefresh } from '../../utils/authFetch';
 import store from '../../slices/store';
 import styles from './UserTyreBookings.module.scss';
 import Button from '../ui/Button';
 
-const API = process.env.REACT_APP_API_URL;
+const API = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
 
 const STATUS_LABEL = (v) => ({ confirmed: 'Подтверждена', cancelled: 'Отменена' }[v] || v);
 
@@ -20,9 +22,8 @@ const apiFetch = async (path, opts={}) => {
 };
 
 export default function UserTyreBookings() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const token = useSelector(s => s.auth.token);
-  const location = useLocation();
   const [highlightId, setHighlightId] = useState(null);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,12 +48,19 @@ export default function UserTyreBookings() {
 
   useEffect(() => { if (token) load(); }, [token]);
   useEffect(() => {
-    const id = (location.hash || '').replace('#','');
-    if (id) setHighlightId(Number(id));
-  }, [location.hash]);
+    if (typeof window === 'undefined') return;
+    const syncFromHash = () => {
+      const id = (window.location.hash || '').replace('#', '');
+      if (id) setHighlightId(Number(id));
+    };
+    syncFromHash();
+    window.addEventListener('hashchange', syncFromHash);
+    return () => window.removeEventListener('hashchange', syncFromHash);
+  }, []);
 
   useEffect(() => {
     // names for composition display
+    if (!API) return;
     fetch(`${API}/tyre-booking/services`).then(r=>r.json()).then(setServices).catch(()=>{});
   }, []);
 
@@ -258,7 +266,7 @@ export default function UserTyreBookings() {
       <div className={styles.headerRow}>
         <h2 className={styles.title}>Мои записи шиномонтажа</h2>
         <div className={styles.actions}>
-          <Button type="button" variant="primary" className={styles.actionButton} onClick={() => navigate('/booking')}>
+          <Button type="button" variant="primary" className={styles.actionButton} onClick={() => router.push('/booking')}>
             Новая запись
           </Button>
           <Button type="button" variant="secondary" className={styles.actionButton} onClick={load}>
@@ -274,7 +282,7 @@ export default function UserTyreBookings() {
       {!loading && futureItems.length === 0 && (
         <div className={styles.empty}>
           У вас пока нет записей.
-          <Button type="button" variant="secondary" size="sm" onClick={() => navigate('/booking')}>
+          <Button type="button" variant="secondary" size="sm" onClick={() => router.push('/booking')}>
             Записаться
           </Button>
         </div>
