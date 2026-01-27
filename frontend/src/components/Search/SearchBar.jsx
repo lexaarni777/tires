@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import styles from './SearchBar.module.scss';
 import { getThumbnailPath } from '../../utils/thumb';
-import Input from '../UI/Input';
+import Input from '../ui/Input';
 
 const DEBOUNCE_MS = 300;
 

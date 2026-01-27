@@ -21,7 +21,6 @@ const Button = forwardRef(
     },
     ref
   ) => {
-    console.log('...rest:', rest);
     const variantClass = styles[`variant${capitalize(variant)}`];
     const sizeClass = size !== 'md' ? styles[`size${capitalize(size)}`] : null;
     const fullWidthClass = fullWidth ? styles.fullWidth : null;
@@ -31,7 +30,6 @@ const Button = forwardRef(
     const withIconClass = hasIcon && !iconOnly ? styles.withIcon : null;
     const loadingClass = loading ? styles.loading : null;
     const depthClass = depth === 'raised' ? styles.neoRaised : depth === 'sunken' ? styles.neoSunken : depth === 'sunkeninp' ? styles.neoSunkenInp : styles.neoFlat  ;
-    console.log('variantClass', variantClass);
     const classes = [
       styles.root,
       variantClass,

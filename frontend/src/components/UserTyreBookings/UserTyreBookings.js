@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { fetchWithRefresh } from '../../utils/authFetch';
 import store from '../../slices/store';
 import styles from './UserTyreBookings.module.scss';
-import Button from '../UI/Button';
+import Button from '../ui/Button';
 
 const API = process.env.REACT_APP_API_URL;
 

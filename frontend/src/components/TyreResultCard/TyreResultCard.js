@@ -2,7 +2,7 @@ import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, decrementToCart } from '../../slices/cartSlice';
 import styles from './TyreResultCard.module.scss';
-import Button from '../UI/Button';
+import Button from '../ui/Button';
 import { warehouseList } from '../../constants/warehouseList';
 import { useNavigate } from 'react-router-dom';
 import { getThumbnailPath } from '../../utils/thumb';

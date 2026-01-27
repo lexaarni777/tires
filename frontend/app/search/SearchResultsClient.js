@@ -1,18 +1,19 @@
+'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useSearchParams } from 'react-router-dom';
-import { fetchProducts, deleteProduct } from '../../slices/productSlice';
-import { fetchStock } from '../../slices/stockSlice';
-import ProductCard from '../ProductCard/ProductCard';
-import ProductCardSkeleton from '../ProductCard/ProductCard.Skeleton';
-import EmptyState from '../ui/EmptyState';
-import Button from '../ui/Button';
-import styles from './SearchResults.module.scss';
+import { useSearchParams } from 'next/navigation';
+import { fetchProducts } from '../../src/slices/productSlice';
+import { fetchStock } from '../../src/slices/stockSlice';
+import ProductCard from '../../src/components/ProductCard/ProductCard';
+import ProductCardSkeleton from '../../src/components/ProductCard/ProductCard.Skeleton';
+import EmptyState from '../../src/components/ui/EmptyState';
+import styles from '../../src/components/Search/SearchResults.module.scss';
 
-const SearchResults = () => {
+export default function SearchResultsClient() {
   const dispatch = useDispatch();
-  const [params] = useSearchParams();
-  const q = params.get('q') || '';
+  const params = useSearchParams();
+  const q = params?.get('q') || '';
 
   const products = useSelector((s) => s.products.items);
   const productsStatus = useSelector((s) => s.products.status);
@@ -50,12 +51,6 @@ const SearchResults = () => {
     });
   }, [products, inStockOnly, selectedCity, stockByTyreId]);
 
-  const handleDelete = (id) => dispatch(deleteProduct(id));
-  const handleEdit = (product) => {
-    // Редактирование через /edit/:id — логика как в ProductList
-    // Навигация делается внутри ProductList, здесь оставим только карточки (без админ-упора)
-  };
-
   return (
     <div className={styles.wrapper}>
       <h2 className={styles.title}>Результаты поиска</h2>
@@ -79,7 +74,10 @@ const SearchResults = () => {
       )}
 
       {productsStatus === 'succeeded' && products.length === 0 && (
-        <EmptyState title="Ничего не найдено" description="Попробуйте изменить запрос или проверить написание." />
+        <EmptyState
+          title="Ничего не найдено"
+          description="Попробуйте изменить запрос или проверить написание."
+        />
       )}
 
       <div className={styles.list}>
@@ -87,14 +85,10 @@ const SearchResults = () => {
           <ProductCard
             key={product.id}
             product={product}
-            onDelete={handleDelete}
-            onEdit={handleEdit}
             stock={stockByTyreId[product.id] || []}
           />
         ))}
       </div>
     </div>
   );
-};
-
-export default SearchResults;
+}

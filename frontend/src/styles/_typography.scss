@@ -1,26 +1,5 @@
 @use './variables' as *;
-
-// === Типографические миксины ===
-@mixin type-heading($size, $weight, $line-height: 1.3) {
-  font-family: $font-family-base;
-  font-size: $size;
-  font-weight: $weight;
-  line-height: $line-height;
-  color: $text-primary;
-}
-
-@mixin type-body($size: 1rem, $line-height: 1.5, $weight: 400) {
-  font-family: $font-family-base;
-  font-size: $size;
-  font-weight: $weight;
-  line-height: $line-height;
-  color: $text-primary;
-}
-
-@mixin tabular-nums {
-  font-variant-numeric: tabular-nums;
-  font-feature-settings: 'tnum' 1;
-}
+@use './typography-mixins' as *;
 
 // === Базовые стили ===
 body {

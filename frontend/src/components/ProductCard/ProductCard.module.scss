@@ -1,6 +1,6 @@
 @use '../../styles/variables' as *;  // Токены
 @use '../../styles/mixins' as *;     // Миксины
-@use '../../styles/typography' as *; // Типографика
+@use '../../styles/typography-mixins' as *; // Типографика (mixins-only)
 
 .card {
   background: $surface;                // Фон карточки

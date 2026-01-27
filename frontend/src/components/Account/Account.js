@@ -3,7 +3,7 @@ import styles from './Account.module.scss'; // Импортируем стили
 import { useDispatch, useSelector } from 'react-redux'; // Импортируем хуки для работы с Redux
 import { NavLink, useNavigate} from 'react-router-dom'; // Импортируем NavLink для навигации между страницами
 import { logout } from '../../slices/authSlice'; // Импортируем действие для выхода из аккаунта
-import Button from '../UI/Button';
+import Button from '../ui/Button';
 
 const Account = () => {
     // Получаем данные пользователя из состояния Redux

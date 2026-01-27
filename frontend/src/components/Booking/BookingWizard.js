@@ -1,15 +1,17 @@
+'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useSearchParams } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
 import { getServices, getPrices, getAvailability, quote, book } from '../../api/booking';
 import styles from './BookingWizard.module.scss';
 import { sendSmsCode, registerUser } from '../../slices/authSlice';
 import { validatePhone } from '../../utils/validators';
 import store from '../../slices/store';
-import Button from '../UI/Button';
-import Radio from '../UI/Radio';
+import Button from '../ui/Button';
+import Radio from '../ui/Radio';
 import RadioTile from './RadioTile';
-import QuantityControl from '../UI/QuantityControl/QuantityControl';
+import QuantityControl from '../ui/QuantityControl/QuantityControl';
 
 const radiusOptions = [
   { value: 'R13-15', label: 'R13–15' },
@@ -61,7 +63,7 @@ const useQuickDates = () => {
 export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQty, onBooked, returnTo = '/booking' } = {}) {
   const dispatch = useDispatch();
   const auth = useSelector(s => s.auth);
-  const location = useLocation();
+  const searchParams = useSearchParams();
   const selectedCity = useSelector(s => s.city?.selectedCity);
   const [services, setServices] = useState([]);
   const [radius, setRadius] = useState('R16');
@@ -104,17 +106,15 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
 
   // Prefill from query (?radius=R18&base=PKG_4&qty=4)
   useEffect(() => {
-    const qs = new URLSearchParams(location.search);
-    const r = qs.get('radius');
+    const r = searchParams?.get('radius');
     const chosen = normalizeRadius(prefillRadius || r);
     if (chosen && radiusValues.includes(chosen)) setRadius(chosen);
-  }, [location.search]);
+  }, [prefillRadius, searchParams]);
 
   useEffect(() => {
     if (!services?.length) return;
-    const qs = new URLSearchParams(location.search);
-    const baseCode = prefillBaseCode || qs.get('base');
-    const qtyParam = Number((prefillQty ?? qs.get('qty')) || '0');
+    const baseCode = prefillBaseCode || searchParams?.get('base');
+    const qtyParam = Number((prefillQty ?? searchParams?.get('qty')) || '0');
     if (baseCode) {
       const svc = services.find(s => s.code === baseCode);
       if (svc) {
@@ -122,7 +122,7 @@ export default function BookingWizard({ prefillRadius, prefillBaseCode, prefillQ
         setBase({ service_id: svc.id, quantity: qty });
       }
     }
-  }, [services, location.search]);
+  }, [services, prefillBaseCode, prefillQty, searchParams]);
 
   useEffect(() => {
     if (!radius) return;

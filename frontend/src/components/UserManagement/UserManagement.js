@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styles from './UserManagement.module.scss'; // SCSS с модулями
-import Button from '../UI/Button';
+import Button from '../ui/Button';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);

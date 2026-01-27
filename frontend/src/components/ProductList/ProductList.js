@@ -2,8 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard";
 import ProductCardSkeleton from "../ProductCard/ProductCard.Skeleton";
-import EmptyState from "../UI/EmptyState";
-import Button from "../UI/Button";
+import EmptyState from "../ui/EmptyState";
+import Button from "../ui/Button";
 import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
 import { warehouseList } from "../../constants/warehouseList";
 import { FiChevronDown } from 'react-icons/fi';

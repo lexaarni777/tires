@@ -1,6 +1,6 @@
 import React from 'react';
 import styles from './ProductCard.module.scss';
-import Skeleton from '../UI/Skeleton';
+import Skeleton from '../ui/Skeleton';
 
 const ProductCardSkeleton = () => {
   return (

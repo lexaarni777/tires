@@ -1,4 +1,5 @@
 import '../src/index.css';
+import '../src/styles/_typography.scss';
 import Layout from '../src/components/Layout';
 import Providers from './providers';
 
