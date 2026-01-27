@@ -1,5 +1,15 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+const safeToken = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem('token');
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Асинхронное действие для загрузки всех остатков и цен по складам.
  * params — объект фильтров (например, { tyre_id: 1 } или { location: "Москва-1" })
@@ -11,7 +21,7 @@ export const fetchStock = createAsyncThunk(
     // Формируем query string из объекта фильтров (пример: ?tyre_id=5&location=Москва-1)
     const query = new URLSearchParams(params).toString();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/stock${query ? `?${query}` : ""}`
+      `${apiBase()}/products/stock${query ? `?${query}` : ""}`
     );
     if (!response.ok) {
       throw new Error("Ошибка при загрузке остатков шин");
@@ -26,8 +36,8 @@ export const fetchStock = createAsyncThunk(
 export const addStock = createAsyncThunk(
   "stock/addStock",
   async (stockData, { rejectWithValue }) => {
-    const token = localStorage.getItem("token");
-    const response = await fetch("${process.env.REACT_APP_API_URL}/products/stock", {
+    const token = safeToken();
+    const response = await fetch(`${apiBase()}/products/stock`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -52,9 +62,9 @@ export const uploadStockFromExcel = createAsyncThunk(
   async (file, { rejectWithValue }) => {
     const formData = new FormData();
     formData.append("file", file);
-    const token = localStorage.getItem("token");
+    const token = safeToken();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/stock/upload`,
+      `${apiBase()}/products/stock/upload`,
       {
         method: "POST",
         headers: {
@@ -77,9 +87,9 @@ export const uploadStockFromExcel = createAsyncThunk(
 export const updateStock = createAsyncThunk(
   "stock/updateStock",
   async ({ id, stockData }, { rejectWithValue }) => {
-    const token = localStorage.getItem("token");
+    const token = safeToken();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/stock/${id}`,
+      `${apiBase()}/products/stock/${id}`,
       {
         method: "PUT",
         headers: {
@@ -103,9 +113,9 @@ export const updateStock = createAsyncThunk(
 export const deleteStock = createAsyncThunk(
   "stock/deleteStock",
   async (id, { rejectWithValue }) => {
-    const token = localStorage.getItem("token");
+    const token = safeToken();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/stock/${id}`,
+      `${apiBase()}/products/stock/${id}`,
       {
         method: "DELETE",
         headers: {

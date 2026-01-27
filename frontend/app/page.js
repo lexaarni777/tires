@@ -1,11 +1,11 @@
 import Link from 'next/link';
+import TyreSelector from '../src/components/TyreSelector/TyreSelector';
 
 export default function HomePage() {
   return (
     <main style={{ padding: 24 }}>
-      <h1>MSKTires</h1>
-      <p>Next.js каркас поднят. Дальше переносим страницы по плану.</p>
-      <p>
+      <TyreSelector />
+      <p style={{ marginTop: 16 }}>
         <Link href="/productlist">Перейти в каталог</Link>
       </p>
     </main>

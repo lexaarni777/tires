@@ -1,5 +1,8 @@
+ 'use client';
+
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { useParams, useNavigate, NavLink } from "react-router-dom";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchProductByArticle, fetchProductById } from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
@@ -13,7 +16,7 @@ import { deleteProduct } from "../../slices/productSlice";
 import { warehouseList } from "../../constants/warehouseList";
 import QuantityControl from "../ui/QuantityControl/QuantityControl";
 import ReviewCard from "./ReviewCard";
-const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
 const DEFAULT_TITLE = 'MSKTires';
 const DEFAULT_DESCRIPTION = 'MSKTires — каталог шин и дисков';
 
@@ -24,10 +27,9 @@ const DEFAULT_DESCRIPTION = 'MSKTires — каталог шин и дисков'
  * Показывает всю информацию по выбранной шине, а также остатки и цены на всех складах.
  * Добавлен функционал управления (редактирование, удаление, инкремент/декремент в корзине).
  */
-const ProductDetailed = () => {
-  const { article } = useParams();
+const ProductDetailed = ({ article }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
   const [quantity, setQuantity] = useState(1);
   const [activeIndex, setActiveIndex] = useState(0);
   const reviewsRef = useRef(null);
@@ -217,24 +219,24 @@ const getFeaturedImage = () => {
   // Переход в корзину
   const handleGoToCart = (e) => {
     e.stopPropagation();
-    navigate("/cart");
+    router.push("/cart");
   };
 
   // Перейти на редактирование
   const handleEdit = (e) => {
     e.stopPropagation();
-    navigate(`/edit/${product.id}`, { state: { product } });
+    router.push(`/edit/${product.id}`);
   };
 
   // Удалить товар (для админа)
-const handleDelete = (e) => {
-  e.stopPropagation();
-  if (window.confirm('Удалить товар?')) {
-    dispatch(deleteProduct(product.id));
-    // После удаления можешь перенаправить пользователя, например:
-    navigate('/productlist');
-  }
-};
+	const handleDelete = (e) => {
+	  e.stopPropagation();
+	  if (window.confirm('Удалить товар?')) {
+	    dispatch(deleteProduct(product.id));
+	    // После удаления можешь перенаправить пользователя, например:
+	    router.push('/productlist');
+	  }
+	};
 
 const handleAddToCart = (e) => {
   e.stopPropagation();
@@ -429,8 +431,8 @@ const handleAddToCart = (e) => {
     { console.log('Navigating to product detailed page for product ID:')}
 
       <ol>
-        <li><NavLink to="/">Главная</NavLink></li>
-        <li><NavLink to="/productlist">Каталог</NavLink></li>
+        <li><Link href="/">Главная</Link></li>
+        <li><Link href="/productlist">Каталог</Link></li>
         <li aria-current="page">{product.name}</li>
       </ol>
     </nav>

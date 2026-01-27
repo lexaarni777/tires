@@ -1,10 +1,12 @@
+ 'use client';
+
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard";
 import ProductCardSkeleton from "../ProductCard/ProductCard.Skeleton";
 import EmptyState from "../ui/EmptyState";
 import Button from "../ui/Button";
-import { useNavigate } from 'react-router-dom'; // Для перенаправления на страницу редактирования
+import { useRouter } from 'next/navigation';
 import { warehouseList } from "../../constants/warehouseList";
 import { FiChevronDown } from 'react-icons/fi';
 
@@ -23,7 +25,7 @@ import styles from "./ProductList.module.scss";
  */
 const ProductList = () => {
   const dispatch = useDispatch();
-  const navigate = useNavigate(); // Хук для работы с маршрутизацией
+  const router = useRouter();
 
   // Состояния для фильтрации — бренд, сезон, типоразмер и сопутствующие параметры
   const [brand, setBrand] = useState("");
@@ -124,7 +126,7 @@ const ProductList = () => {
   // Функция редактирования товара
   const handleEdit = (product) => {
     // Переход на страницу редактирования товара
-    navigate(`/edit/${product.id}`, { state: { product } });
+    router.push(`/edit/${product.id}`);
   };
   const getOptionStates = (field) => {
     const options = [...new Set(allProducts.map(p => p[field]).filter(Boolean))];

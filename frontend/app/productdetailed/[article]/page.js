@@ -1,5 +1,5 @@
-import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import ProductDetailed from '../../../src/components/ProductDetailed/ProductDetailed';
 
 export const dynamic = 'force-dynamic';
 
@@ -77,32 +77,8 @@ export default async function ProductDetailedPage({ params }) {
 
   return (
     <main style={{ padding: 24 }}>
-      <nav aria-label="Хлебные крошки" style={{ marginBottom: 16 }}>
-        <Link href="/">Главная</Link> {' / '}
-        <Link href="/productlist">Каталог</Link> {' / '}
-        <span aria-current="page">{product.name}</span>
-      </nav>
-
-      <h1 style={{ marginBottom: 8 }}>
-        {product.brand ? `${product.brand} ` : ''}
-        {product.name}
-      </h1>
-
-      {product.size && <div style={{ marginBottom: 12 }}>Размер: {product.size}</div>}
-
-      {imageUrl && (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img src={imageUrl} alt={product.name} style={{ maxWidth: 420, width: '100%', height: 'auto' }} />
-      )}
-
-      {product.description && (
-        <section style={{ marginTop: 16 }}>
-          <h2>Описание</h2>
-          <p>{product.description}</p>
-        </section>
-      )}
-
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <ProductDetailed article={params.article} />
     </main>
   );
 }

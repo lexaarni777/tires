@@ -1,13 +1,23 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { addToCart } from './cartSlice';
 import { logout } from './authSlice';
+
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+const safeSetToken = (token) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem('token', token);
+  } catch {
+    // ignore
+  }
+};
 // Thunk для получения заказов
 export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { getState, dispatch, rejectWithValue }) => {
   const { auth } = getState();
   let token = auth.token;
 
   // 1. Первый запрос — с текущим accessToken
-  let response = await fetch(`${process.env.REACT_APP_API_URL}/orders`, {
+  let response = await fetch(`${apiBase()}/orders`, {
     headers: {
       Authorization: `Bearer ${token}`,
     },
@@ -15,7 +25,7 @@ export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { ge
 
   // 2. Если токен истёк — пробуем обновить через refresh
   if (response.status === 401) {
-    const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
+    const refreshResp = await fetch(`${apiBase()}/auth/refresh`, {
       method: 'POST',
       credentials: 'include', // чтобы отправить httpOnly cookie
     });
@@ -29,10 +39,10 @@ export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { ge
 
     // Обновляем Redux (в authSlice добавим редьюсер ниже)
     dispatch({ type: 'auth/tokenRefreshed', payload: token });
-    localStorage.setItem('token', token);
+    safeSetToken(token);
 
     // Повторяем запрос
-    response = await fetch(`${process.env.REACT_APP_API_URL}/orders`, {
+    response = await fetch(`${apiBase()}/orders`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -74,7 +84,7 @@ export const cancelOrder = createAsyncThunk(
   'orders/cancelOrder',
   async (orderId, { getState }) => {
     const { auth } = getState();
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/orders/cancel/${orderId}`, {
+    const response = await fetch(`${apiBase()}/orders/cancel/${orderId}`, {
       method: 'PUT',
       headers: {
         Authorization: `Bearer ${auth.token}`

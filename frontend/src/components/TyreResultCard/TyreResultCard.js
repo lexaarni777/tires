@@ -1,17 +1,19 @@
+ 'use client';
+
 import React from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addToCart, decrementToCart } from '../../slices/cartSlice';
 import styles from './TyreResultCard.module.scss';
 import Button from '../ui/Button';
 import { warehouseList } from '../../constants/warehouseList';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { getThumbnailPath } from '../../utils/thumb';
 import { minimg } from '../../utils/minimg';
-const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
 
 const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const auth = useSelector((state) => state.auth);
   const selectedCity = useSelector((state) => state.city.selectedCity);
@@ -121,17 +123,16 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
               // handleClick — обработчик клика по карточке товара
               // При вызове переводит пользователя на страницу детального просмотра товара
               const slug = tyre.article;
-              navigate(`/productdetailed/${slug}`);
+              router.push(`/productdetailed/${slug}`);
               // Программный переход, путь содержит артикул товара
             };
 
 
-            const handleGoToCart = () => navigate('/cart');
+            const handleGoToCart = () => router.push('/cart');
 
                 return (
                   
                   <tr key={tyre.id}>
-                    {console.log('TRC', tyre)}
                     <td onClick={handleClick}>{tyre.name}</td>
                     <td>{tyre.season}</td>
                     <td>{tyre.load_index}{tyre.speed_index}</td>

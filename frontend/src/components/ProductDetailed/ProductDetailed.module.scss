@@ -1,7 +1,6 @@
 @use '../../styles/variables' as *; // Подключаем переменные (цвета, отступы, тени)
 @use '../../styles/mixins' as *;
 @use '../../styles/typography-mixins' as *;
-@use '../../styles/theme-ai.scss' as *;
 @use 'sass:map';
 
 // Внешний контейнер страниц детальной карточки — как catalogContent по ширине

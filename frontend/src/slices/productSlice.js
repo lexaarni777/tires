@@ -1,5 +1,15 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+const safeToken = () => {
+  if (typeof window === 'undefined') return null;
+  try {
+    return window.localStorage.getItem('token');
+  } catch {
+    return null;
+  }
+};
+
 /**
  * Асинхронное действие для загрузки каталога шин.
  * params — объект фильтров (например, { brand: 'Triangle', size: '205/55R16' })
@@ -11,7 +21,7 @@ export const fetchProducts = createAsyncThunk(
     // Формируем query-string для фильтрации: ?brand=Triangle&size=205/55R16
     const query = new URLSearchParams(params).toString();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/catalog${query ? `?${query}` : ''}`
+      `${apiBase()}/products/catalog${query ? `?${query}` : ''}`
     );
     if (!response.ok) {
       throw new Error('Ошибка при загрузке каталога');
@@ -30,16 +40,13 @@ export const fetchProductByArticle = createAsyncThunk(
   'products/fetchProductByArticle',
   async (article) => {
     const articleKey = normalizeKey(article);
-    const query = new URLSearchParams({ article: String(article ?? '') }).toString();
-    const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/catalog?${query}`
-    );
+    const response = await fetch(`${apiBase()}/products/catalog/by-article/${encodeURIComponent(String(article ?? ''))}`);
     if (!response.ok) {
+      if (response.status === 404) return { articleKey, product: null };
       throw new Error('Ошибка при загрузке товара по артикулу');
     }
-    const data = await response.json();
-    const product = Array.isArray(data) ? (data[0] ?? null) : (data ?? null);
-    return { articleKey, product };
+    const product = await response.json();
+    return { articleKey, product: product ?? null };
   }
 );
 
@@ -52,7 +59,7 @@ export const fetchProductById = createAsyncThunk(
   async (id) => {
     const idKey = String(id ?? '');
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/catalog/${encodeURIComponent(idKey)}`
+      `${apiBase()}/products/catalog/${encodeURIComponent(idKey)}`
     );
     if (!response.ok) {
       if (response.status === 404) return { idKey, product: null };
@@ -70,9 +77,9 @@ export const fetchProductById = createAsyncThunk(
 export const deleteProduct = createAsyncThunk(
   'products/deleteProduct',
   async (id) => {
-    const token = localStorage.getItem('token');
+    const token = safeToken();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/catalog/${id}`,
+      `${apiBase()}/products/catalog/${id}`,
       {
         method: 'DELETE',
         headers: {
@@ -95,8 +102,8 @@ export const deleteProduct = createAsyncThunk(
 export const addProduct = createAsyncThunk(
   'products/addProduct',
   async (productData) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/products/catalog`, {
+    const token = safeToken();
+    const response = await fetch(`${apiBase()}/products/catalog`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -118,8 +125,8 @@ export const addProduct = createAsyncThunk(
 export const addStock = createAsyncThunk(
   'products/addStock',
   async (stockData) => {
-    const token = localStorage.getItem('token');
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/products/stock`, {
+    const token = safeToken();
+    const response = await fetch(`${apiBase()}/products/stock`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -143,9 +150,9 @@ export const uploadProductsFromExcel = createAsyncThunk(
   async (file) => {
     const formData = new FormData();
     formData.append('file', file);
-    const token = localStorage.getItem('token');
+    const token = safeToken();
     const response = await fetch(
-      `${process.env.REACT_APP_API_URL}/products/catalog/upload`,
+      `${apiBase()}/products/catalog/upload`,
       {
         method: 'POST',
         headers: {
