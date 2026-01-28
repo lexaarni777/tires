@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { addProduct, addStock, uploadProductsFromExcel } from '../../slices/productSlice';
@@ -9,6 +11,8 @@ import { warehouseList } from '../../constants/warehouseList';
  * AddProduct — компонент для добавления новой шины вручную
  * и для массовой загрузки каталога из Excel.
  */
+
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
 
 const AddProduct = () => {
   // Состояние для справочника шин (tyre_catalog)
@@ -95,8 +99,8 @@ const uploadImages = async (productId, brand, model) => {
     formData.append('image', file);
 
     const url = useAsReference
-      ? `${process.env.REACT_APP_API_URL}/images/model/${brand}/${model}`
-      : `${process.env.REACT_APP_API_URL}/images/${productId}/upload-image`;
+      ? `${apiBase()}/images/model/${brand}/${model}`
+      : `${apiBase()}/images/${productId}/upload-image`;
 
     await fetch(url, {
       method: 'POST',

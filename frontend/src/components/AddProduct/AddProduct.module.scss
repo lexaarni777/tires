@@ -9,63 +9,48 @@
   border-radius: 8px;                         // Скругление углов
   background-color: #fff;                     // Белый фон
   box-shadow: $shadow-light;                  // Лёгкая тень
-}
+  
+  h2 {
+    color: $text-primary;                       // Основной цвет текста
+    text-align: center;                         // Центровка заголовка
+    margin-bottom: 20px;                        // Отступ снизу
+  }
 
-h2 {
-  color: $text-primary;                       // Основной цвет текста
-  text-align: center;                         // Центровка заголовка
-  margin-bottom: 20px;                        // Отступ снизу
-}
+  h3 {
+    color: $text-primary;                       // Цвет подзаголовка
+    margin: 20px 0 10px;                        // Отступы сверху и снизу
+  }
 
-h3 {
-  color: $text-primary;                       // Цвет подзаголовка
-  margin: 20px 0 10px;                        // Отступы сверху и снизу
-}
+  form {
+    margin-bottom: 20px;                        // Отступ между двумя формами
+  }
 
-form {
-  margin-bottom: 20px;                        // Отступ между двумя формами
+  label {
+    font-weight: bold;                          // Жирный текст
+    margin-bottom: 5px;                         // Отступ от поля
+    color: $text-primary;                       // Цвет шрифта
+  }
+
+  input,
+  textarea {
+    padding: 10px;                              // Внутренний отступ
+    border: 1px solid $border-color;            // Граница
+    border-radius: 4px;                         // Скругление
+    font-size: 16px;                            // Размер шрифта
+    background-color: #fff;                     // Белый фон
+
+    &:focus {
+      outline: none;                            // Убираем обводку
+      border-color: $primary;                   // Синяя граница при фокусе
+      box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.15); // Подсветка
+    }
+  }
 }
 
 .formGroup {
   display: flex;                              // Флекс-контейнер
   flex-direction: column;                    // Расположение по вертикали
   margin-bottom: 15px;                        // Отступ между группами
-}
-
-label {
-  font-weight: bold;                          // Жирный текст
-  margin-bottom: 5px;                         // Отступ от поля
-  color: $text-primary;                       // Цвет шрифта
-}
-
-input,
-textarea {
-  padding: 10px;                              // Внутренний отступ
-  border: 1px solid $border-color;            // Граница
-  border-radius: 4px;                         // Скругление
-  font-size: 16px;                            // Размер шрифта
-  background-color: #fff;                     // Белый фон
-
-  &:focus {
-    outline: none;                            // Убираем обводку
-    border-color: $primary;                   // Синяя граница при фокусе
-    box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.15); // Подсветка
-  }
-}
-
-.button {
-  padding: 10px 15px;                         // Внутренние отступы
-  font-size: 16px;                            // Размер шрифта
-  border: none;                               // Без рамки
-  border-radius: 4px;                         // Скругление
-  cursor: pointer;                            // Курсор — рука
-  transition: background-color 0.2s ease;     // Плавное затемнение
-  background-color: $primary;                 // Синий фон
-  color: #fff;                                // Белый текст
-
-  &:hover {
-    background-color: tone($primary, 10, 'darken');  // Темнее при наведении
-  }
 }
 
 .error {
@@ -114,15 +99,11 @@ textarea {
 @include respond(sm) {
   .container {
     padding: 16px;                            // Меньше внутренние отступы
-  }
-
-  input,
-  textarea {
-    font-size: 14px;                          // Меньше шрифт на мобилке
-  }
-
-  button {
-    font-size: 14px;                          // Меньше кнопка
+    
+    input,
+    textarea {
+      font-size: 14px;                          // Меньше шрифт на мобилке
+    }
   }
 
   .imageItem img {

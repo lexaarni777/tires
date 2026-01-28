@@ -1,3 +1,5 @@
+import AddProduct from '../../src/components/AddProduct/AddProduct';
+
 export const metadata = {
   title: 'Добавить продукт – MSKTires',
   description: 'Админ: добавление товара.',
@@ -7,9 +9,7 @@ export const metadata = {
 export default function AddProductPage() {
   return (
     <main style={{ padding: 24 }}>
-      <h1>Добавить продукт</h1>
-      <p>Админ‑страница в процессе миграции на Next.</p>
+      <AddProduct />
     </main>
   );
 }
-
