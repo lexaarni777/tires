@@ -1,12 +1,14 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+
 export const fetchReviews = createAsyncThunk(
   'reviews/fetchByBrandModel',
   async ({ brand, model }) => {
     const params = new URLSearchParams();
     if (brand) params.append('brand', brand);
     if (model) params.append('model', model);
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/reviews?${params.toString()}`);
+    const response = await fetch(`${apiBase()}/reviews?${params.toString()}`);
     if (!response.ok) {
       throw new Error('Не удалось загрузить отзывы');
     }

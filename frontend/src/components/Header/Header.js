@@ -20,6 +20,7 @@ const navItems = [
 ];
 
 const Header = () => {
+  const [mounted, setMounted] = useState(false);
   const [isNavOpen, setIsNavOpen] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
@@ -43,12 +44,19 @@ const Header = () => {
 
   const cartQuantity = cartItems.reduce((total, item) => total + (item.quantity || 0), 0);
   const formattedCartQuantity = cartQuantity > 99 ? '99+' : cartQuantity;
-  const userLabel = user?.first_name || user?.name || user?.email || 'Войти';
+  const safeUser = mounted ? user : null;
+  const safeCartQuantity = mounted ? cartQuantity : 0;
+  const safeFormattedCartQuantity = safeCartQuantity > 99 ? '99+' : safeCartQuantity;
+  const userLabel = safeUser?.first_name || safeUser?.name || safeUser?.email || 'Войти';
   const logoSrc = '/logo.png';
 
   useEffect(() => {
     setIsNavOpen(false);
   }, [pathname]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const handleNavToggle = () => {
     setIsNavOpen((prev) => !prev);
@@ -63,7 +71,7 @@ const Header = () => {
   };
 
   const handleAccountClick = () => {
-    if (user) {
+    if (safeUser) {
       router.push('/account');
     } else {
       router.push('/authform?from=header_account');
@@ -202,14 +210,14 @@ const Header = () => {
             size="sm"
             onClick={handleCartClick}
             data-qa="nav_cart"
-            aria-label={`Корзина, товаров: ${cartQuantity}`}
+            aria-label={`Корзина, товаров: ${safeCartQuantity}`}
             icon={<FaShoppingCart aria-hidden="true" />}
             className={styles.iconButton}
             depth="raised"
 
           >
             <span className={styles.iconLabel}>Корзина</span>
-            {cartQuantity > 0 && <span className={styles.badge}>{formattedCartQuantity}</span>}
+            {safeCartQuantity > 0 && <span className={styles.badge}>{safeFormattedCartQuantity}</span>}
           </Button>
           <Button
             type="button"
@@ -221,8 +229,8 @@ const Header = () => {
             className={styles.iconButton}
             depth="raised"
           >
-            <span className={styles.iconLabel}>{user ? 'Профиль' : 'Войти'}</span>
-            {user && <span className={styles.badgeDot} aria-hidden="true" />}
+            <span className={styles.iconLabel}>{safeUser ? 'Профиль' : 'Войти'}</span>
+            {safeUser && <span className={styles.badgeDot} aria-hidden="true" />}
           </Button>
 
         </div>

@@ -2,7 +2,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { logout } from './authSlice'; // если путь другой — поменяй
 
-const API_URL_BASE = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+const API_URL_BASE = apiBase().replace('/api', '');
 const IS_BROWSER = typeof window !== 'undefined';
 
 const normalizeGuestCartImage = (image) => {
@@ -54,7 +55,7 @@ export const mergeLocalCartWithServer = createAsyncThunk(
 
     if (!items.length) return { items: [] };
 
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/merge`, {
+    const response = await fetch(`${apiBase()}/cart/merge`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -83,7 +84,7 @@ export const mergeLocalCartWithServer = createAsyncThunk(
  */
 export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { getState }) => {
     const { auth } = getState();
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/getcart/${auth.id}`, {
+    const response = await fetch(`${apiBase()}/cart/getcart/${auth.id}`, {
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${auth.token}`,
@@ -105,7 +106,7 @@ export const addToCart = createAsyncThunk('cart/addToCart', async (item, { getSt
         dispatch(localAdd(item)); // Новый localAdd
         return item;
     }
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/add`, {
+    const response = await fetch(`${apiBase()}/cart/add`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -129,7 +130,7 @@ export const decrementToCart = createAsyncThunk('cart/decrementToCart', async (i
       dispatch(localDecrement({ cart_id: item.cart_id, productId: item.productId, stockId: item.stockId }));
       return item;
     }
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/decrement`, {
+    const response = await fetch(`${apiBase()}/cart/decrement`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -153,7 +154,7 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (car
       dispatch(localRemove({ cart_id })); // payload: { cart_id } or { productId, stockId }
       return cart_id;
     }
-    await fetch(`${process.env.REACT_APP_API_URL}/cart/delete/${cart_id}`, {
+    await fetch(`${apiBase()}/cart/delete/${cart_id}`, {
         method: 'DELETE',
         headers: {
             Authorization: `Bearer ${auth.token}`,
@@ -171,7 +172,7 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (car
  */
 export const placeOrder = createAsyncThunk('cart/placeOrder', async (orderDetails, { getState, dispatch }) => {
     const { auth } = getState();
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/orders/create`, {
+    const response = await fetch(`${apiBase()}/orders/create`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -196,7 +197,7 @@ export const clearCartServerSide = createAsyncThunk(
                 dispatch(clearGuestCart()); // Очищаем только guestCart
                 return;
               }
-        await fetch(`${process.env.REACT_APP_API_URL}/cart/delete`, {
+        await fetch(`${apiBase()}/cart/delete`, {
             method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
@@ -221,7 +222,7 @@ export const removeManyFromCart = createAsyncThunk(
       });
       return cartIds;
     }
-    const response = await fetch(`${process.env.REACT_APP_API_URL}/cart/delete-many`, {
+    const response = await fetch(`${apiBase()}/cart/delete-many`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
