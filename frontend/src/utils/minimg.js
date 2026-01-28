@@ -1,10 +1,8 @@
 import { getThumbnailPath } from "./thumb";
-const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
 
 
 export function minimg(product) {
-console.log('product',product)
-
   if (product?.images && product.images.length > 0) {
     const featured = product.images.find((img) => img.is_featured_image);
     return featured
