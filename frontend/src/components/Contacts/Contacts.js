@@ -1,3 +1,5 @@
+'use client';
+
 import React, { useEffect, useState } from "react";
 import styles from "./Contacts.module.scss";
 
@@ -20,7 +22,7 @@ const mapLocations = [
     hint: "Навигатор: координаты 55.625559, 37.436271.",
     display: "+7 (999) 914-30-09",
     link: "+79999143009",
-    photo: "moscow-workshop.webp",
+    photo: "/moscow-workshop.webp",
     photoAlt: "Вход в шинный центр MskTires в Москве",
   },
   {
@@ -35,7 +37,7 @@ const mapLocations = [
     hint: "Навигатор: координаты 48.758023, 44.523404.",
     display: "+7 (905) 434-30-09",
     link: "+79054343009",
-    photo: "volgograd-workshop.webp",
+    photo: "/volgograd-workshop.webp",
     photoAlt: "Фасад магазина и шиномонтажа MskTires в Волгограде",
   },
 ];
