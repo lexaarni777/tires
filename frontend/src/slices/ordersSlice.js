@@ -120,7 +120,7 @@ const ordersSlice = createSlice({
       })
       .addCase(fetchOrders.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.error.message;
+        state.error = action.payload || action.error?.message || 'Не удалось загрузить заказы';
       })
       .addCase(cancelOrder.fulfilled, (state, action) => {
         const order = state.items.find(o => o.order_id === action.payload.orderId);
