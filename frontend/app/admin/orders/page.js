@@ -1,3 +1,6 @@
+import AdminGate from '../../../src/components/AdminGate/AdminGate';
+import AdminOrders from '../../../src/components/AdminOrders/AdminOrders';
+
 export const metadata = {
   title: 'Админ: заказы – MSKTires',
   description: 'Админ: управление заказами.',
@@ -7,9 +10,9 @@ export const metadata = {
 export default function AdminOrdersPage() {
   return (
     <main style={{ padding: 24 }}>
-      <h1>Админ: заказы</h1>
-      <p>Админ‑страница в процессе миграции на Next.</p>
+      <AdminGate>
+        <AdminOrders />
+      </AdminGate>
     </main>
   );
 }
-

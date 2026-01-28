@@ -1,9 +1,11 @@
+ 'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { fetchWithRefresh } from '../../utils/authFetch';
 import store from '../../slices/store';
 
-const API = process.env.REACT_APP_API_URL;
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
 const RADII = ['R13','R14','R15','R16','R17','R18','R19','R20','R21','R22','R23','R24'];
 
 // Русские подписи (в скобках оставляем значения из БД)
@@ -24,7 +26,7 @@ const STATUS_LABEL = (v, withCode = true) => {
 };
 
 const apiFetch = async (path, opts={}) => {
-  const res = await fetchWithRefresh(`${API}${path}`, opts, { dispatch: store.dispatch, getState: store.getState });
+  const res = await fetchWithRefresh(`${apiBase()}${path}`, opts, { dispatch: store.dispatch, getState: store.getState });
   const text = await res.text();
   let data;
   try { data = text ? JSON.parse(text) : null; } catch { data = text; }

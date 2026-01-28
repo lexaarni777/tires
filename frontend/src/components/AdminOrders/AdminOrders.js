@@ -1,5 +1,17 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+const safeSetToken = (token) => {
+  if (typeof window === 'undefined') return;
+  try {
+    window.localStorage.setItem('token', token);
+  } catch {
+    // ignore
+  }
+};
 
 const AdminOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -8,6 +20,7 @@ const AdminOrders = () => {
   const [sortField, setSortField] = useState('created_at');
   const [sortOrder, setSortOrder] = useState('DESC');
   const [error, setError] = useState(null);
+  const dispatch = useDispatch();
   const token = useSelector((state) => state.auth.token);
 
   // Загрузка списка заказов
@@ -17,12 +30,12 @@ const AdminOrders = () => {
         let accessToken = token;
 
         let response = await fetch(
-          `${process.env.REACT_APP_API_URL}/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+          `${apiBase()}/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
           { headers: { Authorization: `Bearer ${accessToken}` } }
         );
 
         if (response.status === 401) {
-          const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
+          const refreshResp = await fetch(`${apiBase()}/auth/refresh`, {
             method: 'POST',
             credentials: 'include',
           });
@@ -30,10 +43,11 @@ const AdminOrders = () => {
 
           const data = await refreshResp.json();
           accessToken = data.accessToken;
-          localStorage.setItem('token', accessToken);
+          dispatch({ type: 'auth/tokenRefreshed', payload: accessToken });
+          safeSetToken(accessToken);
 
           response = await fetch(
-            `${process.env.REACT_APP_API_URL}/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
+            `${apiBase()}/admin/orders?sortField=${sortField}&sortOrder=${sortOrder}`,
             { headers: { Authorization: `Bearer ${accessToken}` } }
           );
         }
@@ -48,19 +62,19 @@ const AdminOrders = () => {
     };
 
     if (token) fetchAdminOrders();
-  }, [token, sortField, sortOrder]);
+  }, [token, sortField, sortOrder, dispatch]);
 
   // Загрузка подробностей по конкретному заказу
   const fetchOrderDetails = async (id) => {
     try {
       let accessToken = token;
 
-      let response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}`, {
+      let response = await fetch(`${apiBase()}/admin/orders/${id}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
 
       if (response.status === 401) {
-        const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
+        const refreshResp = await fetch(`${apiBase()}/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         });
@@ -68,9 +82,10 @@ const AdminOrders = () => {
 
         const data = await refreshResp.json();
         accessToken = data.accessToken;
-        localStorage.setItem('token', accessToken);
+        dispatch({ type: 'auth/tokenRefreshed', payload: accessToken });
+        safeSetToken(accessToken);
 
-        response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}`, {
+        response = await fetch(`${apiBase()}/admin/orders/${id}`, {
           headers: { Authorization: `Bearer ${accessToken}` },
         });
       }
@@ -101,7 +116,7 @@ const AdminOrders = () => {
     try {
       let accessToken = token;
 
-      let response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}/status`, {
+      let response = await fetch(`${apiBase()}/admin/orders/${id}/status`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -111,7 +126,7 @@ const AdminOrders = () => {
       });
 
       if (response.status === 401) {
-        const refreshResp = await fetch(`${process.env.REACT_APP_API_URL}/auth/refresh`, {
+        const refreshResp = await fetch(`${apiBase()}/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
         });
@@ -119,9 +134,10 @@ const AdminOrders = () => {
 
         const data = await refreshResp.json();
         accessToken = data.accessToken;
-        localStorage.setItem('token', accessToken);
+        dispatch({ type: 'auth/tokenRefreshed', payload: accessToken });
+        safeSetToken(accessToken);
 
-        response = await fetch(`${process.env.REACT_APP_API_URL}/admin/orders/${id}/status`, {
+        response = await fetch(`${apiBase()}/admin/orders/${id}/status`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',

@@ -1,3 +1,6 @@
+import AdminGate from '../../../src/components/AdminGate/AdminGate';
+import AdminTyreBooking from '../../../src/components/AdminTyreBooking/AdminTyreBooking';
+
 export const metadata = {
   title: 'Админ: шиномонтаж – MSKTires',
   description: 'Админ: управление записью на шиномонтаж.',
@@ -7,9 +10,9 @@ export const metadata = {
 export default function AdminTyreBookingPage() {
   return (
     <main style={{ padding: 24 }}>
-      <h1>Админ: шиномонтаж</h1>
-      <p>Админ‑страница в процессе миграции на Next.</p>
+      <AdminGate>
+        <AdminTyreBooking />
+      </AdminGate>
     </main>
   );
 }
-

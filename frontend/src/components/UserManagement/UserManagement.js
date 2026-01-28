@@ -1,7 +1,11 @@
+'use client';
+
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 import styles from './UserManagement.module.scss'; // SCSS с модулями
 import Button from '../ui/Button';
+
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -10,7 +14,7 @@ const UserManagement = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const response = await fetch(`${process.env.REACT_APP_API_URL}/roles`, {
+        const response = await fetch(`${apiBase()}/roles`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

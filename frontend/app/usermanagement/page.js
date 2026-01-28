@@ -1,3 +1,6 @@
+import AdminGate from '../../src/components/AdminGate/AdminGate';
+import UserManagement from '../../src/components/UserManagement/UserManagement';
+
 export const metadata = {
   title: 'Менеджер пользователей – MSKTires',
   description: 'Админ: управление пользователями.',
@@ -7,9 +10,9 @@ export const metadata = {
 export default function UserManagementPage() {
   return (
     <main style={{ padding: 24 }}>
-      <h1>Менеджер пользователей</h1>
-      <p>Админ‑страница в процессе миграции на Next.</p>
+      <AdminGate>
+        <UserManagement />
+      </AdminGate>
     </main>
   );
 }
-
