@@ -46,8 +46,10 @@ SSR-странице нужно быстро получить данные по 
 ## 4) Перенос SEO (главное отличие от CRA)
 
 Для карточки товара:
-- [ ] `generateMetadata()` на сервере (title/description/canonical/OG)
-- [ ] JSON-LD Product schema — сервером (без `document.head` / `useEffect`)
+- [x] `generateMetadata()` на сервере (title/description/canonical/OG + Twitter card)
+- [x] JSON-LD Product schema — сервером (offers + aggregateRating)
+- [x] SSR “краткий блок” контента (H1/цена/наличие/рейтинг/описание) в `app/productdetailed/[article]/page.js`
+- [x] Убраны client-side дубли `<title>/<meta>/<canonical>/JSON-LD` из `src/components/ProductDetailed/ProductDetailed.js`
 - [ ] Реальный 404 для несуществующего товара
 
 ## 5) robots/sitemap/редиректы
@@ -61,3 +63,15 @@ SSR-странице нужно быстро получить данные по 
 - [ ] “View Source” у `/productdetailed/:article` содержит контент + мета + JSON-LD
 - [ ] `robots.txt` и `sitemap.xml` отдаются 200
 - [ ] GSC/Вебмастер: проверка URL показывает серверный HTML, страницы уходят в индекс
+
+## 7) Прод окружение (msktires.ru)
+
+На проде обязательно задать:
+
+- `NEXT_PUBLIC_SITE_URL=https://msktires.ru`
+- `NEXT_PUBLIC_API_URL=https://msktires.ru/api` (если backend за тем же доменом)
+  - либо `NEXT_PUBLIC_API_URL=https://api.msktires.ru/api` (если backend вынесен на поддомен)
+
+Зачем:
+- `sitemap.xml` перестанет ссылаться на `http://localhost:3000`
+- `canonical` и `openGraph.url` станут правильными для карточек
