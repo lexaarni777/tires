@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import ProductDetailed from '../../../src/components/ProductDetailed/ProductDetailed';
+import { warehouseList } from '../../../src/constants/warehouseList';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,17 +60,54 @@ const computeStockSummary = (stockRows) => {
   return { totalStock, minRetailPrice };
 };
 
+const computeOffersByCity = (stockRows, canonical) => {
+  const rows = Array.isArray(stockRows) ? stockRows : [];
+  const locationToCity = new Map((warehouseList || []).map((w) => [w.location, w.city]));
+
+  const cityMap = new Map();
+  for (const row of rows) {
+    const location = row?.location;
+    const city = locationToCity.get(location) || location || 'Неизвестно';
+    const entry = cityMap.get(city) || { city, totalStock: 0, price: null };
+    entry.totalStock += Number(row?.stock) || 0;
+
+    const price = row?.price_retail;
+    if (price != null && Number.isFinite(Number(price))) {
+      // Price is expected to be stable per city; keep the first known.
+      if (entry.price == null) entry.price = Number(price);
+    }
+    cityMap.set(city, entry);
+  }
+
+  const cities = Array.from(cityMap.values())
+    .filter((c) => c.price != null)
+    .sort((a, b) => {
+      if (a.city === 'Москва' && b.city !== 'Москва') return -1;
+      if (b.city === 'Москва' && a.city !== 'Москва') return 1;
+      return String(a.city).localeCompare(String(b.city), 'ru');
+    });
+
+  return cities.map(({ city, totalStock, price }) => ({
+    '@type': 'Offer',
+    priceCurrency: 'RUB',
+    price,
+    availability: totalStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+    url: canonical,
+    itemCondition: 'https://schema.org/NewCondition',
+    eligibleRegion: { '@type': 'AdministrativeArea', name: city },
+  }));
+};
+
 export async function generateMetadata({ params }) {
   const product = await fetchProduct(params.article);
   if (!product) return {};
 
   const stockRows = await fetchStockByTyreId(product.id);
-  const { totalStock, minRetailPrice } = computeStockSummary(stockRows);
+  const { totalStock } = computeStockSummary(stockRows);
 
   const title = `${product.brand ? `${product.brand} ` : ''}${product.name} – купить шины в MSKTires`;
-  const priceText = minRetailPrice != null ? `Цена от ${formatPrice(minRetailPrice)}.` : '';
   const stockText = totalStock > 0 ? 'В наличии.' : 'Нет в наличии.';
-  const fallbackDescription = `Характеристики и наличие шины ${product.name}. ${priceText} ${stockText}`.trim();
+  const fallbackDescription = `Характеристики и наличие шины ${product.name}. ${stockText}`.trim();
   const description = (product.description && String(product.description).slice(0, 160)) || fallbackDescription;
 
   const siteBase = getSiteBase();
@@ -103,13 +141,15 @@ export default async function ProductDetailedPage({ params }) {
   if (!product) notFound();
 
   const stockRows = await fetchStockByTyreId(product.id);
-  const { totalStock, minRetailPrice } = computeStockSummary(stockRows);
+  const { totalStock } = computeStockSummary(stockRows);
 
   const siteBase = getSiteBase();
   const canonical = siteBase ? `${siteBase}/productdetailed/${encodeURIComponent(params.article)}` : undefined;
   const assetBase = getAssetBase();
   const firstImageRel = product?.images?.[0]?.image_path || product?.model_images?.[0]?.image_path;
   const imageUrl = firstImageRel ? `${assetBase}${firstImageRel}` : null;
+
+  const offersByCity = canonical ? computeOffersByCity(stockRows, canonical) : [];
 
   const schema = {
     '@context': 'https://schema.org',
@@ -128,48 +168,21 @@ export default async function ProductDetailedPage({ params }) {
             reviewCount: Number(product.review_count),
           }
         : undefined,
-    offers:
-      minRetailPrice != null
-        ? {
-            '@type': 'Offer',
-            priceCurrency: 'RUB',
-            price: Number(minRetailPrice),
-            availability: totalStock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
-            url: canonical,
-          }
-        : undefined,
+    offers: offersByCity.length ? (offersByCity.length === 1 ? offersByCity[0] : offersByCity) : undefined,
   };
 
   return (
     <main style={{ padding: 24 }}>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
-      <section aria-label="Краткая информация о товаре" style={{ marginBottom: 16 }}>
-        <h1 style={{ margin: '0 0 8px' }}>
+      <section className="srOnly" aria-label="Краткая информация о товаре (SEO)">
+        <h1>
           {product.brand ? `${product.brand} ` : ''}
           {product.name}
           {product.size ? ` ${product.size}` : ''}
         </h1>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, alignItems: 'center' }}>
-          {minRetailPrice != null && (
-            <strong style={{ fontSize: 18 }}>
-              Цена от {formatPrice(minRetailPrice)}
-            </strong>
-          )}
-          <span>
-            {totalStock > 0 ? 'В наличии' : 'Нет в наличии'}
-          </span>
-          {product?.review_count > 0 && product?.avg_rating ? (
-            <span>
-              Рейтинг: {Number(product.avg_rating).toFixed(1)} ({product.review_count})
-            </span>
-          ) : null}
-        </div>
-        {product.description ? (
-          <p style={{ margin: '8px 0 0', maxWidth: 900 }}>
-            {String(product.description).slice(0, 240)}
-            {String(product.description).length > 240 ? '…' : ''}
-          </p>
-        ) : null}
+        <p>
+          {totalStock > 0 ? 'В наличии.' : 'Нет в наличии.'} Цена зависит от города.
+        </p>
       </section>
       <ProductDetailed article={params.article} />
     </main>
