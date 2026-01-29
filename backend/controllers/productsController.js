@@ -58,6 +58,17 @@ exports.getSitemapArticles = async (_req, res) => {
   }
 };
 
+// Данные для sitemap: популярные фильтры (бренд/диаметр/сезон/шипы)
+exports.getSitemapFilters = async (_req, res) => {
+  try {
+    const filters = await productModel.getSitemapFiltersFromDB();
+    res.json(filters);
+  } catch (err) {
+    console.error('Ошибка при получении фильтров для sitemap:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
 
 
 // Создать новую шину в каталоге

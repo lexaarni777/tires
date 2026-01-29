@@ -34,7 +34,8 @@ const {
   uploadStockXlsx,       // Массовый импорт остатков (только для админа)
   updateStock,           // Обновить остаток (только для админа)
   deleteStock,           // Удалить остаток (только для админа)
-  getSitemapArticles     // Данные для sitemap
+  getSitemapArticles,    // Данные для sitemap (список article)
+  getSitemapFilters      // Данные для sitemap (популярные фильтры)
 } = require('../controllers/productsController');
 
 const { getImagesForProduct } = require('../controllers/imagesController');
@@ -55,6 +56,8 @@ router.get('/catalog/:id', getTyreById);
 
 // GET /api/products/sitemap — Данные для sitemap (список article)
 router.get('/sitemap', getSitemapArticles);
+// GET /api/products/sitemap-filters — Данные для sitemap (популярные фильтры)
+router.get('/sitemap-filters', getSitemapFilters);
 
 // POST /api/products/catalog — Добавить новую шину (только админ)
 router.post('/catalog', verifyToken, verifyAdmin, createTyre);

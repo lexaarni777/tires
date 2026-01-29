@@ -322,3 +322,60 @@ exports.getAllProductArticlesForSitemapFromDB = async () => {
   );
   return rows.map((r) => r.article);
 };
+
+// Данные для sitemap: популярные значения фильтров (чтобы добавлять SEO-страницы каталога без мусорных комбинаций)
+exports.getSitemapFiltersFromDB = async () => {
+  const [brandsRes, diametersRes, seasonsRes, studsRes] = await Promise.all([
+    pool.query(
+      `
+        SELECT brand, COUNT(*)::int AS cnt
+        FROM tyre_catalog
+        WHERE brand IS NOT NULL AND TRIM(brand) <> ''
+        GROUP BY brand
+        ORDER BY cnt DESC, brand ASC
+        LIMIT 30;
+      `
+    ),
+    pool.query(
+      `
+        SELECT diameter, COUNT(*)::int AS cnt
+        FROM tyre_catalog
+        WHERE diameter IS NOT NULL
+        GROUP BY diameter
+        ORDER BY cnt DESC, diameter ASC
+        LIMIT 15;
+      `
+    ),
+    pool.query(
+      `
+        SELECT season, COUNT(*)::int AS cnt
+        FROM tyre_catalog
+        WHERE season IS NOT NULL AND TRIM(season) <> ''
+        GROUP BY season
+        ORDER BY cnt DESC, season ASC
+        LIMIT 10;
+      `
+    ),
+    pool.query(
+      `
+        SELECT studs, COUNT(*)::int AS cnt
+        FROM tyre_catalog
+        WHERE studs IS NOT NULL
+        GROUP BY studs
+        ORDER BY cnt DESC;
+      `
+    ),
+  ]);
+
+  const brands = brandsRes.rows.map((r) => r.brand).filter(Boolean);
+  const diameters = diametersRes.rows.map((r) => r.diameter).filter((v) => v != null);
+  const seasons = seasonsRes.rows.map((r) => r.season).filter(Boolean);
+  const studsValues = studsRes.rows.map((r) => r.studs);
+
+  return {
+    brands,
+    diameters,
+    seasons,
+    studsValues,
+  };
+};
