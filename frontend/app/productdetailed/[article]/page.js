@@ -105,9 +105,12 @@ export async function generateMetadata({ params }) {
   const stockRows = await fetchStockByTyreId(product.id);
   const { totalStock } = computeStockSummary(stockRows);
 
-  const title = `${product.brand ? `${product.brand} ` : ''}${product.name} – купить шины в MSKTires`;
+  const baseName = product.model
+    ? `${product.brand ? `${product.brand} ` : ''}${product.model}`
+    : `${product.brand ? `${product.brand} ` : ''}${product.name}`;
+  const title = `${baseName}${product.size ? ` ${product.size}` : ''} — купить шины | MSKTires`;
   const stockText = totalStock > 0 ? 'В наличии.' : 'Нет в наличии.';
-  const fallbackDescription = `Характеристики и наличие шины ${product.name}. ${stockText}`.trim();
+  const fallbackDescription = `Шины ${baseName}${product.size ? ` ${product.size}` : ''}. ${stockText} Цена зависит от города. Доставка по РФ и самовывоз.`.trim();
   const description = (product.description && String(product.description).slice(0, 160)) || fallbackDescription;
 
   const siteBase = getSiteBase();
@@ -125,6 +128,9 @@ export async function generateMetadata({ params }) {
       title,
       description,
       url: canonical,
+      type: 'product',
+      siteName: 'MSKTires',
+      locale: 'ru_RU',
       images: ogImage ? [{ url: ogImage }] : undefined,
     },
     twitter: {
@@ -151,13 +157,24 @@ export default async function ProductDetailedPage({ params }) {
 
   const offersByCity = canonical ? computeOffersByCity(stockRows, canonical) : [];
 
+  const seller = {
+    '@type': 'Organization',
+    name: 'MSKTires',
+    url: siteBase || undefined,
+  };
+
+  const baseName = product.model
+    ? `${product.brand ? `${product.brand} ` : ''}${product.model}`
+    : `${product.brand ? `${product.brand} ` : ''}${product.name}`;
+
   const schema = {
     '@context': 'https://schema.org',
     '@type': 'Product',
-    name: product.name,
+    name: `${baseName}${product.size ? ` ${product.size}` : ''}`,
     description: product.description,
     sku: product.article,
     brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
+    category: 'Tires',
     image: imageUrl ? [imageUrl] : undefined,
     url: canonical,
     aggregateRating:
@@ -168,12 +185,44 @@ export default async function ProductDetailedPage({ params }) {
             reviewCount: Number(product.review_count),
           }
         : undefined,
-    offers: offersByCity.length ? (offersByCity.length === 1 ? offersByCity[0] : offersByCity) : undefined,
+    offers: offersByCity.length
+      ? (offersByCity.length === 1
+          ? { ...offersByCity[0], seller }
+          : offersByCity.map((o) => ({ ...o, seller })))
+      : undefined,
   };
+
+  const breadcrumb = canonical && siteBase ? {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Главная',
+        item: `${siteBase}/`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Каталог шин',
+        item: `${siteBase}/productlist`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: `${baseName}${product.size ? ` ${product.size}` : ''}`,
+        item: canonical,
+      },
+    ],
+  } : null;
 
   return (
     <main style={{ padding: 24 }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }} />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb ? [schema, breadcrumb] : schema) }}
+      />
       <section className="srOnly" aria-label="Краткая информация о товаре (SEO)">
         <h1>
           {product.brand ? `${product.brand} ` : ''}
