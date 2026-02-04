@@ -9,6 +9,21 @@
   border-radius: 8px;                       // Скругление углов
   background-color: #fff;                   // Белый фон
   box-shadow: $shadow-light;                // Лёгкая тень
+
+  input,
+  textarea {
+    padding: 10px;                            // Внутренние отступы
+    border: 1px solid $border-color;          // Граница
+    border-radius: 4px;                       // Скруглённые углы
+    font-size: 16px;                          // Размер шрифта
+    background-color: #fff;                   // Белый фон
+
+    &:focus {
+      outline: none;                          // Убираем обводку
+      border-color: $primary;                 // Цвет при фокусе
+      box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.15); // Подсветка
+    }
+  }
 }
 
 .title {
@@ -27,21 +42,6 @@
   display: flex;                            // Контейнер для группы полей
   flex-direction: column;                  // По вертикали
   gap: 5px;                                 // Расстояние между полями
-}
-
-input,
-textarea {
-  padding: 10px;                            // Внутренние отступы
-  border: 1px solid $border-color;          // Граница
-  border-radius: 4px;                       // Скруглённые углы
-  font-size: 16px;                          // Размер шрифта
-  background-color: #fff;                   // Белый фон
-
-  &:focus {
-    outline: none;                          // Убираем обводку
-    border-color: $primary;                 // Цвет при фокусе
-    box-shadow: 0 0 0 2px rgba(0, 87, 184, 0.15); // Подсветка
-  }
 }
 
 .actions {

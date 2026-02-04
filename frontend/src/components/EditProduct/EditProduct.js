@@ -1,13 +1,15 @@
+ 'use client';
+
 import React, { useState, useEffect } from 'react';
-import { useLocation, useNavigate, useParams } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import styles from './EditProduct.module.scss';
 import { warehouseList } from '../../constants/warehouseList';
-const API_URL = process.env.REACT_APP_API_URL.replace('/api', '');
 
-const EditProduct = () => {
-  const { id } = useParams();
-  const location = useLocation();
-  const navigate = useNavigate();
+const apiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
+
+const EditProduct = ({ id }) => {
+  const router = useRouter();
 
   // Состояния для каталога шин и остатков по складам
   const [catalog, setCatalog] = useState({
@@ -42,23 +44,23 @@ const EditProduct = () => {
     const fetchData = async () => {
   try {
     // Получаем данные из каталога
-    const productRes = await fetch(`${process.env.REACT_APP_API_URL}/products/catalog/${id}`);
+    const productRes = await fetch(`${apiBase()}/products/catalog/${id}`);
     if (!productRes.ok) throw new Error('Ошибка при получении товара');
     const productData = await productRes.json();
     setCatalog(productData);
 
     // Получаем остатки по складам
-    const stockRes = await fetch(`${process.env.REACT_APP_API_URL}/products/stock?tyre_id=${id}`);
+    const stockRes = await fetch(`${apiBase()}/products/stock?tyre_id=${id}`);
     if (!stockRes.ok) throw new Error('Ошибка при получении остатков');
     const stockData = await stockRes.json();
     setStocks(stockData);
 
     // Получаем изображения
-    const imagesRes = await fetch(`${process.env.REACT_APP_API_URL}/products/${id}/images`);
+    const imagesRes = await fetch(`${apiBase()}/products/${id}/images`);
     if (imagesRes.ok) setImages(await imagesRes.json());
 
     // ✅ ВОТ ЗДЕСЬ ДОБАВЬ ЗАГРУЗКУ ЭТАЛОННЫХ ФОТО
-    const modelImagesRes = await fetch(`${process.env.REACT_APP_API_URL}/images/model/${productData.brand}/${productData.model}`);
+    const modelImagesRes = await fetch(`${apiBase()}/images/model/${productData.brand}/${productData.model}`);
     const modelImages = modelImagesRes.ok ? await modelImagesRes.json() : [];
     setModelImages(modelImages);
 
@@ -86,7 +88,7 @@ const EditProduct = () => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/products/catalog/${id}`, {
+      const res = await fetch(`${apiBase()}/products/catalog/${id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -109,7 +111,7 @@ const EditProduct = () => {
     e.preventDefault();
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`${process.env.REACT_APP_API_URL}/products/stock/${stock.id}`, {
+      const res = await fetch(`${apiBase()}/products/stock/${stock.id}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -144,8 +146,8 @@ const EditProduct = () => {
     const formData = new FormData();
     formData.append('image', file);
     const url = useAsReference
-  ? `${process.env.REACT_APP_API_URL}/images/model/${catalog.brand}/${catalog.model}`
-  : `${process.env.REACT_APP_API_URL}/images/${id}/upload-image`;
+  ? `${apiBase()}/images/model/${catalog.brand}/${catalog.model}`
+  : `${apiBase()}/images/${id}/upload-image`;
 
     try {
       const response = await fetch(url, {
@@ -155,7 +157,7 @@ const EditProduct = () => {
       if (response.ok) {
         const data = await response.json();
         if (useAsReference) {
-          const res = await fetch(`${process.env.REACT_APP_API_URL}/images/model/${catalog.brand}/${catalog.model}`);
+          const res = await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}`);
           if (res.ok) setModelImages(await res.json());
         } else {
           setImages((prevImages) => [...prevImages, data]);
@@ -168,7 +170,7 @@ const EditProduct = () => {
 
   const deleteImage = async (imageId) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/images/${imageId}`, {
+      const response = await fetch(`${apiBase()}/images/${imageId}`, {
         method: 'DELETE',
       });
       if (response.ok) {
@@ -210,13 +212,13 @@ const handleDragEnd = async () => {
   }));
 
   try {
-    await fetch(`${process.env.REACT_APP_API_URL}/images/${id}/order`, {
+    await fetch(`${apiBase()}/images/${id}/order`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(orderPayload),
     });
     // Рефрешим список изображений после обновления порядка
-    const imagesRes = await fetch(`${process.env.REACT_APP_API_URL}/products/${id}/images`);
+    const imagesRes = await fetch(`${apiBase()}/products/${id}/images`);
     if (imagesRes.ok) setImages(await imagesRes.json());
   } catch (err) {
     alert('Ошибка сохранения порядка: ' + err.message);
@@ -226,13 +228,13 @@ const handleDragEnd = async () => {
 // Смена главного изображения
 const handleSetFeatured = async (imageId) => {
   try {
-    await fetch(`${process.env.REACT_APP_API_URL}/images/${id}/featured-image`, {
+    await fetch(`${apiBase()}/images/${id}/featured-image`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ imageId }),
     });
     // После смены главного — рефрешить изображения
-    const imagesRes = await fetch(`${process.env.REACT_APP_API_URL}/products/${id}/images`);
+    const imagesRes = await fetch(`${apiBase()}/products/${id}/images`);
     if (imagesRes.ok) setImages(await imagesRes.json());
   } catch (err) {
     alert('Ошибка установки главного изображения: ' + err.message);
@@ -248,22 +250,22 @@ const getThumbPath = (image) => {
 };
 
 const handleSetModelFeatured = async (imageId) => {
-  await fetch(`${process.env.REACT_APP_API_URL}/images/model/${catalog.brand}/${catalog.model}/featured-image`, {
+  await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}/featured-image`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ imageId }),
   });
   // Обнови список
-  const res = await fetch(`${process.env.REACT_APP_API_URL}/images/model/${catalog.brand}/${catalog.model}`);
+  const res = await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}`);
   if (res.ok) setModelImages(await res.json());
 };
 
 const handleDeleteModelImage = async (imageId) => {
-  await fetch(`${process.env.REACT_APP_API_URL}/images/model/${catalog.brand}/${catalog.model}/${imageId}`, {
+  await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}/${imageId}`, {
     method: 'DELETE',
   });
   // Обнови список
-  const res = await fetch(`${process.env.REACT_APP_API_URL}/images/model/${catalog.brand}/${catalog.model}`);
+  const res = await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}`);
   if (res.ok) setModelImages(await res.json());
 };
 
@@ -489,7 +491,7 @@ const handleDeleteModelImage = async (imageId) => {
 
 
 
-      <button type="button" className={styles.cancelButton} onClick={() => navigate('/')}>
+      <button type="button" className={styles.cancelButton} onClick={() => router.push('/')}>
         Отмена
       </button>
     </div>
