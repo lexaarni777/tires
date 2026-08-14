@@ -36,7 +36,7 @@ production-схемы нельзя.
 Из репозитория подтверждено:
 
 - локальный `backend/server.js` слушает HTTP на порту 5001;
-- production-шаблон `backend/server copy.js` слушает HTTP на порту 5000 и сам
+- production-шаблон `backend/server.production.js` слушает HTTP на порту 5000 и сам
   не загружает TLS-сертификат;
 - CORS разрешает `CLIENT_URL` и передачу credentials;
 - production-шаблон теперь устанавливает `NODE_ENV=production`, если процесс

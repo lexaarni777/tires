@@ -7,7 +7,7 @@ const session = require('express-session');
 const path = require('path');
 
 dotenv.config();
-// Это production-шаблон: при ручном деплое файл загружается как server.js.
+// Это исторический production-шаблон: при ручном деплое файл загружается как server.js.
 process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 // Импортируем маршруты
