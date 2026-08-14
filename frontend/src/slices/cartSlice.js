@@ -200,8 +200,9 @@ export const placeOrder = createAsyncThunk('cart/placeOrder', async (orderDetail
         return rejectWithValue(data.message || 'Не удалось оформить заказ');
       }
 
-      // Корзину меняем только после подтверждённого сервером создания заказа.
-      dispatch(removeManyFromCart(orderDetails.items.map((item) => item.cart_id)));
+      // Сервер уже удалил купленные строки корзины в транзакции с заказом.
+      // Перечитываем корзину, чтобы Redux точно отражал подтверждённое состояние БД.
+      await dispatch(fetchCart());
       return data;
     } catch (error) {
       return rejectWithValue('Не удалось связаться с сервером. Корзина не изменена.');

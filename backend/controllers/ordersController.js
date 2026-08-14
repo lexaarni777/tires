@@ -6,9 +6,7 @@
  */
 
 const {
-  createOrderInDB,
-  addOrderItemsInDB,
-  getValidatedOrderItems,
+  createOrderTransaction,
   OrderValidationError,
   getUserOrders,
   getOrderByIdAdmin,
@@ -82,12 +80,18 @@ exports.createOrder = async (req, res) => {
     return res.status(400).json({ message: 'Неверный формат телефона.' });
   }
 
-  try {
-    // До создания заказа повторно читаем цену и остаток из базы.
-    const validatedOrder = await getValidatedOrderItems(normalizedItems);
+  const bookingId = booking_id === undefined || booking_id === null
+    ? null
+    : toPositiveInteger(booking_id);
+  if (booking_id !== undefined && booking_id !== null && !bookingId) {
+    return res.status(400).json({
+      message: 'Неверный идентификатор записи на шиномонтаж.',
+      code: 'INVALID_BOOKING_ID',
+    });
+  }
 
-    // Создаём заказ с дополнительными полями (нужно расширить модель/таблицу orders)
-    const order = await createOrderInDB(
+  try {
+    const order = await createOrderTransaction({
       userId,
       phone,
       deliveryMethod,
@@ -95,29 +99,15 @@ exports.createOrder = async (req, res) => {
       address,
       comment,
       paymentMethod,
-      booking_id || null
-    );
-
-    // Добавляем товары заказа
-    await addOrderItemsInDB(order.id, validatedOrder.items);
-    if (deliveryMethod === 'delivery' && address) {
-      const check = await pool.query(
-        'SELECT id FROM addresses WHERE user_id = $1 AND address = $2',
-        [userId, address]
-      );
-      if (check.rows.length === 0) {
-        await pool.query(
-          'INSERT INTO addresses (user_id, address) VALUES ($1, $2)',
-          [userId, address]
-        );
-      }
-    }
+      bookingId,
+      items: normalizedItems,
+    });
 
     res.status(201).json({
       message: 'Заказ успешно создан!',
       orderId: order.id,
-      booking_id: booking_id || null,
-      totalAmount: validatedOrder.totalAmount,
+      booking_id: order.bookingId,
+      totalAmount: order.totalAmount,
     });
   } catch (err) {
     if (err instanceof OrderValidationError) {

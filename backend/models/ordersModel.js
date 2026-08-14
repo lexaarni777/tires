@@ -38,13 +38,19 @@ const formatCents = (cents) => {
 /**
  * Получить актуальные складские данные и подготовить безопасные позиции заказа.
  * Цена из запроса клиента здесь намеренно не используется.
+ *
+ * В транзакции строки блокируются в порядке id. Поэтому два заказа на один
+ * остаток не проверяют одно и то же старое значение одновременно.
  */
-exports.getValidatedOrderItems = async (requestedItems) => {
-  const stockIds = [...new Set(requestedItems.map((item) => item.stockId))];
-  const { rows } = await pool.query(
+const getValidatedOrderItems = async (requestedItems, queryable = pool, lockStock = false) => {
+  const stockIds = [...new Set(requestedItems.map((item) => item.stockId))]
+    .sort((left, right) => left - right);
+  const lockClause = lockStock ? ' FOR UPDATE' : '';
+  const { rows } = await queryable.query(
     `SELECT id, tyre_id AS product_id, price_retail, stock
      FROM tyre_stock
-     WHERE id = ANY($1::int[])`,
+     WHERE id = ANY($1::int[])
+     ORDER BY id${lockClause}`,
     [stockIds]
   );
 
@@ -122,10 +128,14 @@ exports.getValidatedOrderItems = async (requestedItems) => {
   };
 };
 
+exports.getValidatedOrderItems = getValidatedOrderItems;
 exports.OrderValidationError = OrderValidationError;
 
-// Создаём новый заказ для пользователя с расширенными полями
-exports.createOrderInDB = async (
+/**
+ * Полностью создать заказ через один клиент PostgreSQL.
+ * Ни одна запись не остаётся в базе, пока все действия не завершились успешно.
+ */
+exports.createOrderTransaction = async ({
   userId,
   phone,
   deliveryMethod,
@@ -133,46 +143,132 @@ exports.createOrderInDB = async (
   address,
   comment,
   paymentMethod,
-  bookingId
-) => {
-  const query = `
-    INSERT INTO orders 
-    (user_id, phone, delivery_method, pickup_warehouse, address, comment, payment_method, booking_id, status, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'В обработке', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    RETURNING id;
-  `;
-  const { rows } = await pool.query(query, [
-    userId,
-    phone,
-    deliveryMethod,
-    pickupWarehouse,
-    address,
-    comment,
-    paymentMethod,
-    bookingId || null
-  ]);
-  return rows[0];
-};
+  bookingId = null,
+  items,
+}) => {
+  const client = await pool.connect();
+  let transactionStarted = false;
 
+  try {
+    await client.query('BEGIN');
+    transactionStarted = true;
 
-// Добавляем товары из корзины в таблицу order_items
-exports.addOrderItemsInDB = async (orderId, cartItems) => {
-  const query = `
-    INSERT INTO order_items (order_id, product_id, stock_id, quantity, price, created_at, updated_at)
-    VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
-  `;
+    const validatedOrder = await getValidatedOrderItems(items, client, true);
 
-  const promises = cartItems.map((item) =>
-    pool.query(query, [
-      orderId,
-      item.productId,
-      item.stockId,
-      item.quantity,
-      item.price
-    ])
-  );
+    if (bookingId !== null) {
+      const bookingResult = await client.query(
+        `SELECT id
+         FROM bookings
+         WHERE id = $1 AND user_id = $2
+         FOR UPDATE`,
+        [bookingId, userId]
+      );
 
-  await Promise.all(promises);
+      if (bookingResult.rows.length === 0) {
+        throw new OrderValidationError(
+          'Запись на шиномонтаж не найдена или принадлежит другому пользователю.',
+          400,
+          'INVALID_BOOKING',
+          { bookingId }
+        );
+      }
+
+      const linkedOrder = await client.query(
+        'SELECT id FROM orders WHERE booking_id = $1 LIMIT 1',
+        [bookingId]
+      );
+      if (linkedOrder.rows.length > 0) {
+        throw new OrderValidationError(
+          'Эта запись на шиномонтаж уже связана с другим заказом.',
+          409,
+          'BOOKING_ALREADY_LINKED',
+          { bookingId }
+        );
+      }
+    }
+
+    const orderResult = await client.query(
+      `INSERT INTO orders
+       (user_id, phone, delivery_method, pickup_warehouse, address, comment, payment_method, booking_id, status, created_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'В обработке', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
+       RETURNING id`,
+      [
+        userId,
+        phone,
+        deliveryMethod,
+        pickupWarehouse,
+        address,
+        comment,
+        paymentMethod,
+        bookingId,
+      ]
+    );
+    const order = orderResult.rows[0];
+
+    for (const item of validatedOrder.items) {
+      await client.query(
+        `INSERT INTO order_items
+         (order_id, product_id, stock_id, quantity, price, created_at, updated_at)
+         VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)`,
+        [order.id, item.productId, item.stockId, item.quantity, item.price]
+      );
+
+      const stockUpdate = await client.query(
+        `UPDATE tyre_stock
+         SET stock = stock - $1, updated_at = CURRENT_TIMESTAMP
+         WHERE id = $2 AND stock >= $1
+         RETURNING stock`,
+        [item.quantity, item.stockId]
+      );
+      if (stockUpdate.rows.length === 0) {
+        throw new OrderValidationError(
+          'Остаток товара изменился во время оформления заказа.',
+          409,
+          'INSUFFICIENT_STOCK',
+          { productId: item.productId, stockId: item.stockId }
+        );
+      }
+
+      // После успешной покупки убираем только соответствующую строку своей корзины.
+      await client.query(
+        `DELETE FROM cart
+         WHERE user_id = $1 AND product_id = $2 AND stock_id = $3`,
+        [userId, item.productId, item.stockId]
+      );
+    }
+
+    if (deliveryMethod === 'delivery' && address) {
+      await client.query(
+        `INSERT INTO addresses (user_id, address)
+         SELECT $1, $2
+         WHERE NOT EXISTS (
+           SELECT 1 FROM addresses WHERE user_id = $1 AND address = $2
+         )`,
+        [userId, address]
+      );
+    }
+
+    await client.query('COMMIT');
+    transactionStarted = false;
+
+    return {
+      id: order.id,
+      bookingId,
+      totalAmount: validatedOrder.totalAmount,
+      items: validatedOrder.items,
+    };
+  } catch (error) {
+    if (transactionStarted) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        error.rollbackError = rollbackError;
+      }
+    }
+    throw error;
+  } finally {
+    client.release();
+  }
 };
 
 // Получаем заказы пользователя (с деталями по товарам из tyre_catalog)
