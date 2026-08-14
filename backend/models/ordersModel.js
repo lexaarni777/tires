@@ -322,8 +322,29 @@ exports.getUserOrders = async (userId) => {
   return result.rows;
 };
 
+const ADMIN_ORDER_SORT_FIELDS = Object.freeze({
+  created_at: 'o.created_at',
+  total_amount: 'SUM(oi.quantity * oi.price)',
+  status: 'o.status',
+});
+
+const getAdminOrderSort = (sortField, sortOrder) => {
+  const sortExpression = typeof sortField === 'string'
+    && Object.prototype.hasOwnProperty.call(ADMIN_ORDER_SORT_FIELDS, sortField)
+    ? ADMIN_ORDER_SORT_FIELDS[sortField]
+    : undefined;
+  const normalizedSortOrder = typeof sortOrder === 'string' ? sortOrder : '';
+
+  if (!sortExpression || !['ASC', 'DESC'].includes(normalizedSortOrder)) {
+    return { expression: ADMIN_ORDER_SORT_FIELDS.created_at, order: 'DESC' };
+  }
+
+  return { expression: sortExpression, order: normalizedSortOrder };
+};
+
 // Получить все заказы (для админа)
 exports.getAllOrders = async (sortField = 'created_at', sortOrder = 'DESC') => {
+  const { expression, order } = getAdminOrderSort(sortField, sortOrder);
   const query = `
     SELECT 
       o.id AS order_id,
@@ -340,7 +361,7 @@ exports.getAllOrders = async (sortField = 'created_at', sortOrder = 'DESC') => {
     LEFT JOIN order_items oi ON o.id = oi.order_id
     LEFT JOIN users u ON o.user_id = u.id
     GROUP BY o.id, u.name, u.email
-    ORDER BY ${sortField} ${sortOrder}
+    ORDER BY ${expression} ${order}, o.id DESC
   `;
   const { rows } = await pool.query(query);
   return rows;
