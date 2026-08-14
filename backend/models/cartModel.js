@@ -50,7 +50,7 @@ exports.getCart = async (userId) => {
     SELECT 
       c.id AS cart_id,
       c.quantity,
-      c.price,         
+      ts.price_retail AS price,
       c.stock_id,
       t.id AS product_id,
       t.name AS product_name,

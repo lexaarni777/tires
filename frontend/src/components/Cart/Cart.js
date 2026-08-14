@@ -178,8 +178,12 @@ const Cart = () => {
 
 
     if (placeOrder.fulfilled.match(result)) {
+      const confirmedTotal = Number(result.payload?.totalAmount);
+      const successMessage = Number.isFinite(confirmedTotal)
+        ? `Заказ успешно создан! Итоговая сумма: ${formatCurrency(confirmedTotal)}`
+        : 'Заказ успешно создан!';
 
-      alert('Заказ успешно создан!');
+      alert(successMessage);
       resetForm();
       setShowModal(false);
       router.push('/orders');

@@ -8,6 +8,122 @@
 
 const pool = require('../config/db');
 
+class OrderValidationError extends Error {
+  constructor(message, statusCode, code, details) {
+    super(message);
+    this.name = 'OrderValidationError';
+    this.statusCode = statusCode;
+    this.code = code;
+    this.details = details;
+  }
+}
+
+const parsePriceToCents = (value) => {
+  if (value === null || value === undefined) return null;
+
+  const normalized = String(value).trim();
+  if (!/^\d+(?:\.\d{1,2})?$/.test(normalized)) return null;
+
+  const [rubles, kopecks = ''] = normalized.split('.');
+  const cents = (BigInt(rubles) * 100n) + BigInt(kopecks.padEnd(2, '0'));
+  return cents > 0n ? cents : null;
+};
+
+const formatCents = (cents) => {
+  const rubles = cents / 100n;
+  const kopecks = String(cents % 100n).padStart(2, '0');
+  return `${rubles}.${kopecks}`;
+};
+
+/**
+ * Получить актуальные складские данные и подготовить безопасные позиции заказа.
+ * Цена из запроса клиента здесь намеренно не используется.
+ */
+exports.getValidatedOrderItems = async (requestedItems) => {
+  const stockIds = [...new Set(requestedItems.map((item) => item.stockId))];
+  const { rows } = await pool.query(
+    `SELECT id, tyre_id AS product_id, price_retail, stock
+     FROM tyre_stock
+     WHERE id = ANY($1::int[])`,
+    [stockIds]
+  );
+
+  const stockById = new Map(rows.map((row) => [Number(row.id), row]));
+  let totalCents = 0n;
+
+  const items = requestedItems.map((item) => {
+    const stockRow = stockById.get(item.stockId);
+
+    if (!stockRow) {
+      throw new OrderValidationError(
+        'Выбранная складская позиция больше недоступна.',
+        400,
+        'STOCK_ITEM_NOT_FOUND',
+        { productId: item.productId, stockId: item.stockId }
+      );
+    }
+
+    if (Number(stockRow.product_id) !== item.productId) {
+      throw new OrderValidationError(
+        'Выбранный склад не относится к указанному товару.',
+        400,
+        'PRODUCT_STOCK_MISMATCH',
+        { productId: item.productId, stockId: item.stockId }
+      );
+    }
+
+    const availableQuantity = stockRow.stock === null ? null : Number(stockRow.stock);
+    if (!Number.isSafeInteger(availableQuantity) || availableQuantity < 0) {
+      throw new OrderValidationError(
+        'Не удалось определить актуальный остаток товара.',
+        409,
+        'STOCK_UNAVAILABLE',
+        { productId: item.productId, stockId: item.stockId }
+      );
+    }
+
+    if (item.quantity > availableQuantity) {
+      throw new OrderValidationError(
+        `Недостаточно товара на складе: доступно ${availableQuantity} шт.`,
+        409,
+        'INSUFFICIENT_STOCK',
+        {
+          productId: item.productId,
+          stockId: item.stockId,
+          requestedQuantity: item.quantity,
+          availableQuantity,
+        }
+      );
+    }
+
+    const priceCents = parsePriceToCents(stockRow.price_retail);
+    if (priceCents === null) {
+      throw new OrderValidationError(
+        'Для товара не указана действующая розничная цена.',
+        409,
+        'PRICE_UNAVAILABLE',
+        { productId: item.productId, stockId: item.stockId }
+      );
+    }
+
+    totalCents += priceCents * BigInt(item.quantity);
+
+    return {
+      productId: item.productId,
+      stockId: item.stockId,
+      quantity: item.quantity,
+      price: formatCents(priceCents),
+    };
+  });
+
+  return {
+    items,
+    totalAmount: formatCents(totalCents),
+  };
+};
+
+exports.OrderValidationError = OrderValidationError;
+
 // Создаём новый заказ для пользователя с расширенными полями
 exports.createOrderInDB = async (
   userId,
@@ -41,7 +157,6 @@ exports.createOrderInDB = async (
 
 // Добавляем товары из корзины в таблицу order_items
 exports.addOrderItemsInDB = async (orderId, cartItems) => {
-  // В идеале, если контролируешь склады — добавляй сюда также stock_id!
   const query = `
     INSERT INTO order_items (order_id, product_id, stock_id, quantity, price, created_at, updated_at)
     VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
@@ -50,10 +165,10 @@ exports.addOrderItemsInDB = async (orderId, cartItems) => {
   const promises = cartItems.map((item) =>
     pool.query(query, [
       orderId,
-      item.product_id || item.productId,
-      item.stock_id || item.stockId,   // Вот так!
+      item.productId,
+      item.stockId,
       item.quantity,
-      parseFloat(item.price)
+      item.price
     ])
   );
 

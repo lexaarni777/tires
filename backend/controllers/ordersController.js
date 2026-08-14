@@ -5,12 +5,55 @@
  * - Получение всех заказов пользователя
  */
 
-const { createOrderInDB, addOrderItemsInDB, getUserOrders, getOrderByIdAdmin, getAllOrders, updateOrderStatus  } = require('../models/ordersModel');
+const {
+  createOrderInDB,
+  addOrderItemsInDB,
+  getValidatedOrderItems,
+  OrderValidationError,
+  getUserOrders,
+  getOrderByIdAdmin,
+  getAllOrders,
+  updateOrderStatus,
+} = require('../models/ordersModel');
 const pool = require('../config/db');
+
+const MAX_ORDER_ITEMS = 100;
+
+const toPositiveInteger = (value) => {
+  if (typeof value !== 'number' && (typeof value !== 'string' || value.trim() === '')) return null;
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number > 0 && number <= 2147483647 ? number : null;
+};
+
+const normalizeOrderItems = (requestedItems) => {
+  if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > MAX_ORDER_ITEMS) {
+    return null;
+  }
+
+  const itemsByProductAndStock = new Map();
+
+  for (const item of requestedItems) {
+    const productId = toPositiveInteger(item?.productId ?? item?.product_id);
+    const stockId = toPositiveInteger(item?.stockId ?? item?.stock_id);
+    const quantity = toPositiveInteger(item?.quantity);
+
+    if (!productId || !stockId || !quantity) return null;
+
+    const key = `${productId}:${stockId}`;
+    const previousQuantity = itemsByProductAndStock.get(key)?.quantity || 0;
+    const combinedQuantity = previousQuantity + quantity;
+
+    if (!Number.isSafeInteger(combinedQuantity) || combinedQuantity > 2147483647) return null;
+
+    itemsByProductAndStock.set(key, { productId, stockId, quantity: combinedQuantity });
+  }
+
+  return [...itemsByProductAndStock.values()];
+};
 
 // Создание нового заказа
 exports.createOrder = async (req, res) => {
-  const userId = req.user.id; // Получаем ID пользователя из токена
+  const userId = toPositiveInteger(req.user?.id);
   const {
     items,
     phone,
@@ -18,19 +61,31 @@ exports.createOrder = async (req, res) => {
     pickupWarehouse,
     address,
     comment,
-    paymentMethod
-  } = req.body;
-  const { booking_id } = req.body; // опционально
+    paymentMethod,
+    booking_id,
+  } = req.body || {};
 
-  if (!items || !Array.isArray(items) || items.length === 0) {
-    return res.status(400).json({ message: 'Нет товаров для оформления заказа.' });
+  if (!userId) {
+    return res.status(401).json({ message: 'Неверные данные авторизации.' });
+  }
+
+  const normalizedItems = normalizeOrderItems(items);
+  if (!normalizedItems) {
+    return res.status(400).json({
+      message: `Заказ должен содержать от 1 до ${MAX_ORDER_ITEMS} корректных позиций.`,
+      code: 'INVALID_ORDER_ITEMS',
+    });
   }
   if (!phone) return res.status(400).json({ message: 'Не указан телефон.' });
   const phoneRegex = /^\+?[0-9]{10,15}$/;
-if (!phoneRegex.test(phone)) {
-  return res.status(400).json({ message: 'Неверный формат телефона.' });
-}
+  if (!phoneRegex.test(phone)) {
+    return res.status(400).json({ message: 'Неверный формат телефона.' });
+  }
+
   try {
+    // До создания заказа повторно читаем цену и остаток из базы.
+    const validatedOrder = await getValidatedOrderItems(normalizedItems);
+
     // Создаём заказ с дополнительными полями (нужно расширить модель/таблицу orders)
     const order = await createOrderInDB(
       userId,
@@ -44,8 +99,7 @@ if (!phoneRegex.test(phone)) {
     );
 
     // Добавляем товары заказа
-    await addOrderItemsInDB(order.id, items);
-    const pool = require('../config/db');
+    await addOrderItemsInDB(order.id, validatedOrder.items);
     if (deliveryMethod === 'delivery' && address) {
       const check = await pool.query(
         'SELECT id FROM addresses WHERE user_id = $1 AND address = $2',
@@ -63,10 +117,19 @@ if (!phoneRegex.test(phone)) {
       message: 'Заказ успешно создан!',
       orderId: order.id,
       booking_id: booking_id || null,
+      totalAmount: validatedOrder.totalAmount,
     });
   } catch (err) {
+    if (err instanceof OrderValidationError) {
+      return res.status(err.statusCode).json({
+        message: err.message,
+        code: err.code,
+        details: err.details,
+      });
+    }
+
     console.error('Ошибка создания заказа:', err);
-    res.status(500).json({ message: 'Ошибка сервера при создании заказа.' });
+    return res.status(500).json({ message: 'Ошибка сервера при создании заказа.' });
   }
 };
 

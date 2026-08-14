@@ -173,22 +173,39 @@ export const removeFromCart = createAsyncThunk('cart/removeFromCart', async (car
 
 /**
  * Асинхронное действие: оформить заказ (сформировать order на сервере).
- * Передаём массив CartItem'ов; сервер формирует order + order_items, списывает остатки.
+ * На сервер отправляем только идентификаторы товара/склада и количество.
+ * Цена и окончательная доступность определяются по актуальным данным базы.
  */
-export const placeOrder = createAsyncThunk('cart/placeOrder', async (orderDetails, { getState, dispatch }) => {
+export const placeOrder = createAsyncThunk('cart/placeOrder', async (orderDetails, { getState, dispatch, rejectWithValue }) => {
     const { auth } = getState();
-    const response = await fetch(`${apiBase()}/orders/create`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${auth.token}`,
-        },
-        body: JSON.stringify(orderDetails),
-    });
-    const data = await response.json();
-    // После заказа — очистить корзину в redux и на сервере
-    dispatch(removeManyFromCart(orderDetails.items.map(item => item.cart_id)));
-    return data;
+    const requestItems = orderDetails.items.map((item) => ({
+      productId: item.product_id ?? item.productId,
+      stockId: item.stock_id ?? item.stockId,
+      quantity: item.quantity,
+    }));
+
+    try {
+      const response = await fetch(`${apiBase()}/orders/create`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${auth.token}`,
+          },
+          body: JSON.stringify({ ...orderDetails, items: requestItems }),
+      });
+
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        dispatch(fetchCart());
+        return rejectWithValue(data.message || 'Не удалось оформить заказ');
+      }
+
+      // Корзину меняем только после подтверждённого сервером создания заказа.
+      dispatch(removeManyFromCart(orderDetails.items.map((item) => item.cart_id)));
+      return data;
+    } catch (error) {
+      return rejectWithValue('Не удалось связаться с сервером. Корзина не изменена.');
+    }
 });
 
 /**
@@ -359,9 +376,19 @@ const cartSlice = createSlice({
                 // Сервер сам вернёт обновлённую корзину через fetchCart
             })
             // Оформление заказа
-            .addCase(placeOrder.fulfilled, (state) => {
-                state.items = [];
-                state.totalAmount = 0;
+            .addCase(placeOrder.fulfilled, (state, action) => {
+                const orderedCartIds = new Set(action.meta.arg.items.map((item) => item.cart_id));
+                state.items = state.items.filter((item) => !orderedCartIds.has(item.cart_id));
+                state.totalAmount = state.items.reduce(
+                    (sum, item) => sum + (item.price * item.quantity),
+                    0
+                );
+                state.status = 'succeeded';
+                state.error = null;
+            })
+            .addCase(placeOrder.rejected, (state, action) => {
+                state.status = 'failed';
+                state.error = action.payload || action.error?.message || 'Не удалось оформить заказ';
             })
             // Очистка корзины на сервере (результат fetchCart)
             .addCase(clearCartServerSide.fulfilled, (state) => {
