@@ -305,4 +305,24 @@ const authSlice = createSlice({
 });
 
 export const { logout } = authSlice.actions;
+
+export const logoutUser = () => async (dispatch) => {
+  const apiBase = process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '/api';
+  let serverLogoutSucceeded = false;
+
+  try {
+    const response = await fetch(`${apiBase}/auth/logout`, {
+      method: 'POST',
+      credentials: 'include',
+    });
+    serverLogoutSucceeded = response.ok;
+  } catch {
+    // При недоступном backend всё равно завершаем локальную сессию.
+  } finally {
+    dispatch(logout());
+  }
+
+  return serverLogoutSucceeded;
+};
+
 export default authSlice.reducer;

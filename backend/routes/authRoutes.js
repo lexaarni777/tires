@@ -20,7 +20,8 @@ const {
   resetPassword,    // Сбросить пароль по коду из SMS
   sendEmailCode,   // Отправить код на email для подтверждения
   verifyEmail,      // Подтвердить email по коду
-  refreshAccessToken // Обновление access токена по refresh токену
+  refreshAccessToken, // Обновление access токена по refresh токену
+  logoutUser          // Удаление refresh cookie при выходе
 } = require('../controllers/authController');
 const router = express.Router();
 
@@ -79,6 +80,7 @@ router.post('/reset-password', resetPassword);
 router.post('/send-email-code', codeLimiter, sendEmailCode);
 router.post('/verify-email', verifyEmail);
 router.post('/refresh', refreshAccessToken);
+router.post('/logout', logoutUser);
 
 
 module.exports = router;

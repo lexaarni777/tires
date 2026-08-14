@@ -6,6 +6,10 @@ const dotenv = require('dotenv');
 const session = require('express-session');
 const path = require('path');
 
+dotenv.config();
+// Это production-шаблон: при ручном деплое файл загружается как server.js.
+process.env.NODE_ENV = process.env.NODE_ENV || 'production';
+
 // Импортируем маршруты
 const productRoutes = require('./routes/productsRoutes');
 const imageRoutes = require('./routes/imagesRoutes');
@@ -20,9 +24,11 @@ const reviewsRoutes = require('./routes/reviewsRoutes');
 
 
 // Настройка приложения
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Production-схема предполагает один ближайший reverse proxy, завершающий HTTPS.
+app.set('trust proxy', 1);
 
 // Middleware
 app.use(cors({

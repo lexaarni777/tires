@@ -4,7 +4,7 @@ import React from 'react';
 import styles from './Account.module.scss'; // Импортируем стили
 import { useDispatch, useSelector } from 'react-redux'; // Импортируем хуки для работы с Redux
 import { useRouter } from 'next/navigation';
-import { logout } from '../../slices/authSlice'; // Импортируем действие для выхода из аккаунта
+import { logoutUser } from '../../slices/authSlice'; // Серверный и локальный выход из аккаунта
 import Button from '../ui/Button';
 
 const Account = () => {
@@ -102,7 +102,10 @@ const Account = () => {
                   type="button"
                   variant="danger"
                   className={styles.actionButton}
-                  onClick={() => dispatch(logout())}
+                  onClick={async () => {
+                    await dispatch(logoutUser());
+                    router.push('/');
+                  }}
                   depth="raised"
                 >
                   Выйти

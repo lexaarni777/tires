@@ -49,6 +49,7 @@ const cors = require('cors');
 const dotenv = require('dotenv');
 const session = require('express-session');
 
+dotenv.config();
 
 // Импортируем маршруты
 const productRoutes = require('./routes/productsRoutes');
@@ -63,9 +64,13 @@ const tyreBookingRoutes = require('./routes/tyreBookingRoutes');
 const reviewsRoutes = require('./routes/reviewsRoutes');
 
 // Настройка приложения
-dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5001;
+
+if (process.env.NODE_ENV === 'production') {
+  // Доверяем только ближайшему reverse proxy (например, Nginx), который завершает HTTPS.
+  app.set('trust proxy', 1);
+}
 
 // Middleware
 app.use(cors({

@@ -14,6 +14,11 @@ const jwt = require('jsonwebtoken');
 const pool = require('../config/db'); 
 const axios = require('axios');
 const nodemailer = require('nodemailer');
+const {
+  REFRESH_COOKIE_NAME,
+  getRefreshCookieOptions,
+  getRefreshCookieClearOptions,
+} = require('../config/authCookie');
 
 const SMS_GATEWAY_URL = process.env.SMS_GATEWAY_URL;
 const SMS_GATEWAY_USER = process.env.SMS_GATEWAY_USER;
@@ -65,12 +70,7 @@ exports.registerUser = async (req, res) => {
         { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
       );
 
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'Lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      });
+      res.cookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions());
 
       return res.status(201).json({
         message: 'Пользователь успешно зарегистрирован',
@@ -114,12 +114,7 @@ exports.registerUser = async (req, res) => {
         { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
       );
 
-      res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: false,
-        sameSite: 'Lax',
-        maxAge: 30 * 24 * 60 * 60 * 1000,
-      });
+      res.cookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions());
 
       return res.status(201).json({
         message: 'Пользователь успешно зарегистрирован',
@@ -188,12 +183,7 @@ exports.loginUser = async (req, res) => {
   );
 
   // Отправляем refreshToken как httpOnly cookie
-  res.cookie('refreshToken', refreshToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: 'Lax',
-    maxAge: 30 * 24 * 60 * 60 * 1000, // 30 дней
-  });
+  res.cookie(REFRESH_COOKIE_NAME, refreshToken, getRefreshCookieOptions());
 
 
 res.json({
@@ -437,7 +427,7 @@ exports.verifyEmail = async (req, res) => {
 };
 
 exports.refreshAccessToken = async (req, res) => {
-  const token = req.cookies.refreshToken;
+  const token = req.cookies[REFRESH_COOKIE_NAME];
   if (!token) return res.status(401).json({ message: 'Нет refresh токена' });
 
   try {
@@ -451,6 +441,12 @@ exports.refreshAccessToken = async (req, res) => {
     );
     res.json({ accessToken });
   } catch (err) {
+    res.clearCookie(REFRESH_COOKIE_NAME, getRefreshCookieClearOptions());
     return res.status(403).json({ message: 'Неверный refresh токен' });
   }
+};
+
+exports.logoutUser = (req, res) => {
+  res.clearCookie(REFRESH_COOKIE_NAME, getRefreshCookieClearOptions());
+  return res.status(204).send();
 };
