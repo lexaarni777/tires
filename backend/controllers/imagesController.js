@@ -9,11 +9,59 @@
 
 const { addImageToDB, deleteImageFromDB, getImagesForProductFromDB, updateFeaturedImage  } = require('../models/imageModel');
 const {  addModelImage,  deleteModelImage,  getModelImages,  updateModelFeaturedImage,  batchUpdateModelImageOrder} = require('../models/modelImageModel');
+const pool = require('../config/db');
 const { generateThumbnail } = require('../utils/generateThumbnail');
 
 const path = require('path');
 const sharp = require('sharp');
 const fs = require('fs');
+
+const createRequestError = (message) => {
+  const error = new Error(message);
+  error.statusCode = 400;
+  return error;
+};
+
+const validateImageOrderPayload = (productIdValue, orderArray) => {
+  const productId = Number(productIdValue);
+
+  if (!Number.isSafeInteger(productId) || productId <= 0) {
+    throw createRequestError('Некорректный идентификатор товара.');
+  }
+
+  if (!Array.isArray(orderArray) || orderArray.length === 0) {
+    throw createRequestError('Порядок изображений должен быть непустым массивом.');
+  }
+
+  const imageIds = new Set();
+  const orderValues = new Set();
+
+  const normalizedOrder = orderArray.map((item) => {
+    if (!item || typeof item !== 'object' || Array.isArray(item)) {
+      throw createRequestError('Каждый элемент порядка должен содержать id и order.');
+    }
+
+    const { id, order } = item;
+    if (!Number.isSafeInteger(id) || id <= 0) {
+      throw createRequestError('Идентификаторы изображений должны быть положительными целыми числами.');
+    }
+    if (!Number.isSafeInteger(order) || order <= 0) {
+      throw createRequestError('Порядок изображений должен состоять из положительных целых чисел.');
+    }
+    if (imageIds.has(id)) {
+      throw createRequestError('Массив порядка содержит повторяющийся идентификатор изображения.');
+    }
+    if (orderValues.has(order)) {
+      throw createRequestError('Массив порядка содержит повторяющееся значение order.');
+    }
+
+    imageIds.add(id);
+    orderValues.add(order);
+    return { id, order };
+  });
+
+  return { productId, normalizedOrder, imageIds };
+};
 
 // Удалить изображение
 exports.deleteImage = async (req, res) => {
@@ -157,24 +205,70 @@ exports.setFeaturedImage = async (req, res) => {
 
 // Массовое обновление порядка изображений (при сортировке)
 exports.batchUpdateImageOrder = async (req, res) => {
-  const orderArray = req.body; // [{id, order}]
-  const client = await pool.connect();
+  let validatedPayload;
+
   try {
+    validatedPayload = validateImageOrderPayload(req.params.productId, req.body);
+  } catch (err) {
+    return res.status(err.statusCode || 400).json({ message: err.message });
+  }
+
+  const { productId, normalizedOrder, imageIds } = validatedPayload;
+  let client;
+  let transactionStarted = false;
+
+  try {
+    client = await pool.connect();
     await client.query('BEGIN');
-    for (const { id, order } of orderArray) {
-      await client.query(
-        'UPDATE productsimages SET "order" = $1 WHERE id = $2',
-        [order, id]
+    transactionStarted = true;
+
+    const currentImages = await client.query(
+      'SELECT id FROM productsimages WHERE product_id = $1 ORDER BY id FOR UPDATE',
+      [productId]
+    );
+    const currentImageIds = new Set(currentImages.rows.map(({ id }) => Number(id)));
+    const containsExactlyCurrentImages =
+      currentImageIds.size === imageIds.size &&
+      [...imageIds].every((id) => currentImageIds.has(id));
+
+    if (!containsExactlyCurrentImages) {
+      throw createRequestError(
+        'Переданы изображения другого товара либо список изображений устарел. Обновите страницу и повторите попытку.'
       );
     }
+
+    for (const { id, order } of normalizedOrder) {
+      const result = await client.query(
+        'UPDATE productsimages SET "order" = $1 WHERE id = $2 AND product_id = $3',
+        [order, id, productId]
+      );
+
+      if (result.rowCount !== 1) {
+        throw new Error(`Не удалось обновить порядок изображения ${id}.`);
+      }
+    }
+
     await client.query('COMMIT');
-    res.json({ message: 'Порядок обновлён' });
+    transactionStarted = false;
+    return res.json({ message: 'Порядок обновлён' });
   } catch (err) {
-    await client.query('ROLLBACK');
-    console.error('Ошибка при массовом обновлении порядка:', err);
-    res.status(500).send('Ошибка при обновлении порядка');
+    if (client && transactionStarted) {
+      try {
+        await client.query('ROLLBACK');
+      } catch (rollbackError) {
+        console.error('Ошибка при откате порядка изображений:', rollbackError);
+      }
+    }
+
+    const statusCode = err.statusCode || 500;
+    if (statusCode === 500) {
+      console.error('Ошибка при массовом обновлении порядка:', err);
+    }
+    return res.status(statusCode).json({
+      message: statusCode === 500 ? 'Ошибка при обновлении порядка' : err.message,
+    });
   } finally {
-    client.release();
+    if (client) client.release();
   }
 };
 
@@ -195,16 +289,27 @@ exports.setFeaturedImageById = async (productId, imageId) => {
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+
+    const selectedImage = await client.query(
+      'SELECT id FROM productsimages WHERE id = $1 AND product_id = $2 FOR UPDATE',
+      [imageId, productId]
+    );
+
+    if (selectedImage.rowCount !== 1) {
+      await client.query('ROLLBACK');
+      return false;
+    }
+
     await client.query(
       'UPDATE productsimages SET is_featured_image = false WHERE product_id = $1',
       [productId]
     );
-    await client.query(
+    const result = await client.query(
       'UPDATE productsimages SET is_featured_image = true WHERE id = $1 AND product_id = $2',
       [imageId, productId]
     );
     await client.query('COMMIT');
-    return true;
+    return result.rowCount === 1;
   } catch (err) {
     await client.query('ROLLBACK');
     throw err;
