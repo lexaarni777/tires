@@ -143,6 +143,7 @@ const EditProduct = ({ id }) => {
   };
 
   const uploadImage = async (file) => {
+    const token = localStorage.getItem('token');
     const formData = new FormData();
     formData.append('image', file);
     const url = useAsReference
@@ -152,6 +153,7 @@ const EditProduct = ({ id }) => {
     try {
       const response = await fetch(url, {
       method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
       body: formData,
       });
       if (response.ok) {
@@ -169,9 +171,11 @@ const EditProduct = ({ id }) => {
   };
 
   const deleteImage = async (imageId) => {
+    const token = localStorage.getItem('token');
     try {
       const response = await fetch(`${apiBase()}/images/${imageId}`, {
         method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (response.ok) {
         setImages((prevImages) => prevImages.filter((img) => img.id !== imageId));
@@ -205,6 +209,7 @@ const handleDragOver = (index, e) => {
 // Отпускание мыши — сохраняем порядок на сервере
 const handleDragEnd = async () => {
   setDraggedIndex(null);
+  const token = localStorage.getItem('token');
   // Формируем payload для API
   const orderPayload = images.map((img, idx) => ({
     id: img.id,
@@ -214,7 +219,10 @@ const handleDragEnd = async () => {
   try {
     await fetch(`${apiBase()}/images/${id}/order`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify(orderPayload),
     });
     // Рефрешим список изображений после обновления порядка
@@ -227,10 +235,14 @@ const handleDragEnd = async () => {
 
 // Смена главного изображения
 const handleSetFeatured = async (imageId) => {
+  const token = localStorage.getItem('token');
   try {
     await fetch(`${apiBase()}/images/${id}/featured-image`, {
       method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`,
+      },
       body: JSON.stringify({ imageId }),
     });
     // После смены главного — рефрешить изображения
@@ -250,9 +262,13 @@ const getThumbPath = (image) => {
 };
 
 const handleSetModelFeatured = async (imageId) => {
+  const token = localStorage.getItem('token');
   await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}/featured-image`, {
     method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
     body: JSON.stringify({ imageId }),
   });
   // Обнови список
@@ -261,8 +277,10 @@ const handleSetModelFeatured = async (imageId) => {
 };
 
 const handleDeleteModelImage = async (imageId) => {
+  const token = localStorage.getItem('token');
   await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}/${imageId}`, {
     method: 'DELETE',
+    headers: { Authorization: `Bearer ${token}` },
   });
   // Обнови список
   const res = await fetch(`${apiBase()}/images/model/${catalog.brand}/${catalog.model}`);

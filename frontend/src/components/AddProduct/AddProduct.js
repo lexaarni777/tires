@@ -94,6 +94,7 @@ const AddProduct = () => {
    * (вызывается после успешного создания товара)
    */
 const uploadImages = async (productId, brand, model) => {
+  const token = localStorage.getItem('token');
   for (const file of images) {
     const formData = new FormData();
     formData.append('image', file);
@@ -104,6 +105,9 @@ const uploadImages = async (productId, brand, model) => {
 
     await fetch(url, {
       method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
       body: formData,
     });
   }

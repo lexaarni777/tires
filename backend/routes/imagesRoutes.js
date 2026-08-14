@@ -8,7 +8,13 @@
  */
 
 const express = require('express');
-const { uploadImage, uploadModelImage } = require('../config/multer');
+const {
+  uploadImage,
+  uploadModelImage,
+  validateUploadedImage,
+  handleImageUploadError,
+} = require('../config/multer');
+const { verifyToken, verifyAdmin } = require('../middleware/authMiddleware');
 const {
   deleteImage,
   getImagesForProduct,
@@ -23,25 +29,41 @@ const {
 } = require('../controllers/imagesController');
 const router = express.Router();
 
-router.post('/:id/upload-image', uploadImage.single('image'), uploadProductImage);
+router.post(
+  '/:id/upload-image',
+  verifyToken,
+  verifyAdmin,
+  uploadImage.single('image'),
+  validateUploadedImage,
+  uploadProductImage,
+  handleImageUploadError
+);
 
 // DELETE /api/images/:imageId - Удалить изображение по ID
-router.delete('/:imageId', deleteImage);
+router.delete('/:imageId', verifyToken, verifyAdmin, deleteImage);
 
 // GET /api/images/:id - Получить все изображения для товара
 router.get('/:id', getImagesForProduct);
 
 // PUT: /api/images/productId/featured-image Установка главного изображения
-router.put('/:productId/featured-image', setFeaturedImage);
+router.put('/:productId/featured-image', verifyToken, verifyAdmin, setFeaturedImage);
 
 // PUT: /api/images/:productId/order
-router.put('/:productId/order', batchUpdateImageOrder);
+router.put('/:productId/order', verifyToken, verifyAdmin, batchUpdateImageOrder);
 
-router.post('/model/:brand/:model', uploadModelImage.single('image'), uploadModelImageHandler);
+router.post(
+  '/model/:brand/:model',
+  verifyToken,
+  verifyAdmin,
+  uploadModelImage.single('image'),
+  validateUploadedImage,
+  uploadModelImageHandler,
+  handleImageUploadError
+);
 router.get('/model/:brand/:model', getModelImagesHandler);
-router.put('/model/:brand/:model/featured-image', setModelFeaturedImageHandler);
-router.put('/model/:brand/:model/order', updateModelImageOrderHandler);
-router.delete('/model/:brand/:model/:imageId', deleteModelImageHandler);
+router.put('/model/:brand/:model/featured-image', verifyToken, verifyAdmin, setModelFeaturedImageHandler);
+router.put('/model/:brand/:model/order', verifyToken, verifyAdmin, updateModelImageOrderHandler);
+router.delete('/model/:brand/:model/:imageId', verifyToken, verifyAdmin, deleteModelImageHandler);
 
 
 
