@@ -47,9 +47,9 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
-const session = require('express-session');
+const path = require('path');
 
-dotenv.config();
+dotenv.config({ path: path.join(__dirname, '.env') });
 
 // Импортируем маршруты
 const productRoutes = require('./routes/productsRoutes');
@@ -66,6 +66,7 @@ const reviewsRoutes = require('./routes/reviewsRoutes');
 // Настройка приложения
 const app = express();
 const PORT = process.env.PORT || 5001;
+const HOST = process.env.HOST || (process.env.NODE_ENV === 'production' ? '127.0.0.1' : undefined);
 
 if (process.env.NODE_ENV === 'production') {
   // Доверяем только ближайшему reverse proxy (например, Nginx), который завершает HTTPS.
@@ -79,13 +80,13 @@ app.use(cors({
 })); // Разрешаем запросы из других источников
 app.use(express.json()); // Для обработки JSON в теле запросов
 app.use(cookieParser()); // Для обработки cookies
-app.use('/uploads', express.static('uploads')); // Статические файлы для изображений
-app.use(session({
-  secret: process.env.SESSION_SECRET, // Используйте секретный ключ для шифрования сессий
-  resave: false,
-  saveUninitialized: true,
-  cookie: { maxAge: 600000 } // Сессия будет активна в течение 10 минут
-}));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads'))); // Статические файлы для изображений
+
+// Проверка доступности процесса для Nginx, systemd и deployment smoke-тестов.
+// Эндпоинт намеренно не раскрывает конфигурацию, секреты или состояние базы.
+app.get('/api/health', (req, res) => {
+  res.status(200).json({ status: 'ok', service: 'msktires-api' });
+});
 
 // Подключение маршрутов
 app.use('/api/products', productRoutes); // Маршруты для товаров
@@ -101,6 +102,7 @@ app.use('/api/reviews', reviewsRoutes);
 
 
 // Запуск сервера
-app.listen(PORT, () => {
-  console.log(`Сервер запущен на http://localhost:${PORT}`);
+app.listen(PORT, HOST, () => {
+  const displayHost = HOST || 'localhost';
+  console.log(`Сервер запущен на http://${displayHost}:${PORT}`);
 });

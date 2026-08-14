@@ -1,0 +1,22 @@
+[Unit]
+Description=MSKTires Express API
+After=network-online.target postgresql.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=msktires
+Group=msktires
+WorkingDirectory=/opt/msktires/current/backend
+Environment=NODE_ENV=production
+Environment=HOST=127.0.0.1
+Environment=PORT=5001
+EnvironmentFile=/etc/msktires/backend.env
+ExecStart=/usr/bin/node server.js
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target
