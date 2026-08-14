@@ -58,14 +58,10 @@ export const fetchOrders = createAsyncThunk('orders/fetchOrders', async (_, { ge
 });
 
 
-export const repeatOrder = (items) => async (dispatch, getState) => {
-  const { auth } = getState(); // получаем userId
-  const userId = auth.id;
-
+export const repeatOrder = (items) => async (dispatch) => {
   for (const item of items) {
     if (!item.stock_id) continue; // safety
     const cartItem = {
-      userId,
       productId: item.product_id,
       stockId: item.stock_id,
       quantity: item.quantity,

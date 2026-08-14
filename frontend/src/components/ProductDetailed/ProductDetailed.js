@@ -181,7 +181,6 @@ const getFeaturedImage = () => {
     if ((cartItem?.quantity || 0) < selectedStock.stock) {
       dispatch(
         addToCart({
-          userId: auth.id || 0,
           productId: product.id,
           productName: product.name,
           article: product.article,
@@ -204,7 +203,6 @@ const getFeaturedImage = () => {
     if (cartItem.quantity > 1) {
       dispatch(
         decrementToCart({
-          userId: auth.id || 0,
           productId: product.id,
           stockId: selectedStockId,
           quantity: 1,
@@ -244,7 +242,6 @@ const handleAddToCart = (e) => {
   if (!selectedStock) return;
   dispatch(
     addToCart({
-      userId: auth.id || 0,
       productId: product.id,
       productName: product.name,
       article: product.article,

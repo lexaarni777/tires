@@ -15,7 +15,6 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
-  const auth = useSelector((state) => state.auth);
   const selectedCity = useSelector((state) => state.city.selectedCity);
   const cartItems = useSelector((state) => state.cart.items);
 
@@ -77,7 +76,6 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
             const handleAdd = () => {
               if (!cityStock) return;
               dispatch(addToCart({
-                userId: auth.id || 0,
                 productId: tyre.id,
                 productName: tyre.name,
                 article: tyre.article,
@@ -94,7 +92,6 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
               if (!cityStock) return;
               if ((cartItem?.quantity || 0) < cityStock.stock) {
                 dispatch(addToCart({
-                  userId: auth.id || 0,
                   productId: tyre.id,
                   productName: tyre.name,
                   article: tyre.article,
@@ -111,7 +108,6 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
             const handleDecrement = () => {
               if (cartItem && cartItem.quantity > 0) {
                 dispatch(decrementToCart({
-                  userId: auth.id || 0,
                   productId: tyre.id,
                   stockId: cityStock.id,
                   quantity: 1

@@ -1,148 +1,237 @@
 /**
- * Контроллеры для обработки запросов, связанных с корзиной товаров.
- * Теперь все действия — с учётом склада (stock_id) и цены (price).
+ * Контроллеры корзины.
+ * Все серверные операции выполняются только для user id из проверенного JWT.
  */
 
-const { addToCart, getCart, updateCartItem, removeFromCart, clearCart, getCartItem, removeManyFromCart, addMultipleToCart} = require('../models/cartModel');
+const {
+  addToCart,
+  getCart,
+  updateCartItem,
+  removeFromCart,
+  removeCartItemByProductAndStock,
+  clearCart,
+  getCartItem,
+  removeManyFromCart,
+  addMultipleToCart,
+} = require('../models/cartModel');
 
-// Уменьшить количество товара в корзине (если quantity = 1 — удалить строку)
+const toPositiveInteger = (value) => {
+  if (typeof value !== 'number' && (typeof value !== 'string' || value.trim() === '')) return null;
+  const number = Number(value);
+  return Number.isSafeInteger(number) && number > 0 && number <= 2147483647 ? number : null;
+};
+
+const toNonNegativeNumber = (value) => {
+  if (typeof value !== 'number' && (typeof value !== 'string' || value.trim() === '')) return null;
+  const number = Number(value);
+  return Number.isFinite(number) && number >= 0 ? number : null;
+};
+
+const getAuthenticatedUserId = (req, res) => {
+  const userId = toPositiveInteger(req.user?.id);
+  if (!userId) {
+    res.status(401).json({ message: 'Неверные данные авторизации' });
+    return null;
+  }
+  return userId;
+};
+
+const parseCartItem = (item) => {
+  const productId = toPositiveInteger(item?.productId ?? item?.product_id);
+  const stockId = toPositiveInteger(item?.stockId ?? item?.stock_id);
+  const quantity = toPositiveInteger(item?.quantity);
+  const price = toNonNegativeNumber(item?.price);
+
+  if (!productId || !stockId || !quantity || price === null) return null;
+  return { productId, stockId, quantity, price };
+};
+
+// Уменьшить количество (при нуле удалить собственную позицию).
 exports.decrementCartItem = async (req, res) => {
-  const { userId, productId, stockId, quantity } = req.body;
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
+
+  const productId = toPositiveInteger(req.body?.productId);
+  const stockId = toPositiveInteger(req.body?.stockId);
+  const quantity = toPositiveInteger(req.body?.quantity);
 
   if (!productId || !stockId || !quantity) {
-    return res.status(400).json({ message: 'Не переданы обязательные параметры (productId, stockId, quantity)' });
+    return res.status(400).json({ message: 'Неверные productId, stockId или quantity' });
   }
 
   try {
-    // Получить текущий cartItem
     const cartItem = await getCartItem(userId, productId, stockId);
 
     if (!cartItem) {
       return res.status(404).json({ message: 'Товар не найден в корзине' });
     }
 
-    // Если quantity после декремента <= 0 — удалить строку
     if (cartItem.quantity - quantity <= 0) {
-      await require('../models/cartModel').removeFromCart(userId, productId, stockId);
-      res.status(200).json({ message: 'Товар удалён из корзины' });
-    } else {
-      // Иначе — уменьшить количество
-      const updatedItem = await require('../models/cartModel').updateCartItem(
-        userId,
-        productId,
-        stockId,
-        cartItem.quantity - quantity
-      );
-      res.status(200).json(updatedItem);
+      await removeCartItemByProductAndStock(userId, productId, stockId);
+      return res.status(200).json({ message: 'Товар удалён из корзины' });
     }
+
+    const updatedItem = await updateCartItem(
+      userId,
+      productId,
+      stockId,
+      cartItem.quantity - quantity
+    );
+    return res.status(200).json(updatedItem);
   } catch (err) {
     console.error('Ошибка при уменьшении товара в корзине:', err);
-    res.status(500).send('Ошибка сервера');
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
-// Добавить товар в корзину
+// Добавить товар в корзину.
 exports.addProductToCart = async (req, res) => {
-  // userId получаем из body (или из req.user, если есть авторизация)
-  const { userId, productId, stockId, price, quantity } = req.body;
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
 
-  if (!productId || !stockId || !quantity) {
-    return res.status(400).json({ message: 'Не переданы все обязательные параметры (productId, stockId, quantity)' });
+  const item = parseCartItem(req.body);
+  if (!item) {
+    return res.status(400).json({ message: 'Неверные productId, stockId, price или quantity' });
   }
 
   try {
-    // Вызываем модель, теперь с учётом склада и цены
-    const cartItem = await addToCart(userId, productId, stockId, price, quantity);
-    res.status(201).json(cartItem);
+    const cartItem = await addToCart(
+      userId,
+      item.productId,
+      item.stockId,
+      item.price,
+      item.quantity
+    );
+    return res.status(201).json(cartItem);
   } catch (err) {
     console.error('Ошибка добавления товара в корзину:', err);
-    res.status(500).send('Ошибка сервера');
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
-// Получить корзину пользователя
+// Получить корзину текущего пользователя.
 exports.getCart = async (req, res) => {
-  const userId = req.params.userId;
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
+
   try {
     const cartItems = await getCart(userId);
-    res.status(200).json({ items: cartItems });
+    return res.status(200).json({ items: cartItems });
   } catch (err) {
     console.error('Ошибка получения корзины:', err);
-    res.status(500).send('Ошибка сервера');
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
-// Обновить количество товара в корзине
+// Установить количество собственной позиции.
 exports.updateCartItem = async (req, res) => {
-  const userId = req.body.id;
-  const { productId, stockId, quantity } = req.body;
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
+
+  const productId = toPositiveInteger(req.body?.productId ?? req.params?.productId);
+  const stockId = toPositiveInteger(req.body?.stockId);
+  const quantity = toPositiveInteger(req.body?.quantity);
 
   if (!productId || !stockId || !quantity) {
-    return res.status(400).json({ message: 'Не переданы обязательные параметры (productId, stockId, quantity)' });
+    return res.status(400).json({ message: 'Неверные productId, stockId или quantity' });
   }
 
   try {
     const updatedItem = await updateCartItem(userId, productId, stockId, quantity);
-    res.status(200).json(updatedItem);
+    if (!updatedItem) {
+      return res.status(404).json({ message: 'Товар не найден в корзине' });
+    }
+    return res.status(200).json(updatedItem);
   } catch (err) {
     console.error('Ошибка обновления корзины:', err);
-    res.status(500).send('Ошибка сервера');
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
-// Удалить товар из корзины по cart_id
+// Удалить собственную позицию по id строки корзины.
 exports.removeFromCart = async (req, res) => {
-  const cart_id = req.params.cart_id; // <-- берем id из параметра URL
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
+
+  const cartId = toPositiveInteger(req.params?.cart_id);
+  if (!cartId) {
+    return res.status(400).json({ message: 'Неверный cart_id' });
+  }
+
   try {
-    await removeFromCart(cart_id); // Функция в cartModel удаляет по cart_id
-    res.status(200).json({ message: 'Товар удалён из корзины' });
+    const removedItem = await removeFromCart(userId, cartId);
+    if (!removedItem) {
+      return res.status(404).json({ message: 'Товар не найден в корзине' });
+    }
+    return res.status(200).json({ message: 'Товар удалён из корзины' });
   } catch (err) {
     console.error('Ошибка удаления товара из корзины:', err);
-    res.status(500).send('Ошибка сервера');
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
-
-// Очистить всю корзину пользователя
+// Очистить корзину текущего пользователя.
 exports.clearCart = async (req, res) => {
-  const userId = req.body.userId;
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
+
   try {
     await clearCart(userId);
-    res.status(200).json({ message: 'Корзина очищена' });
+    return res.status(200).json({ message: 'Корзина очищена' });
   } catch (err) {
     console.error('Ошибка очистки корзины:', err);
-    res.status(500).send('Ошибка сервера');
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
-/**
- * Удалить несколько товаров из корзины по массиву cart_id.
- * POST /api/cart/delete-many
- * Тело запроса: { cart_ids: [1,2,3...] }
- */
+// Удалить несколько собственных позиций.
 exports.removeManyFromCart = async (req, res) => {
-  const { cart_ids } = req.body;
-  if (!Array.isArray(cart_ids) || cart_ids.length === 0) {
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
+
+  const requestedIds = req.body?.cart_ids;
+  if (!Array.isArray(requestedIds) || requestedIds.length === 0) {
     return res.status(400).json({ message: 'Не передан массив cart_ids' });
   }
+
+  const cartIds = [...new Set(requestedIds.map(toPositiveInteger))];
+  if (cartIds.some((id) => id === null)) {
+    return res.status(400).json({ message: 'Массив cart_ids содержит неверное значение' });
+  }
+
   try {
-    await removeManyFromCart(cart_ids);
-    res.status(200).json({ message: 'Выбранные товары удалены из корзины', cart_ids });
+    const removedIds = await removeManyFromCart(userId, cartIds);
+    return res.status(200).json({
+      message: 'Выбранные товары удалены из корзины',
+      cart_ids: removedIds,
+    });
   } catch (err) {
     console.error('Ошибка массового удаления из корзины:', err);
-    res.status(500).json({ message: 'Ошибка сервера' });
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };
 
+// Перенести гостевую корзину текущему авторизованному пользователю.
 exports.mergeCart = async (req, res) => {
-  const userId = req.user.id; // или req.body.userId, если нет авторизации через middleware
-  const items = req.body.items || [];
+  const userId = getAuthenticatedUserId(req, res);
+  if (!userId) return;
+
+  const requestedItems = req.body?.items;
+  if (!Array.isArray(requestedItems) || requestedItems.length === 0 || requestedItems.length > 100) {
+    return res.status(400).json({ message: 'Корзина для слияния должна содержать от 1 до 100 позиций' });
+  }
+
+  const items = requestedItems.map(parseCartItem);
+  if (items.some((item) => item === null)) {
+    return res.status(400).json({ message: 'Гостевая корзина содержит неверную позицию' });
+  }
+
   try {
     await addMultipleToCart(userId, items);
     const cartItems = await getCart(userId);
-    res.status(200).json({ items: cartItems });
+    return res.status(200).json({ items: cartItems });
   } catch (err) {
     console.error('Ошибка при объединении корзины:', err);
-    res.status(500).send('Ошибка сервера');
+    return res.status(500).json({ message: 'Ошибка сервера' });
   }
 };

@@ -120,7 +120,6 @@ const Cart = () => {
 
   const handleIncrement = (item) => {
     dispatch(addToCart({
-      userId: auth.id,
       cart_id: item.cart_id,
       productId: item.product_id,
       productName: item.product_name,
@@ -137,7 +136,6 @@ const Cart = () => {
   const handleDecrement = (item) => {
     if (item.quantity > 1) {
       dispatch(decrementToCart({
-        userId: auth.id,
         cart_id: item.cart_id,
         productId: item.product_id,
         stockId: item.stock_id,

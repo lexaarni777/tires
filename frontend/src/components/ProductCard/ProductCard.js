@@ -134,7 +134,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     setQuantity(1);
     dispatch(
       addToCart({
-        userId: auth.id || 0,
         productId: product.id,
         productName: product.name,
         article: product.article,
@@ -164,7 +163,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
       // Проверяем, что количество в корзине меньше чем доступно на складе
       dispatch(
         addToCart({
-          userId: auth.id || 0,
           productId: product.id,
           productName: product.name,
           article: product.article,
@@ -190,7 +188,6 @@ const ProductCard = ({ product, stock = [], onDelete, onEdit }) => {
     if (cartItem.quantity > 1) {
       dispatch(
         decrementToCart({
-          userId: auth.id || 0,
           productId: product.id,
           stockId: selectedStockId,
           quantity: 1, // уменьшаем на 1

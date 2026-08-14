@@ -1,43 +1,41 @@
 /**
- * Маршруты для работы с козиной
- * Функции:
- * - Добавть товар в козину.
- * - Получить текущую корзину пользователя.
- * - Обновить количество товара в корзине.
- * - Удалить указанный товар из корзины.
- * - Удалить все товары из корзины.
+ * Серверная корзина доступна только авторизованному пользователю.
+ * Гостевая корзина хранится на frontend в localStorage.
  */
 
 const express = require('express');
-const { addProductToCart, getCart, updateCartItem, removeFromCart, clearCart, decrementCartItem, removeManyFromCart, mergeCart } = require('../controllers/cartController');
+const {
+  addProductToCart,
+  getCart,
+  updateCartItem,
+  removeFromCart,
+  clearCart,
+  decrementCartItem,
+  removeManyFromCart,
+  mergeCart,
+} = require('../controllers/cartController');
 const { verifyToken } = require('../middleware/authMiddleware');
+
 const router = express.Router();
 
+// Защищаем сразу все текущие и будущие маршруты этого router.
+router.use(verifyToken);
 
-// POST /api/cart/add - добавть товар в козину
-router.post('/add', addProductToCart );
+router.post('/add', addProductToCart);
+router.post('/decrement', decrementCartItem);
 
-// POST /api/cart/decrement - добавть товар в козину
-router.post('/decrement', decrementCartItem );
+router.get('/getcart', getCart);
+// Временная обратная совместимость: userId в URL игнорируется.
+router.get('/getcart/:userId', getCart);
 
-// GET /api/cart/getcart - Получить текущую корзину пользователя.
-router.get('/getcart/:userId', getCart );
+router.put('/update', updateCartItem);
+router.put('/update/:productId', updateCartItem);
+// Старый GET-маршрут оставлен на переходный период и также защищён JWT.
+router.get('/update/:productId', updateCartItem);
 
-// PUT /api/cart/update/:productId - Обновить количество товара в корзине
-router.get('/update/:productId', updateCartItem  );
-
-// DELETE  /api/cart/delete/:cart_id) - Удалить указанный товар из корзины
-router.delete('/delete/:cart_id', removeFromCart   );
-
-// DELETE  /api/cart/delete - Удалить все товары из корзины
+router.delete('/delete/:cart_id', removeFromCart);
 router.delete('/delete', clearCart);
-
-// Удалить несколько товаров из корзины
 router.post('/delete-many', removeManyFromCart);
-
-router.post('/merge', verifyToken, mergeCart);
-
-
-
+router.post('/merge', mergeCart);
 
 module.exports = router;

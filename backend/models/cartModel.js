@@ -88,9 +88,24 @@ exports.updateCartItem = async (userId, productId, stockId, quantity) => {
   return updatedItem.rows[0];
 };
 
-// Удалить товар из корзины по cart_id
-exports.removeFromCart = async (cart_id) => {
-  await pool.query('DELETE FROM cart WHERE id = $1', [cart_id]);
+// Удалить только собственную позицию по cart_id.
+exports.removeFromCart = async (userId, cartId) => {
+  const result = await pool.query(
+    'DELETE FROM cart WHERE id = $1 AND user_id = $2 RETURNING id',
+    [cartId, userId]
+  );
+  return result.rows[0];
+};
+
+// Удалить собственную позицию по паре товар/склад.
+exports.removeCartItemByProductAndStock = async (userId, productId, stockId) => {
+  const result = await pool.query(
+    `DELETE FROM cart
+     WHERE user_id = $1 AND product_id = $2 AND stock_id = $3
+     RETURNING id`,
+    [userId, productId, stockId]
+  );
+  return result.rows[0];
 };
 
 // Очистить корзину пользователя полностью
@@ -100,15 +115,18 @@ exports.clearCart = async (userId) => {
 
 /**
  * Массовое удаление товаров из корзины по массиву cart_id.
- * @param {number[]} cart_ids - массив cart_id для удаления
+ * @param {number} userId - владелец корзины из JWT
+ * @param {number[]} cartIds - массив cart_id для удаления
  */
-exports.removeManyFromCart = async (cart_ids) => {
-  if (!cart_ids.length) return;
-  // Удаляем все товары одним SQL-запросом
-  await pool.query(
-    'DELETE FROM cart WHERE id = ANY($1::int[])',
-    [cart_ids]
+exports.removeManyFromCart = async (userId, cartIds) => {
+  if (!cartIds.length) return [];
+  const result = await pool.query(
+    `DELETE FROM cart
+     WHERE user_id = $1 AND id = ANY($2::int[])
+     RETURNING id`,
+    [userId, cartIds]
   );
+  return result.rows.map((row) => row.id);
 };
 
 exports.addMultipleToCart = async (userId, items) => {

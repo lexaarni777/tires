@@ -82,17 +82,22 @@ export const mergeLocalCartWithServer = createAsyncThunk(
  * Асинхронное действие: получить корзину текущего пользователя с сервера.
  * Возвращает массив объектов корзины, где каждый связан с определённым складом (stock_id).
  */
-export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { getState }) => {
-    const { auth } = getState();
-    const response = await fetch(`${apiBase()}/cart/getcart/${auth.id}`, {
+export const fetchCart = createAsyncThunk('cart/fetchCart', async (_, { getState, rejectWithValue }) => {
+    const { auth, cart } = getState();
+    if (!auth.token) return { items: cart.items };
+
+    const response = await fetch(`${apiBase()}/cart/getcart`, {
         headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${auth.token}`,
         }
     });
-    // Ожидаем массив CartItem-объектов с новой структурой
+    if (!response.ok) {
+      const error = await response.text();
+      return rejectWithValue(error || 'Не удалось загрузить корзину');
+    }
     const data = await response.json();
-    return data; // [{productId, productName, ... stockId, price, quantity, ...}]
+    return data;
 });
 
 /**
@@ -203,7 +208,6 @@ export const clearCartServerSide = createAsyncThunk(
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${auth.token}`,
             },
-            body: JSON.stringify({ userId: auth.id }),
         });
         // После очистки — обновить корзину в redux
         dispatch(fetchCart());
