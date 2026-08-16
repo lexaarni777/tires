@@ -4,7 +4,7 @@ import Button from '../../../src/components/ui/Button';
 
 export default function ProductDetailedError({ error, reset }) {
   return (
-    <main style={{ padding: 24 }}>
+    <div>
       <h1>Не удалось загрузить карточку</h1>
       <p style={{ maxWidth: 720 }}>
         Проверь, что backend запущен и `NEXT_PUBLIC_API_URL` указывает на него (например `http://localhost:5001/api`).
@@ -18,7 +18,7 @@ export default function ProductDetailedError({ error, reset }) {
           В каталог
         </Button>
       </div>
-    </main>
+    </div>
   );
 }
 

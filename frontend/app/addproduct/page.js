@@ -8,8 +8,6 @@ export const metadata = {
 
 export default function AddProductPage() {
   return (
-    <main style={{ padding: 24 }}>
       <AddProduct />
-    </main>
   );
 }

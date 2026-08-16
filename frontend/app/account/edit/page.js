@@ -8,9 +8,7 @@ export const metadata = {
 
 export default function AccountEditPage() {
   return (
-    <main style={{ padding: 24 }}>
       <EditProfile />
-    </main>
   );
 }
 

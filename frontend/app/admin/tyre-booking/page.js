@@ -9,10 +9,8 @@ export const metadata = {
 
 export default function AdminTyreBookingPage() {
   return (
-    <main style={{ padding: 24 }}>
       <AdminGate>
         <AdminTyreBooking />
       </AdminGate>
-    </main>
   );
 }

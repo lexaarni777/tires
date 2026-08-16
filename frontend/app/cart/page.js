@@ -8,9 +8,7 @@ export const metadata = {
 
 export default function CartPage() {
   return (
-    <main style={{ padding: 24 }}>
       <Cart />
-    </main>
   );
 }
 

@@ -110,7 +110,7 @@
 }
 
 .navToggle {
-  display: inline-flex;
+  display: none !important;
   align-items: center;
   justify-content: center;
   width: 2.75rem;
@@ -335,6 +335,9 @@
 }
 
 @include respond(lg) {
+  .navToggle {
+    display: inline-block !important;
+  }
   .utilityBar {
     padding: var(--sp-8) var(--sp-16);
   }
@@ -388,10 +391,6 @@
 }
 
 @media (min-width: 1024px) {
-  .navToggle {
-    display: none;
-  }
-
   .menu {
     flex-direction: row;
     padding: var(--sp-12) var(--sp-32);
@@ -459,7 +458,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@media (min-width: 780px) {
   .iconLabel {
     display: inline;
   }
@@ -473,13 +472,10 @@
   .socialBtnVk {
     display: none;
   }
-
-}
-
-@media (max-width: 705px) {
-  .utilityTextFerst {
+   .utilityTextFerst {
    display: none;
   }
+
 }
 
 @media (max-width: 670px) {

@@ -19,7 +19,7 @@
   gap: $space-24;
   padding: $space-24;
   background-color: $surface;
-  border-radius: var(--radius-ai-lg);
+  border-radius: var(--radius-12);
   box-shadow: $shadow-soft;
 }
 
@@ -105,7 +105,7 @@
 .galleryModal {
   width: min(1100px, 96vw);
   max-height: 92vh;
-  border-radius: var(--radius-ai-lg);
+  border-radius: var(--radius-12);
   background: color-mix(in srgb, var(--c-surface, #fff) 94%, var(--c-bg, #f6f8fa) 6%);
   border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.35);
@@ -412,7 +412,7 @@
   align-self: start;
   padding: $space-16;
   //border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
-  border-radius: var(--radius-ai-lg);
+  border-radius: var(--radius-12);
   //background: color-mix(in srgb, var(--c-surface, #fff) 93%, var(--c-bg, #f6f8fa) 7%);
   box-shadow:
     0.15rem 0.15rem 0.25rem #c1c2c4,  // тёмная тень снизу-справа
@@ -460,7 +460,7 @@
   padding: $space-24;
   background: color-mix(in srgb, var(--c-surface, #fff) 94%, var(--c-bg, #f6f8fa) 6%);
   border: 1px solid var(--surface-border-weak, rgba(233, 237, 242, 0.8));
-  border-radius: var(--radius-ai-lg);
+  border-radius: var(--radius-12);
   box-shadow: $shadow-soft;
 }
 
@@ -535,7 +535,7 @@
 
 .reviewCard {
   border: 1px solid color-mix(in srgb, var(--surface-border-weak, rgba(233, 237, 242, 0.8)) 70%, transparent 30%);
-  border-radius: var(--radius-ai-lg);
+  border-radius: var(--radius-12);
   padding: 0.9rem 1rem;
   background: color-mix(in srgb, var(--c-surface, #fff) 97%, var(--c-bg, #f6f8fa) 3%);
   box-shadow: var(--shadow-raised, 0.25rem 0.25rem 0.55rem rgba(15, 23, 42, 0.10)), -0.2rem -0.2rem 0.5rem rgba(255, 255, 255, 0.9);

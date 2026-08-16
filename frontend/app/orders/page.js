@@ -8,8 +8,6 @@ export const metadata = {
 
 export default function OrdersPage() {
   return (
-    <main style={{ padding: 24 }}>
       <Orders />
-    </main>
   );
 }

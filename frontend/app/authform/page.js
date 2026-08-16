@@ -11,10 +11,8 @@ export const dynamic = 'force-dynamic';
 
 export default function AuthFormPage() {
   return (
-    <main style={{ padding: 24 }}>
       <Suspense fallback={null}>
         <AuthForm />
       </Suspense>
-    </main>
   );
 }

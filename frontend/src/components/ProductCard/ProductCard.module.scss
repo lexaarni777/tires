@@ -5,7 +5,7 @@
 .card {
   background: $surface;                // Фон карточки
   //border: 1px solid $border-color;     // Граница
-  border-radius: var(--radius-ai-lg);
+  border-radius: var(--radius-12);
   box-shadow: $shadow-soft;            // Мягкая тень
   padding: $space-16;                  // Внутренний отступ
   cursor: pointer;                     // Курсор — рука

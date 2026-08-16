@@ -283,6 +283,15 @@ const Header = () => {
               Контакты
             </Link>
           </li>
+          <li className={styles.menuItem}>
+            <Link
+              href="/services/delivery"
+              className={`${styles.menuLink} ${isActivePath('/services/delivery') ? styles.menuLinkActive : ''}`}
+              data-qa="nav_delivery"
+            >
+              Доставка
+            </Link>
+          </li>
         </ul>
       </nav>
       <div className={styles.searchMobile}>

@@ -191,8 +191,6 @@ export default async function ProductListPage({ searchParams }) {
 
   // Base catalog (and non-indexable complex filter pages) keep interactive client UI.
   return (
-    <main style={{ padding: 24 }}>
       <ProductList />
-    </main>
   );
 }

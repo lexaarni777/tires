@@ -7,8 +7,6 @@ export const metadata = {
 
 export default function ContactsPage() {
   return (
-    <main style={{ padding: 24 }}>
       <Contacts />
-    </main>
   );
 }

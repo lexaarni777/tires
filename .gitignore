@@ -27,6 +27,9 @@ backend/.env.development.local
 backend/.env.test.local
 backend/.env.production.local
 
+# Local Codex project guidance (contains the private working roadmap)
+/AGENTS.md
+
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*

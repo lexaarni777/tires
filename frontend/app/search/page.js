@@ -10,9 +10,7 @@ export const dynamic = 'force-dynamic';
 
 export default function SearchPage() {
   return (
-    <main style={{ padding: 24 }}>
       <SearchResultsClient />
-    </main>
   );
 }
 

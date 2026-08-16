@@ -128,7 +128,7 @@ export async function generateMetadata({ params }) {
       title,
       description,
       url: canonical,
-      type: 'product',
+      type: 'website',
       siteName: 'MSKTires',
       locale: 'ru_RU',
       images: ogImage ? [{ url: ogImage }] : undefined,
@@ -218,7 +218,7 @@ export default async function ProductDetailedPage({ params }) {
   } : null;
 
   return (
-    <main style={{ padding: 24 }}>
+    <main>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb ? [schema, breadcrumb] : schema) }}

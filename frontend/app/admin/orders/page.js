@@ -9,10 +9,8 @@ export const metadata = {
 
 export default function AdminOrdersPage() {
   return (
-    <main style={{ padding: 24 }}>
       <AdminGate>
         <AdminOrders />
       </AdminGate>
-    </main>
   );
 }

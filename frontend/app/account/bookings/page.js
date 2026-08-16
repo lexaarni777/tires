@@ -8,8 +8,6 @@ export const metadata = {
 
 export default function AccountBookingsPage() {
   return (
-    <main style={{ padding: 24 }}>
       <UserTyreBookings />
-    </main>
   );
 }

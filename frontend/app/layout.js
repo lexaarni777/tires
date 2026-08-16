@@ -1,6 +1,5 @@
 import '../src/index.css';
 import '../src/styles/_typography.scss';
-import '../src/styles/theme-ai.scss';
 import Layout from '../src/components/Layout';
 import Providers from './providers';
 
@@ -17,7 +16,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="ru">
-      <body className="theme-ai">
+      <body>
         <Providers>
           <Layout>{children}</Layout>
         </Providers>

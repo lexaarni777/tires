@@ -8,9 +8,7 @@ export const metadata = {
 
 export default function AccountPage() {
   return (
-    <main style={{ padding: 24 }}>
       <Account />
-    </main>
   );
 }
 
