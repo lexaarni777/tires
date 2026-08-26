@@ -4,30 +4,44 @@ import ProductList from '../../src/components/ProductList/ProductList';
 const getSiteBase = () => process.env.NEXT_PUBLIC_SITE_URL || '';
 const getApiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
 const getAssetBase = () => getApiBase().replace(/\/api\/?$/, '');
+const SEO_PARAM_ORDER = ['brand', 'diameter', 'season', 'studs'];
+const normalizeDiameter = (value) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric)
+    ? String(Math.trunc(numeric))
+    : String(value ?? '').replace(/[^0-9]/g, '');
+};
 
 const buildCanonical = (siteBase, searchParams) => {
   if (!siteBase) return undefined;
-  const allowedKeys = ['brand', 'diameter', 'season', 'studs'];
-  const entries = Object.entries(searchParams || {}).filter(([k, v]) => allowedKeys.includes(k) && v != null && `${v}` !== '');
-  if (!entries.length) return `${siteBase}/productlist`;
+  const hasParams = SEO_PARAM_ORDER.some((key) => searchParams?.[key] != null && `${searchParams[key]}` !== '');
+  if (!hasParams) return `${siteBase}/productlist`;
   const qs = new URLSearchParams();
-  entries.forEach(([k, v]) => qs.set(k, String(v)));
+  SEO_PARAM_ORDER.forEach((key) => {
+    const value = searchParams?.[key];
+    if (value != null && `${value}` !== '') qs.set(key, String(value));
+  });
   return `${siteBase}/productlist?${qs.toString()}`;
 };
 
-const isIndexableFilter = (searchParams) => {
-  const allowedKeys = ['brand', 'diameter', 'season', 'studs'];
+const isIndexableFilter = (searchParams, seoFilters) => {
   const entries = Object.entries(searchParams || {}).filter(([k, v]) => v != null && `${v}` !== '');
   if (!entries.length) return true;
 
   // If any unknown params are present -> noindex
-  if (entries.some(([k]) => !allowedKeys.includes(k))) return false;
+  if (entries.some(([k]) => !SEO_PARAM_ORDER.includes(k))) return false;
 
-  const keys = entries.map(([k]) => k);
+  if (!seoFilters) return false;
+  const params = Object.fromEntries(entries);
+  const keys = Object.keys(params);
 
-  // Index only simple filters: 1 param OR (season+studs)
-  if (keys.length === 1) return true;
-  if (keys.length === 2 && keys.includes('season') && keys.includes('studs')) return true;
+  if (keys.length === 1 && keys[0] === 'brand') return seoFilters.brands.includes(String(params.brand));
+  if (keys.length === 1 && keys[0] === 'diameter') return seoFilters.diameters.includes(String(params.diameter));
+  if (keys.length === 1 && keys[0] === 'season') return seoFilters.seasons.includes(String(params.season));
+  if (keys.length === 2 && keys.includes('season') && keys.includes('studs')) {
+    const studs = params.studs === 'true';
+    return seoFilters.seasonStuds.some((item) => item.season === String(params.season) && item.studs === studs);
+  }
 
   return false;
 };
@@ -54,10 +68,36 @@ const seoDescriptionFor = ({ brand, diameter, season, studs }) => {
   return `${parts.join(' ')} ${baseDescription}`.trim();
 };
 
-export function generateMetadata({ searchParams }) {
+async function fetchSeoFilters() {
+  const apiBase = getApiBase();
+  if (!apiBase) return null;
+
+  try {
+    // Indexability must follow the current curated set; do not retain an old
+    // sitemap-filter response after stock or catalogue changes.
+    const response = await fetch(`${apiBase}/products/sitemap-filters`, { cache: 'no-store' });
+    if (!response.ok) return null;
+    const data = await response.json();
+    return {
+      brands: Array.isArray(data?.brands) ? data.brands.map(String) : [],
+      // PostgreSQL may return numeric diameters as "17.0", while the stable
+      // public URL and sitemap use "17".
+      diameters: Array.isArray(data?.diameters)
+        ? data.diameters.map(normalizeDiameter).filter(Boolean)
+        : [],
+      seasons: Array.isArray(data?.seasons) ? data.seasons.map(String) : [],
+      seasonStuds: Array.isArray(data?.seasonStuds) ? data.seasonStuds : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
+export async function generateMetadata({ searchParams }) {
   const siteBase = getSiteBase();
   const canonical = buildCanonical(siteBase, searchParams);
-  const indexable = isIndexableFilter(searchParams);
+  const seoFilters = await fetchSeoFilters();
+  const indexable = isIndexableFilter(searchParams, seoFilters);
 
   const title = seoTitleFor(searchParams || {});
   const description = seoDescriptionFor(searchParams || {});
@@ -119,7 +159,8 @@ const pickFirstImage = (product) => {
 };
 
 export default async function ProductListPage({ searchParams }) {
-  const indexable = isIndexableFilter(searchParams);
+  const seoFilters = await fetchSeoFilters();
+  const indexable = isIndexableFilter(searchParams, seoFilters);
   const hasAnyFilter = Object.entries(searchParams || {}).some(([, v]) => v != null && `${v}` !== '');
 
   // For SEO indexable filter pages: render server HTML list (no dependency on client Redux)

@@ -100,6 +100,18 @@ exports.getSitemapArticles = async (_req, res) => {
   }
 };
 
+// Данные для публичного YML-фида. XML собирается на frontend-слое, чтобы
+// использовать единый канонический домен и URL карточек.
+exports.getYmlProducts = async (_req, res) => {
+  try {
+    const products = await productModel.getProductsForYmlFromDB();
+    res.json(products);
+  } catch (err) {
+    console.error('Ошибка при получении данных для YML-фида:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
 // Данные для sitemap: популярные фильтры (бренд/диаметр/сезон/шипы)
 exports.getSitemapFilters = async (_req, res) => {
   try {

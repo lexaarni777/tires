@@ -1,5 +1,11 @@
 const getApiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
 const getSiteBase = () => process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+const normalizeDiameter = (value) => {
+  const numeric = Number(value);
+  return Number.isFinite(numeric)
+    ? String(Math.trunc(numeric))
+    : String(value ?? '').replace(/[^0-9]/g, '');
+};
 
 export const dynamic = 'force-dynamic';
 
@@ -31,17 +37,17 @@ async function fetchArticles() {
 
 async function fetchSitemapFilters() {
   const apiBase = getApiBase();
-  if (!apiBase) return { brands: [], diameters: [], seasons: [], studsValues: [] };
+  if (!apiBase) return { brands: [], diameters: [], seasons: [], seasonStuds: [] };
 
   const resp = await fetch(`${apiBase}/products/sitemap-filters`, { cache: 'no-store' });
-  if (!resp.ok) return { brands: [], diameters: [], seasons: [], studsValues: [] };
+  if (!resp.ok) return { brands: [], diameters: [], seasons: [], seasonStuds: [] };
 
   const data = await resp.json();
   return {
     brands: Array.isArray(data?.brands) ? data.brands : [],
     diameters: Array.isArray(data?.diameters) ? data.diameters : [],
     seasons: Array.isArray(data?.seasons) ? data.seasons : [],
-    studsValues: Array.isArray(data?.studsValues) ? data.studsValues : [],
+    seasonStuds: Array.isArray(data?.seasonStuds) ? data.seasonStuds : [],
   };
 }
 
@@ -77,19 +83,19 @@ export async function GET() {
   const filters = await fetchSitemapFilters();
 
   const importantDiameters = filters.diameters
-    .map((d) => String(d).replace(/[^0-9]/g, ''))
+    .map(normalizeDiameter)
     .filter(Boolean)
-    .slice(0, 10);
+    .slice(0, 5);
 
   const importantSeasons = filters.seasons
     .map((s) => String(s).trim())
     .filter(Boolean)
-    .slice(0, 5);
+    .slice(0, 3);
 
   const importantBrands = filters.brands
     .map((b) => String(b).trim())
     .filter(Boolean)
-    .slice(0, 30);
+    .slice(0, 10);
 
   const filterUrls = [
     // Top diameters
@@ -104,19 +110,12 @@ export async function GET() {
       changefreq: 'daily',
       priority: 0.7,
     })),
-    // Winter studs page (only if studs exists in DB)
-    ...(importantSeasons.some((s) => /зим/i.test(s)) && filters.studsValues.some((v) => v === true)
-      ? [
-          {
-            loc: productListUrl(siteBase, {
-              season: importantSeasons.find((s) => /зим/i.test(s)) || 'Зимние',
-              studs: 'true',
-            }),
-            changefreq: 'daily',
-            priority: 0.65,
-          },
-        ]
-      : []),
+    // Only combinations that also pass the in-stock threshold.
+    ...filters.seasonStuds.map(({ season, studs }) => ({
+      loc: productListUrl(siteBase, { season, studs: String(studs) }),
+      changefreq: 'daily',
+      priority: 0.65,
+    })),
     // Brands
     ...importantBrands.map((brand) => ({
       loc: productListUrl(siteBase, { brand }),

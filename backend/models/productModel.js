@@ -359,59 +359,126 @@ exports.getAllProductArticlesForSitemapFromDB = async () => {
   return rows.map((r) => r.article);
 };
 
-// Данные для sitemap: популярные значения фильтров (чтобы добавлять SEO-страницы каталога без мусорных комбинаций)
+// Товары для публичного YML-фида: только позиции с положительным остатком и
+// действующей розничной ценой. Не подставляем отсутствующие идентификаторы или
+// характеристики, чтобы не передавать торговым сервисам недостоверные данные.
+exports.getProductsForYmlFromDB = async () => {
+  const { rows } = await pool.query(`
+    SELECT
+      t.id, t.article, t.name, t.brand, t.model, t.size, t.season,
+      t.section_width, t.profile, t.diameter, t.load_index, t.speed_index,
+      t.studs, t.country, t.description,
+      MIN(stock.price_retail)::numeric AS price,
+      SUM(stock.stock)::int AS stock_total,
+      COALESCE(
+        (
+          SELECT image.image_path
+          FROM productsimages image
+          WHERE image.product_id = t.id
+          ORDER BY image.is_featured_image DESC, image.id ASC
+          LIMIT 1
+        ),
+        (
+          SELECT image.image_path
+          FROM model_images image
+          WHERE image.brand = t.brand AND image.model = t.model
+          ORDER BY image.is_featured_image DESC, image."order" ASC, image.id ASC
+          LIMIT 1
+        )
+      ) AS image_path
+    FROM tyre_catalog t
+    JOIN tyre_stock stock ON stock.tyre_id = t.id
+    WHERE stock.stock > 0 AND stock.price_retail IS NOT NULL
+    GROUP BY
+      t.id, t.article, t.name, t.brand, t.model, t.size, t.season,
+      t.section_width, t.profile, t.diameter, t.load_index, t.speed_index,
+      t.studs, t.country, t.description
+    ORDER BY t.id ASC
+  `);
+  return rows;
+};
+
+// Короткий список посадочных страниц для sitemap. В индекс попадают только
+// значения с устойчивым ассортиментом: не менее трёх товаров в наличии.
 exports.getSitemapFiltersFromDB = async () => {
-  const [brandsRes, diametersRes, seasonsRes, studsRes] = await Promise.all([
+  const minimumInStock = 3;
+  const [brandsRes, diametersRes, seasonsRes, seasonStudsRes] = await Promise.all([
     pool.query(
       `
-        SELECT brand, COUNT(*)::int AS cnt
-        FROM tyre_catalog
-        WHERE brand IS NOT NULL AND TRIM(brand) <> ''
+        SELECT t.brand
+        FROM tyre_catalog t
+        WHERE NULLIF(TRIM(t.brand), '') IS NOT NULL
         GROUP BY brand
-        ORDER BY cnt DESC, brand ASC
-        LIMIT 30;
-      `
+        HAVING COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM tyre_stock stock
+          WHERE stock.tyre_id = t.id AND stock.stock > 0
+        )) >= $1
+        ORDER BY COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM tyre_stock stock
+          WHERE stock.tyre_id = t.id AND stock.stock > 0
+        )) DESC, brand ASC;
+      `,
+      [minimumInStock]
     ),
     pool.query(
       `
-        SELECT diameter, COUNT(*)::int AS cnt
-        FROM tyre_catalog
-        WHERE diameter IS NOT NULL
+        SELECT t.diameter
+        FROM tyre_catalog t
+        WHERE t.diameter IS NOT NULL
         GROUP BY diameter
-        ORDER BY cnt DESC, diameter ASC
-        LIMIT 15;
-      `
+        HAVING COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM tyre_stock stock
+          WHERE stock.tyre_id = t.id AND stock.stock > 0
+        )) >= $1
+        ORDER BY COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM tyre_stock stock
+          WHERE stock.tyre_id = t.id AND stock.stock > 0
+        )) DESC, diameter ASC;
+      `,
+      [minimumInStock]
     ),
     pool.query(
       `
-        SELECT season, COUNT(*)::int AS cnt
-        FROM tyre_catalog
-        WHERE season IS NOT NULL AND TRIM(season) <> ''
+        SELECT t.season
+        FROM tyre_catalog t
+        WHERE NULLIF(TRIM(t.season), '') IS NOT NULL
         GROUP BY season
-        ORDER BY cnt DESC, season ASC
-        LIMIT 10;
-      `
+        HAVING COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM tyre_stock stock
+          WHERE stock.tyre_id = t.id AND stock.stock > 0
+        )) >= $1
+        ORDER BY COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM tyre_stock stock
+          WHERE stock.tyre_id = t.id AND stock.stock > 0
+        )) DESC, season ASC;
+      `,
+      [minimumInStock]
     ),
     pool.query(
       `
-        SELECT studs, COUNT(*)::int AS cnt
-        FROM tyre_catalog
-        WHERE studs IS NOT NULL
-        GROUP BY studs
-        ORDER BY cnt DESC;
-      `
+        SELECT t.season, t.studs
+        FROM tyre_catalog t
+        WHERE NULLIF(TRIM(t.season), '') IS NOT NULL AND t.studs IS NOT NULL
+        GROUP BY t.season, t.studs
+        HAVING COUNT(*) FILTER (WHERE EXISTS (
+          SELECT 1 FROM tyre_stock stock
+          WHERE stock.tyre_id = t.id AND stock.stock > 0
+        )) >= $1
+        ORDER BY t.season ASC, t.studs ASC;
+      `,
+      [minimumInStock]
     ),
   ]);
 
   const brands = brandsRes.rows.map((r) => r.brand).filter(Boolean);
   const diameters = diametersRes.rows.map((r) => r.diameter).filter((v) => v != null);
   const seasons = seasonsRes.rows.map((r) => r.season).filter(Boolean);
-  const studsValues = studsRes.rows.map((r) => r.studs);
+  const seasonStuds = seasonStudsRes.rows.map((r) => ({ season: r.season, studs: r.studs }));
 
   return {
     brands,
     diameters,
     seasons,
-    studsValues,
+    seasonStuds,
   };
 };

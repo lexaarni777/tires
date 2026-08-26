@@ -37,6 +37,7 @@ const {
   updateStock,           // Обновить остаток (только для админа)
   deleteStock,           // Удалить остаток (только для админа)
   getSitemapArticles,    // Данные для sitemap (список article)
+  getYmlProducts,        // Данные доступных товаров для YML-фида
   getSitemapFilters      // Данные для sitemap (популярные фильтры)
 } = require('../controllers/productsController');
 
@@ -62,6 +63,7 @@ router.get('/catalog/:id', getTyreById);
 
 // GET /api/products/sitemap — Данные для sitemap (список article)
 router.get('/sitemap', getSitemapArticles);
+router.get('/yml', getYmlProducts);
 // GET /api/products/sitemap-filters — Данные для sitemap (популярные фильтры)
 router.get('/sitemap-filters', getSitemapFilters);
 

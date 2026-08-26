@@ -1,11 +1,24 @@
 import { notFound } from 'next/navigation';
+import { headers } from 'next/headers';
 import ProductDetailed from '../../../src/components/ProductDetailed/ProductDetailed';
 import { warehouseList } from '../../../src/constants/warehouseList';
 
 export const dynamic = 'force-dynamic';
 
 const getApiBase = () => process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '';
-const getSiteBase = () => process.env.NEXT_PUBLIC_SITE_URL || '';
+const getSiteBase = () => {
+  const configured = process.env.NEXT_PUBLIC_SITE_URL;
+  if (configured) return configured.replace(/\/$/, '');
+
+  // Local and proxy requests still need an absolute URL for Product/Offer
+  // schema. The current request host is safer than guessing a production host.
+  const requestHeaders = headers();
+  const host = requestHeaders.get('x-forwarded-host') || requestHeaders.get('host');
+  if (!host) return '';
+  const forwardedProtocol = requestHeaders.get('x-forwarded-proto')?.split(',')[0]?.trim();
+  const protocol = forwardedProtocol || (host.startsWith('localhost') || host.startsWith('127.0.0.1') ? 'http' : 'https');
+  return `${protocol}://${host}`;
+};
 
 const getAssetBase = () => {
   const apiBase = getApiBase();
@@ -175,6 +188,13 @@ export default async function ProductDetailedPage({ params }) {
     sku: product.article,
     brand: product.brand ? { '@type': 'Brand', name: product.brand } : undefined,
     category: 'Tires',
+    additionalProperty: [
+      product.size ? { '@type': 'PropertyValue', name: 'Размер', value: product.size } : null,
+      product.season ? { '@type': 'PropertyValue', name: 'Сезон', value: product.season } : null,
+      product.load_index ? { '@type': 'PropertyValue', name: 'Индекс нагрузки', value: String(product.load_index) } : null,
+      product.speed_index ? { '@type': 'PropertyValue', name: 'Индекс скорости', value: String(product.speed_index) } : null,
+      product.studs != null ? { '@type': 'PropertyValue', name: 'Шипы', value: product.studs === true || product.studs === 'true' ? 'Да' : 'Нет' } : null,
+    ].filter(Boolean),
     image: imageUrl ? [imageUrl] : undefined,
     url: canonical,
     aggregateRating:
