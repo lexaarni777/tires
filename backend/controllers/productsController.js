@@ -21,6 +21,48 @@ exports.getAllTyres = async (req, res) => {
   }
 };
 
+// Получить одну порцию каталога. Берём на одну запись больше лимита, чтобы
+// клиент мог понять, есть ли следующая порция, без отдельного COUNT-запроса.
+exports.getTyresPage = async (req, res) => {
+  try {
+    const requestedLimit = Number(req.query.limit);
+    const limit = Number.isInteger(requestedLimit) && requestedLimit > 0
+      ? Math.min(requestedLimit, 48)
+      : 24;
+    const requestedOffset = Number(req.query.offset);
+    const offset = Number.isInteger(requestedOffset) && requestedOffset >= 0
+      ? requestedOffset
+      : 0;
+
+    const products = await productModel.getProductsFromDB({
+      ...req.query,
+      limit: limit + 1,
+      offset,
+    });
+    const hasMore = products.length > limit;
+    const items = hasMore ? products.slice(0, limit) : products;
+
+    res.json({
+      items,
+      hasMore,
+      nextOffset: offset + items.length,
+    });
+  } catch (err) {
+    console.error('Ошибка при постраничной загрузке каталога шин:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
+exports.getCatalogFacets = async (_req, res) => {
+  try {
+    const facets = await productModel.getCatalogFacetsFromDB();
+    res.json(facets);
+  } catch (err) {
+    console.error('Ошибка при получении параметров каталога:', err);
+    res.status(500).send('Ошибка сервера');
+  }
+};
+
 // Получить одну шину по id
 exports.getTyreById = async (req, res) => {
   try {
@@ -240,6 +282,10 @@ exports.deleteTyre = async (req, res) => {
 exports.getStock = async (req, res) => {
   try {
     const { tyre_id } = req.query; // ?tyre_id=1
+    const tyreIds = String(req.query.tyre_ids || '')
+      .split(',')
+      .map((value) => Number(value))
+      .filter((value) => Number.isInteger(value) && value > 0);
     const { location } = req.query; // ?location=Москва-1
     let query = 'SELECT * FROM tyre_stock';
     const values = [];
@@ -248,6 +294,10 @@ exports.getStock = async (req, res) => {
     if (tyre_id) {
       where.push('tyre_id = $' + (values.length + 1));
       values.push(tyre_id);
+    }
+    if (tyreIds.length) {
+      where.push('tyre_id = ANY($' + (values.length + 1) + '::int[])');
+      values.push(tyreIds);
     }
     if (location) {
       where.push('location = $' + (values.length + 1));

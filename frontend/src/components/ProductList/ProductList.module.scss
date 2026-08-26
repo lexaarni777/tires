@@ -25,6 +25,13 @@
   gap: 24px;
 }
 
+.catalogTitle {
+  margin: 0;
+  font-size: 28px;
+  line-height: 1.2;
+  color: $text-primary;
+}
+
 .filtersCard {
   display: flex;
   flex-direction: column;
@@ -165,6 +172,19 @@
 .statusMessage {
   font-size: 15px;
   color: $text-muted;
+}
+
+.loadMore {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 0 16px;
+}
+
+.paginationStatus {
+  color: $text-muted;
+  font-size: 14px;
 }
 
 // === Адаптивность для маленьких экранов ===

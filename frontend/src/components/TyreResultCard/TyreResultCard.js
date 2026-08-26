@@ -7,6 +7,7 @@ import styles from './TyreResultCard.module.scss';
 import Button from '../ui/Button';
 import { warehouseList } from '../../constants/warehouseList';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { getThumbnailPath } from '../../utils/thumb';
 import { minimg } from '../../utils/minimg';
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || process.env.REACT_APP_API_URL || '').replace('/api', '');
@@ -129,7 +130,11 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
                 return (
                   
                   <tr key={tyre.id}>
-                    <td onClick={handleClick}>{tyre.name}</td>
+                    <td>
+                      <Link href={`/productdetailed/${encodeURIComponent(tyre.article || tyre.id)}`}>
+                        {tyre.name}
+                      </Link>
+                    </td>
                     <td>{tyre.season}</td>
                     <td>{tyre.load_index}{tyre.speed_index}</td>
                     <td>{`${tyre.profile}/${tyre.diameter}`}</td>

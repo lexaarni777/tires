@@ -90,6 +90,24 @@ async function fetchProductsForSeo(searchParams) {
   return Array.isArray(data) ? data : [];
 }
 
+async function fetchInitialCatalogPage() {
+  const apiBase = getApiBase();
+  if (!apiBase) return [];
+
+  try {
+    const resp = await fetch(`${apiBase}/products/catalog/page?limit=24`, {
+      next: { revalidate: 300 },
+    });
+    if (!resp.ok) return [];
+    const data = await resp.json();
+    return Array.isArray(data?.items) ? data.items : [];
+  } catch {
+    // The interactive catalog remains available even if the API is briefly
+    // unavailable during a server render.
+    return [];
+  }
+}
+
 const pickFirstImage = (product) => {
   const rel =
     product?.images?.[0]?.image_path ||
@@ -189,8 +207,13 @@ export default async function ProductListPage({ searchParams }) {
     );
   }
 
-  // Base catalog (and non-indexable complex filter pages) keep interactive client UI.
+  // Base catalog keeps its existing interactive client UI.
+  // The first product portion is server-rendered, while ProductList continues
+  // loading later portions in the browser as the visitor scrolls.
+  const initialProducts = await fetchInitialCatalogPage();
   return (
-      <ProductList />
+    <main>
+      <ProductList initialProducts={initialProducts} />
+    </main>
   );
 }

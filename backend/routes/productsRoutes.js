@@ -22,6 +22,8 @@ const upload = multer();
 const express = require('express');
 const {
   getAllTyres,           // Получить все шины каталога (с фильтрацией)
+  getTyresPage,          // Получить одну порцию каталога
+  getCatalogFacets,      // Получить компактные параметры фильтров
   getTyreById,           // Получить одну шину по id
   getTyreByArticle,      // Получить одну шину по article (для SSR/SEO)
   createTyre,            // Добавить новую шину (только для админа)
@@ -47,6 +49,10 @@ const router = express.Router();
 
 // GET /api/products/catalog — Получить все шины с возможной фильтрацией по query (например, бренд, размер, сезон и т.д.)
 router.get('/catalog', getAllTyres);
+
+// Порции карточек и компактный набор значений для фильтров.
+router.get('/catalog/page', getTyresPage);
+router.get('/catalog/facets', getCatalogFacets);
 
 // GET /api/products/catalog/by-article/:article — Получить шину по article (для SSR/SEO)
 router.get('/catalog/by-article/:article', getTyreByArticle);

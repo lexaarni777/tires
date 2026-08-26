@@ -1,6 +1,6 @@
  'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import ProductCard from "../ProductCard/ProductCard";
 import ProductCardSkeleton from "../ProductCard/ProductCard.Skeleton";
@@ -11,10 +11,12 @@ import { warehouseList } from "../../constants/warehouseList";
 import { FiChevronDown } from 'react-icons/fi';
 
 // Импортируем асинхронные thunks из productSlice и stockSlice
-import { fetchProducts,deleteProduct} from "../../slices/productSlice";
+import { fetchCatalogFacets, fetchCatalogPage, deleteProduct } from "../../slices/productSlice";
 import { fetchStock } from "../../slices/stockSlice";
 import { fetchCart } from "../../slices/cartSlice"; // Импортируем экшен для загрузки корзины
 import styles from "./ProductList.module.scss";
+
+const PAGE_SIZE = 24;
 /**
  * Компонент ProductList
  * 
@@ -23,7 +25,7 @@ import styles from "./ProductList.module.scss";
  * - Передаёт в каждую карточку нужные данные (product, stock).
  * - Управляет фильтрами для каталога.
  */
-const ProductList = () => {
+const ProductList = ({ initialProducts = [] }) => {
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -39,13 +41,20 @@ const ProductList = () => {
   const [country, setCountry] = useState("");
   const [inStockOnly, setInStockOnly] = useState(true);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const loadMoreRef = useRef(null);
  
 
 
   // Получаем данные из Redux: список шин и их статусы
-  const products = useSelector((state) => state.products.items);
-  const [allProducts, setAllProducts] = useState([]);
-  const productsStatus = useSelector((state) => state.products.status);
+  const loadedProducts = useSelector((state) => state.products.items);
+  // Первую порцию отдаёт сервер. Redux подменит её свежими данными после
+  // гидратации или при смене фильтра, без дублирования карточек на странице.
+  const products = loadedProducts.length ? loadedProducts : initialProducts;
+  const allProducts = useSelector((state) => state.products.facets);
+  const productsStatus = useSelector((state) => state.products.catalogStatus);
+  const hasMore = useSelector((state) => state.products.catalogHasMore);
+  const nextOffset = useSelector((state) => state.products.catalogNextOffset);
+  const isLoadingMore = useSelector((state) => state.products.catalogLoadingMore);
 
   // Получаем данные из Redux: все остатки по складам
   const stock = useSelector((state) => state.stock.items);
@@ -67,15 +76,6 @@ const ProductList = () => {
   .filter(w => w.city === selectedCity)
   .map(w => w.location);
 
-  const filteredProducts = products.filter(product => {
-  if (!inStockOnly) return true;
-  const stockRows = stockByTyreId[product.id] || [];
-  // Фильтруем остатки только по складам нужного города и stock > 0
-  return stockRows.some(row =>
-    cityWarehouses.includes(row.location) && Number(row.stock) > 0
-  );
-});
-
   // Формируем объект фильтров для отправки на backend
   const filters = {};
   if (sectionWidth) filters.section_width = sectionWidth;
@@ -93,24 +93,45 @@ const ProductList = () => {
     dispatch(fetchCart());
   }, [dispatch]);
 
-  // Загружаем полный каталог один раз, чтобы сформировать списки опций
+  // Для фильтров нужен только компактный список параметров, без карточек.
   useEffect(() => {
-    dispatch(fetchProducts({})).then(action => {
-      if (action.payload) setAllProducts(action.payload);
-    });
+    dispatch(fetchCatalogFacets());
   }, [dispatch]);
 
-  // Загружаем все остатки после загрузки каталога
+  // Остатки нужны только для карточек уже загруженной порции.
   useEffect(() => {
     if (products.length > 0) {
-      dispatch(fetchStock());
+      dispatch(fetchStock({ tyre_ids: products.map((product) => product.id).join(',') }));
     }
   }, [dispatch, products]);
 
-  // Обновляем список товаров при изменении активных фильтров
+  // При изменении фильтров или города начинаем выдачу заново с первой порции.
   useEffect(() => {
-    dispatch(fetchProducts(filters));
-  }, [dispatch, brand, sectionWidth, profile, diameter, loadIndex, speedIndex, season, studs, country]);
+    const pageFilters = { ...filters, limit: PAGE_SIZE, offset: 0 };
+    if (inStockOnly) pageFilters.in_stock_locations = cityWarehouses.join(',');
+    dispatch(fetchCatalogPage(pageFilters));
+  }, [dispatch, brand, sectionWidth, profile, diameter, loadIndex, speedIndex, season, studs, country, inStockOnly, selectedCity]);
+
+  const loadNextPage = useCallback(() => {
+    if (!hasMore || isLoadingMore) return;
+    const pageFilters = { ...filters, limit: PAGE_SIZE, offset: nextOffset };
+    if (inStockOnly) pageFilters.in_stock_locations = cityWarehouses.join(',');
+    dispatch(fetchCatalogPage(pageFilters));
+  }, [dispatch, hasMore, isLoadingMore, nextOffset, brand, sectionWidth, profile, diameter, loadIndex, speedIndex, season, studs, country, inStockOnly, selectedCity]);
+
+  useEffect(() => {
+    const target = loadMoreRef.current;
+    if (!target || !hasMore || isLoadingMore) return undefined;
+
+    const observer = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting) {
+        loadNextPage();
+      }
+    }, { rootMargin: '320px' });
+
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [hasMore, isLoadingMore, loadNextPage]);
 
 
 
@@ -328,7 +349,8 @@ const ProductList = () => {
       </aside>
 
       <div className={styles.catalogContent}>
-        {(productsStatus === "loading" || stockStatus === "loading") && (
+        <h1 className={styles.catalogTitle}>Каталог шин</h1>
+        {productsStatus === "loading" && products.length === 0 && (
           <div className={styles.list}>
             {Array.from({ length: 8 }).map((_, i) => (
               <ProductCardSkeleton key={i} />
@@ -345,7 +367,7 @@ const ProductList = () => {
               <Button variant="tertiary" onClick={resetFilters}>Сбросить фильтры</Button>
             </EmptyState>
           )}
-          {filteredProducts.map((product) => (
+          {products.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -355,6 +377,14 @@ const ProductList = () => {
             />
           ))}
         </div>
+        {hasMore && (
+          <div className={styles.loadMore} ref={loadMoreRef}>
+            <span className={styles.paginationStatus}>Показано {products.length} товаров</span>
+            <Button type="button" variant="tertiary" onClick={loadNextPage} disabled={isLoadingMore}>
+              {isLoadingMore ? 'Загружаем…' : 'Показать ещё'}
+            </Button>
+          </div>
+        )}
       </div>
     </div>
   );

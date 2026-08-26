@@ -81,6 +81,23 @@ exports.getProductsFromDB = async (filters = {}) => {
     values.push(filters.country);
     where.push(`t.country = $${values.length}`);
   }
+  if (filters.in_stock_locations) {
+    const locations = String(filters.in_stock_locations)
+      .split(',')
+      .map((location) => location.trim())
+      .filter(Boolean);
+
+    if (locations.length) {
+      values.push(locations);
+      where.push(`EXISTS (
+        SELECT 1
+        FROM tyre_stock stock
+        WHERE stock.tyre_id = t.id
+          AND stock.stock > 0
+          AND stock.location = ANY($${values.length}::text[])
+      )`);
+    }
+  }
 
   // Поиск по текстовому запросу q (подстрока по основным полям)
   if (filters.q) {
@@ -132,7 +149,26 @@ exports.getProductsFromDB = async (filters = {}) => {
     }
   }
 
+  if (filters.offset) {
+    const offsetNum = Number(filters.offset);
+    if (Number.isInteger(offsetNum) && offsetNum >= 0) {
+      values.push(offsetNum);
+      query += `\n  OFFSET $${values.length}`;
+    }
+  }
+
   const { rows } = await pool.query(query, values);
+  return rows;
+};
+
+// Компактный набор полей для построения фильтров каталога без изображений,
+// отзывов и остатков каждой карточки.
+exports.getCatalogFacetsFromDB = async () => {
+  const { rows } = await pool.query(`
+    SELECT brand, section_width, profile, diameter, load_index, speed_index, season, studs, country
+    FROM tyre_catalog
+    ORDER BY id ASC
+  `);
   return rows;
 };
 

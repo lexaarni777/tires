@@ -17,9 +17,11 @@
 }
 
 .imageWrap {
+  display: block;
   position: relative;
   text-align: center;                 // Центрирование изображения
   margin-bottom: $space-12;           // Отступ снизу
+  text-decoration: none;
 }
 
 .image {

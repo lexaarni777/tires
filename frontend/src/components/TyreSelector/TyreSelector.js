@@ -189,7 +189,7 @@ const TyreSelector = () => {
 
   return (
     <div className={styles.wrapper}>
-      <h2 className={styles.title}>Подбор шин</h2>
+      <h1 className={styles.title}>Подбор шин</h1>
       <div className={styles.titleHead}>
       <div className={styles.titleHeadLeft}>
         <div className={styles.tabs}>

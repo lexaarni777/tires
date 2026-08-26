@@ -30,6 +30,36 @@ export const fetchProducts = createAsyncThunk(
   }
 );
 
+// Порционная выдача используется именно каталогом: не загружает все карточки
+// и их изображения до того, как пользователь дойдёт до них.
+export const fetchCatalogPage = createAsyncThunk(
+  'products/fetchCatalogPage',
+  async (params = {}) => {
+    const query = new URLSearchParams(params).toString();
+    const response = await fetch(
+      `${apiBase()}/products/catalog/page${query ? `?${query}` : ''}`
+    );
+    if (!response.ok) {
+      throw new Error('Ошибка при загрузке каталога');
+    }
+    const page = await response.json();
+    return { ...page, append: Number(params.offset || 0) > 0 };
+  }
+);
+
+// Для выпадающих фильтров нужен лишь небольшой набор технических полей, а не
+// полный список карточек с изображениями и отзывами.
+export const fetchCatalogFacets = createAsyncThunk(
+  'products/fetchCatalogFacets',
+  async () => {
+    const response = await fetch(`${apiBase()}/products/catalog/facets`);
+    if (!response.ok) {
+      throw new Error('Ошибка при загрузке параметров каталога');
+    }
+    return response.json();
+  }
+);
+
 const normalizeKey = (val) => String(val ?? '').trim().toLowerCase();
 
 /**
@@ -176,6 +206,11 @@ const productSlice = createSlice({
     items: [], // Массив всех шин (tyre_catalog)
     status: 'idle', // idle | loading | succeeded | failed
     error: null,
+    catalogStatus: 'idle',
+    catalogLoadingMore: false,
+    catalogHasMore: false,
+    catalogNextOffset: 0,
+    facets: [],
     byArticle: {}, // { [articleLower]: product|null }
     byArticleStatus: {}, // { [articleLower]: idle|loading|succeeded|failed }
     byArticleError: {}, // { [articleLower]: string|null }
@@ -203,6 +238,27 @@ const productSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.status = 'failed';
         state.error = action.error.message;
+      })
+      .addCase(fetchCatalogPage.pending, (state, action) => {
+        const append = Number(action.meta.arg?.offset || 0) > 0;
+        state.catalogLoadingMore = append;
+        if (!append) state.catalogStatus = 'loading';
+      })
+      .addCase(fetchCatalogPage.fulfilled, (state, action) => {
+        const { items, hasMore, nextOffset, append } = action.payload;
+        state.catalogStatus = 'succeeded';
+        state.catalogLoadingMore = false;
+        state.catalogHasMore = Boolean(hasMore);
+        state.catalogNextOffset = Number(nextOffset) || 0;
+        state.items = append ? [...state.items, ...items] : items;
+      })
+      .addCase(fetchCatalogPage.rejected, (state, action) => {
+        state.catalogStatus = 'failed';
+        state.catalogLoadingMore = false;
+        state.error = action.error.message;
+      })
+      .addCase(fetchCatalogFacets.fulfilled, (state, action) => {
+        state.facets = action.payload;
       })
 
       // Загрузка товара по артикулу (точечно)
