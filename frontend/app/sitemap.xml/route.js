@@ -69,6 +69,8 @@ export async function GET() {
     { loc: `${siteBase}/productlist`, changefreq: 'hourly', priority: 0.9 },
     { loc: `${siteBase}/booking`, changefreq: 'weekly', priority: 0.7 },
     { loc: `${siteBase}/contacts`, changefreq: 'monthly', priority: 0.4 },
+    { loc: `${siteBase}/contacts/moscow`, changefreq: 'monthly', priority: 0.5 },
+    { loc: `${siteBase}/contacts/volgograd`, changefreq: 'monthly', priority: 0.5 },
     { loc: `${siteBase}/services/delivery`, changefreq: 'monthly', priority: 0.4 },
   ];
 

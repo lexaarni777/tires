@@ -1,0 +1,6 @@
+.locations { max-width: 1080px; margin: 0 auto 48px; padding: 0 24px; }
+.locations h2 { color: #162033; }
+.locations div { display: flex; flex-wrap: wrap; gap: 12px; }
+.locations a { padding: 12px 16px; border: 1px solid #cddbef; border-radius: 8px; color: #075fc8; background: #fff; text-decoration: none; font-weight: 600; }
+.locations a:hover { background: #edf5ff; }
+@media (max-width: 600px) { .locations { padding: 0 16px; } }
