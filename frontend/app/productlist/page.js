@@ -219,6 +219,9 @@ export default async function ProductListPage({ searchParams }) {
                       src={img || '/info.png'}
                       alt={p.name}
                       loading="lazy"
+                      decoding="async"
+                      width={96}
+                      height={96}
                       style={{ width: 96, height: 96, objectFit: 'contain', borderRadius: 8, background: '#f7f7f7' }}
                     />
                   </Link>

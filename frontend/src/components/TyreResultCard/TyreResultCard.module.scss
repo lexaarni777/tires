@@ -14,7 +14,7 @@
 
 .image {
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
 }
 
@@ -76,6 +76,7 @@
 .imageWrapper {
   flex: 0 0 200px;
   max-width: 220px;
+  aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
   justify-content: center;

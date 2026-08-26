@@ -315,7 +315,13 @@ const TyreSelector = () => {
 
       </div>
       <div className={styles.titleHeadImg}>
-         <img src='info.png' alt='Инфографика'/>
+         <img
+           src="/info.png"
+           alt="Инфографика с расшифровкой параметров шины"
+           width={852}
+           height={476}
+           fetchPriority="high"
+         />
       </div>
       </div>
       <div className={styles.results}>

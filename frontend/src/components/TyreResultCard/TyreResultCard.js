@@ -36,7 +36,10 @@ const TyreResultCard = ({ brand, model, tyres, stockByTyreId }) => {
             className={styles.image}
             src={minimg(tyres[0])}
             alt={tyres[0].name}
+            width={220}
+            height={220}
             loading="lazy"
+            decoding="async"
           />
         </div>
 
